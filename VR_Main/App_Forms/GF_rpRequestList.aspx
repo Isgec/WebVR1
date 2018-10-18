@@ -1,9 +1,10 @@
 <%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="GF_rpRequestList.aspx.vb" Inherits="GF_rpRequestList" title="Report: Request List" %>
 <asp:Content ID="CPHvrReports" ContentPlaceHolderID="cph1" Runat="Server">
-<div id="div1" class="page">
-<%--<asp:UpdatePanel ID="UPNLvrReports" runat="server"  >
-  <ContentTemplate>
---%>  <asp:Label ID="LabelvrReports" runat="server" Text="&nbsp;Print: Request List" Width="100%" CssClass="sis_formheading"></asp:Label>
+<div class="ui-widget-content page">
+<div class="caption">
+    <asp:Label ID="LabeltaApprovalWFTypes" runat="server" Text="&nbsp;Print: Request List"></asp:Label>
+</div>
+<div class="pagedata">
   <LGM:ToolBar0 
     ID = "TBLvrReports"
     ToolType = "lgNMAdd"
@@ -17,6 +18,7 @@
 	DataSourceID = "ODSvrReports"
 	DefaultMode = "Insert" CssClass="sis_formview">
 	<InsertItemTemplate>
+    <div style="min-height:400px;">
     <br />
     <asp:Label ID="L_ErrMsgvrReports" runat="server" ForeColor="Red" Font-Bold="true" Text=""></asp:Label>
 		<table width="100%">
@@ -347,6 +349,59 @@
 			</tr>
 		</table>
 		<br />
+<div class="caption">
+    <asp:Label ID="LabeltaApprovalWFTypes" runat="server" Text="&nbsp;Display: Project Sanction & Balance"></asp:Label>
+</div>
+
+    <br />
+    <table>
+      <tr>
+				<td class="alignright">
+					<b><asp:Label ID="Label1" runat="server" Text="Enter Project ID :" /></b>
+				</td>
+        <td>
+					<asp:TextBox
+						ID = "S_F_ProjectID"
+						CssClass = "myfktxt"
+            Width="62px"
+						AutoCompleteType = "None"
+						onfocus = "return this.select();"
+            onblur= "script_vrReports.validate_S_F_ProjectID(this);"
+						Runat="Server" />
+					<asp:Label
+						ID = "S_F_ProjectID_Display"
+						Runat="Server" />
+          <AJX:AutoCompleteExtender
+            ID="ACES_F_ProjectID"
+            ContextKey=""
+            UseContextKey="true"
+            ServiceMethod="TProjectCompletionList"
+            TargetControlID="S_F_ProjectID"
+            EnableCaching="false"
+            CompletionInterval="100"
+            FirstRowSelected="true"
+            MinimumPrefixLength="1"
+            OnClientItemSelected="script_vrReports.ACETProject_Selected"
+            OnClientPopulating="script_vrReports.ACETProject_Populating"
+            OnClientPopulated="script_vrReports.ACETProject_Populated"
+            CompletionSetCount="10"
+						CompletionListCssClass = "autocomplete_completionListElement"
+						CompletionListItemCssClass = "autocomplete_listItem"
+						CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
+            Runat="Server" />
+        </td>
+        <td>
+          <asp:Button ID="cmdBalance" runat="server" Text="Show Project Sanction" CommandName="showBalance" />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2"></td>
+        <td id="pBal" runat="server" clientidmode="static" style="background-color:gold;height:100px;width:250px;">
+
+        </td>
+      </tr>
+    </table>
+    </div>
 	</InsertItemTemplate>
 </asp:FormView>
 <%--  </ContentTemplate>
@@ -360,5 +415,6 @@
   SelectMethod = "GetNewRecord"
   runat = "server" >
 </asp:ObjectDataSource>
+</div>
 </div>
 </asp:Content>

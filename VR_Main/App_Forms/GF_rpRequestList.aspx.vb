@@ -110,33 +110,46 @@ Partial Class GF_rpRequestList
 		End If
 		Return mRet
 	End Function
-	<System.Web.Services.WebMethod()> _
-	 Public Shared Function validate_FK_VR_Reports_TProjectID(ByVal value As String) As String
-		Dim aVal() As String = value.Split(",".ToCharArray)
-		Dim mRet As String = "0|" & aVal(0)
-		Dim TProject As String = CType(aVal(1), String)
-		Dim oVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(TProject)
-		If oVar Is Nothing Then
-			mRet = "1|" & aVal(0) & "|Record not found."
-		Else
-			mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
-		End If
-		Return mRet
-	End Function
-	<System.Web.Services.WebMethod()> _
-	 Public Shared Function validate_FK_VR_Reports_FSupplier(ByVal value As String) As String
-		Dim aVal() As String = value.Split(",".ToCharArray)
-		Dim mRet As String = "0|" & aVal(0)
-		Dim FSupplier As String = CType(aVal(1), String)
-		Dim oVar As SIS.VR.vrTransporters = SIS.VR.vrTransporters.vrTransportersGetByID(FSupplier)
-		If oVar Is Nothing Then
-			mRet = "1|" & aVal(0) & "|Record not found."
-		Else
-			mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
-		End If
-		Return mRet
-	End Function
-	<System.Web.Services.WebMethod()> _
+  <System.Web.Services.WebMethod()>
+  Public Shared Function validate_FK_VR_Reports_S_F_ProjectID(ByVal value As String) As String
+    Dim aVal() As String = value.Split(",".ToCharArray)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim TProject As String = CType(aVal(1), String)
+    Dim oVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(TProject)
+    If oVar Is Nothing Then
+      mRet = "1|" & aVal(0) & "|Record not found."
+    Else
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
+    End If
+    Return mRet
+  End Function
+  <System.Web.Services.WebMethod()>
+  Public Shared Function validate_FK_VR_Reports_TProjectID(ByVal value As String) As String
+    Dim aVal() As String = value.Split(",".ToCharArray)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim TProject As String = CType(aVal(1), String)
+    Dim oVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(TProject)
+    If oVar Is Nothing Then
+      mRet = "1|" & aVal(0) & "|Record not found."
+    Else
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
+    End If
+    Return mRet
+  End Function
+  <System.Web.Services.WebMethod()>
+  Public Shared Function validate_FK_VR_Reports_FSupplier(ByVal value As String) As String
+    Dim aVal() As String = value.Split(",".ToCharArray)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim FSupplier As String = CType(aVal(1), String)
+    Dim oVar As SIS.VR.vrTransporters = SIS.VR.vrTransporters.vrTransportersGetByID(FSupplier)
+    If oVar Is Nothing Then
+      mRet = "1|" & aVal(0) & "|Record not found."
+    Else
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
+    End If
+    Return mRet
+  End Function
+  <System.Web.Services.WebMethod()> _
 	 Public Shared Function validate_FK_VR_Reports_TSupplier(ByVal value As String) As String
 		Dim aVal() As String = value.Split(",".ToCharArray)
 		Dim mRet As String = "0|" & aVal(0)
@@ -351,4 +364,12 @@ Partial Class GF_rpRequestList
 		Return Results
 	End Function
 
+  Private Sub FVvrReports_ItemCommand(sender As Object, e As FormViewCommandEventArgs) Handles FVvrReports.ItemCommand
+    If e.CommandName.ToLower = "showbalance" Then
+      Dim ProjectID As String = CType(FVvrReports.FindControl("S_F_ProjectID"), TextBox).Text
+      If ProjectID = "" Then Return
+      ProjectID = ProjectID.ToUpper
+      CType(FVvrReports.FindControl("pBal"), HtmlTableCell).InnerHtml = SIS.VR.vrRequestExecution.GetHTMLForProjectID(ProjectID)
+    End If
+  End Sub
 End Class

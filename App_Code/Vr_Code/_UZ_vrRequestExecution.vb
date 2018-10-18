@@ -1432,10 +1432,66 @@ Namespace SIS.VR
 			End Using
 			Return Results
 		End Function
-		Public Shared Function UZ_vrRequestExecutionLinkedSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal LinkID As Int32) As Integer
-			Return _RecordCount
-		End Function
-		Public Shared Function ValidateSanction(ByVal SRNNO As Integer, ByRef strHTML As String) As SIS.VR.vrRequestExecution
+    Public Shared Function UZ_vrRequestExecutionLinkedSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal LinkID As Int32) As Integer
+      Return _RecordCount
+    End Function
+    Public Shared Function GetHTMLForProjectID(ByVal ProjectID As String) As String
+      Dim mRet As Boolean = False
+      Dim Company As String = GetProjectFinanceCompany(ProjectID)
+      If ProjectID.StartsWith("BS") Then
+        Company = "700"
+      End If
+      Dim SanctionAmount As Decimal = GetSanctionFromERPLN(ProjectID, Company)
+      Dim ConsumedInMaterial As Decimal = GetConsumedInMaterial(ProjectID, Company)
+      Dim StartDate As String = GetVRSystemStartDate(ProjectID)
+      Dim ConsumedBeforeVRSystem As Decimal = GetConsumedBeforeVRSystem(ProjectID, StartDate)
+
+      Dim AvailableSanction As Decimal = SanctionAmount '- ConsumedInMaterial - ConsumedBeforeVRSystem
+      Dim ConsumedInVehicleRequests As Decimal = 0
+      'FOR CONSUMED IN VRs
+      '1. Select Executions
+      Dim oREs As List(Of vrExecutions) = GetExecutions(ProjectID)
+      '2. Select IRs
+      Dim oIRs As List(Of vrIRs) = GetIRs(ProjectID)
+      '3. Remove Execution, If Linked IR is Picked (may be Linked to Multiple Executions)
+      For Each tmp As vrIRs In oIRs
+        For I As Integer = oREs.Count - 1 To 0 Step -1
+          Dim tm As vrExecutions = oREs(I)
+          If tmp.SRNNo = tm.SRNNo Then
+            oREs.RemoveAt(I)
+          End If
+        Next
+      Next
+      '3. As oIRs contains dulicate IR, because One stransporter bill contains multiple execution 			
+      oIRs = GetDistinctIRs(ProjectID)
+
+      '4. Select PTR
+      For Each tmp As vrIRs In oIRs
+        '5. Update IR Bill Amount with PTR Amount, If Linked PTR is picked (1 IR = 1 PTR NO Multiple Linking)
+        tmp.BillAmount = GetPTRFromERPLN(tmp.IRNo, tmp.BillAmount, Company)
+      Next
+      'Calculate consumed
+      For Each tmp As vrIRs In oIRs
+        ConsumedInVehicleRequests += tmp.BillAmount
+      Next
+      For Each tmp As vrExecutions In oREs
+        ConsumedInVehicleRequests += tmp.Amount
+      Next
+
+      Dim TotalConsumed As Decimal = ConsumedInVehicleRequests + ConsumedInMaterial + ConsumedBeforeVRSystem
+      'Update Vehicle Execution record
+      Dim strHTML As String = ""
+      strHTML = "<table>"
+      strHTML &= "<tr><td>" & ProjectID & "</td><td>" & SanctionAmount & "</td></tr>"
+      strHTML &= "<tr><td> P.O. </td><td>" & ConsumedInMaterial & "</td></tr>"
+      strHTML &= "<tr><td> Vehicle Requests </td><td>" & ConsumedInVehicleRequests & "</td></tr>"
+      strHTML &= "<tr><td> Total Consumed </td><td>" & TotalConsumed & "</td></tr>"
+      strHTML &= "<tr><td> Balance Available </td><td>" & AvailableSanction - TotalConsumed & "</td></tr>"
+      strHTML &= "</table>"
+      Return strHTML
+    End Function
+
+    Public Shared Function ValidateSanction(ByVal SRNNO As Integer, ByRef strHTML As String) As SIS.VR.vrRequestExecution
 			Dim mRet As Boolean = False
 			Dim oRE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNO)
 			Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNO, "")
