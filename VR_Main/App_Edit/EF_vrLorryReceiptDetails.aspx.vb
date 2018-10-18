@@ -49,9 +49,6 @@ Partial Class EF_vrLorryReceiptDetails
   Protected Sub FVvrLorryReceiptDetails_PreRender(ByVal sender As Object, ByVal e As System.EventArgs) Handles FVvrLorryReceiptDetails.PreRender
     TBLvrLorryReceiptDetails.EnableSave = Editable
     TBLvrLorryReceiptDetails.EnableDelete = Deleteable
-    Dim aVal() As String = PrimaryKey.Split("|".ToCharArray)
-    Dim tmp As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(aVal(0), aVal(1))
-    CType(FVvrLorryReceiptDetails.FindControl("F_TransporterID"), TextBox).Text = tmp.TransporterID
     Dim mStr As String = ""
     Dim oTR As IO.StreamReader = New IO.StreamReader(HttpContext.Current.Server.MapPath("~/VR_Main/App_Edit") & "/EF_vrLorryReceiptDetails.js")
     mStr = oTR.ReadToEnd
@@ -76,24 +73,6 @@ Partial Class EF_vrLorryReceiptDetails
       mRet = "1|" & aVal(0) & "|Record not found." 
     Else
       mRet = "0|" & aVal(0) & "|" & oVar.DisplayField 
-    End If
-    Return mRet
-  End Function
-  <System.Web.Services.WebMethod()>
-  <System.Web.Script.Services.ScriptMethod()>
-  Public Shared Function GRorLRNoCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
-    Return SIS.TFISG.tfisg003.Selecttfisg003AutoCompleteList(prefixText, count, contextKey)
-  End Function
-  <System.Web.Services.WebMethod()>
-  Public Shared Function validate_FK_VR_LorryReceiptDetails_GRNo(ByVal value As String) As String
-    Dim aVal() As String = value.Split(",".ToCharArray)
-    Dim mRet As String = "0|" & aVal(0)
-    Dim GRorLRNo As String = CType(aVal(1), String)
-    Dim oVar As SIS.TFISG.tfisg003 = SIS.TFISG.tfisg003.tfisg003GetByID(GRorLRNo)
-    If oVar Is Nothing Then
-      mRet = "0|" & aVal(0) & "|||"
-    Else
-      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField & "|" & oVar.t_grdt & "|" & oVar.SupplierID
     End If
     Return mRet
   End Function

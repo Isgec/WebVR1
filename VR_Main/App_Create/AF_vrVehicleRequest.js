@@ -122,7 +122,7 @@ var script_vrVehicleRequest = {
 		},
 		validate_ERPPONumber: function(o) {                                                                     
 			var value = o.id;                                                                                         
-			try{$get('ctl00_cph1_FVvrVehicleRequest_L_ErrMsgvrVehicleRequest').innerHTML = '';}catch(ex){}   
+			try{$get('L_ErrMsgvrVehicleRequest').innerHTML = '';}catch(ex){}   
 			if(o=='')                                                                                
 				return true;                                                                                            
 			value = value + ',' + o.value ;                                                                
@@ -136,7 +136,7 @@ var script_vrVehicleRequest = {
 			var o = $get(p[1]);                                                                                       
 			o.style.backgroundImage  = 'none';                                                                        
 			if(p[0]=='1'){                                                                                            
-				try{$get('ctl00_cph1_FVvrVehicleRequest_L_ErrMsgvrVehicleRequest').innerHTML = p[2];}catch(ex){}
+				try{$get('L_ErrMsgvrVehicleRequest').innerHTML = p[2];}catch(ex){}
 				o.value='';                                                                                             
 				o.focus();                                                                                              
 			}
@@ -145,7 +145,16 @@ var script_vrVehicleRequest = {
 				var z = $get(o.id.replace('F_ERPPONumber','D_ERPPONumber'));
 				y.value=p[2];
 				z.innerHTML=p[3];
-			}                                                                                                         
+				var oj = eval('(' + p[4] + ')');
+				$get('F_SupplierID').value=oj.SupplierID;
+				$get('F_ProjectID').value=oj.ProjectID;
+				$get('F_SupplierID_Display').innerText=oj.SupplierName;
+				$get('F_ProjectID_Display').innerText=oj.ProjectName;
+				$get('F_ProjectType').value=oj.ProjectType;
+				$get('F_SupplierLocation').value=oj.SupplierAddress;
+				$get('F_DeliveryLocation').value=oj.ProjectAddress;
+
+      }                                                                                                         
 		},        
 		temp: function() {
 		}

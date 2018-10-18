@@ -13,18 +13,12 @@
   ID = "RequiredFieldValidatorvrVehicleTypes"
   Runat = "server" 
   ControlToValidate = "DDLvrVehicleTypes"
-  Text = "Vehicle Types is required."
+  Text = "<div class='errorLG'>Required!</div>"
   ErrorMessage = "[Required!]"
   Display = "Dynamic"
   EnableClientScript = "true"
   ValidationGroup = "none"
   SetFocusOnError = "true" />
-<AJX:ListSearchExtender
-  ID="DDSEvrVehicleTypes"
-  runat = "server"
-  TargetControlID = "DDLvrVehicleTypes"
-  PromptCssClass="ddsearchprompt">
-</AJX:ListSearchExtender>
 <asp:ObjectDataSource 
   ID = "OdsDdlvrVehicleTypes"
   TypeName = "SIS.VR.vrVehicleTypes"

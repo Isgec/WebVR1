@@ -1,5 +1,5 @@
 ﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="PageSearchBar.ascx.vb" Inherits="PageSearchBar" %>
-<table width="100%" style="border: solid 1pt #66CCFF; color: #1975FF" >
+<table style="background-color:#1e1e3b;color:white;width:100%;" >
 	<tr class="ps_bg">
 	<td style="text-align:left; width:80%">
 	  <asp:Label ID="txtBar" runat="server" Font-Size="12px" Font-Names="Tahoma" Font-Bold="true" Text="" />

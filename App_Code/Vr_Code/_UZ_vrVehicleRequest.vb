@@ -9,13 +9,18 @@ Namespace SIS.VR
   Partial Public Class vrVehicleRequest
     Public Function GetColor() As System.Drawing.Color
       Dim mRet As System.Drawing.Color = Drawing.Color.Black
-      If RequestStatus = RequestStates.Returned Then
-        mRet = Drawing.Color.Red
-      ElseIf RequestStatus >= RequestStates.UnderExecution And RequestStatus < RequestStates.VehicleArranged Then
-        mRet = Drawing.Color.DarkOrchid
-      ElseIf RequestStatus = RequestStates.VehicleArranged Then
-        mRet = Drawing.Color.Green
-      End If
+      Select Case RequestStatus
+        Case RequestStates.Free
+          mRet = Drawing.Color.Black
+        Case RequestStates.Returned
+          mRet = Drawing.Color.Red
+        Case RequestStates.VehicleArranged, RequestStates.VehiclePlaced
+          mRet = Drawing.Color.Green
+        Case RequestStates.RequestLinked
+          mRet = Drawing.Color.DarkGoldenrod
+        Case Else
+          mRet = Drawing.Color.DarkOrchid
+      End Select
       Return mRet
     End Function
     Public Function GetVisible() As Boolean
@@ -29,12 +34,10 @@ Namespace SIS.VR
     Public ReadOnly Property Notification() As String
       Get
         Dim mRet As String = ""
-        '<li><b><u>Material Size</u></b></li>
         If RequestStatus = RequestStates.Returned Then
           mRet = "<li><b><u></u></b></li>" & Me.ReturnRemarks
         ElseIf RequestStatus >= RequestStates.Free Then
           If OverDimentionConsignement Then
-            'If ODCReasonID = String.Empty And Remarks = String.Empty Then
             If ODCReasonID = String.Empty Then
               mRet = "<img alt='warning' src='../../images/Error.gif' style='height:14px; width:14px' /><b>Specify Reason for ODC/Under Utilization</b>"
             Else
@@ -42,6 +45,8 @@ Namespace SIS.VR
             End If
           ElseIf ODCAtSupplierLoading Then
             mRet = "<img alt='warning' src='../../images/warn-blink.gif' style='height:14px; width:14px' /><b>ODC/Under Utilization Vehicle Request</b"
+          ElseIf RequestDescription = "" OrElse SupplierLocation = "" OrElse DeliveryLocation = "" OrElse FromLocation = "" OrElse ToLocation = "" OrElse ItemDescription = "" OrElse VehicleRequiredOn = "" OrElse VehicleTypeID = "" Then
+            mRet = "<img alt='warning' src='../../images/Error.gif' style='height:14px; width:14px' /><b>Incomplete Vehicle Request.</b>"
           End If
         End If
         Return mRet
@@ -64,6 +69,9 @@ Namespace SIS.VR
               mRet = True
             End If
           End If
+          If _ProjectID = "" Or _SupplierID = "" Or _VehicleTypeID = "" Then
+            mRet = False
+          End If
         Catch ex As Exception
         End Try
         Return mRet
@@ -82,6 +90,25 @@ Namespace SIS.VR
     Public Shared Function InitiateWF(ByVal RequestNo As Int32) As SIS.VR.vrVehicleRequest
       Dim Results As SIS.VR.vrVehicleRequest = vrVehicleRequestGetByID(RequestNo)
       With Results
+        If .RequestDescription = "" OrElse .SupplierLocation = "" OrElse .DeliveryLocation = "" OrElse .FromLocation = "" OrElse .ToLocation = "" OrElse .ItemDescription = "" OrElse .VehicleRequiredOn = "" OrElse .VehicleTypeID = "" Then
+          Throw New Exception("Incomplete Vehicle Request, Can Not Forward.")
+        End If
+      End With
+      'Check Progress Percent
+      Dim NoProgress As Boolean = True
+      Dim POIrefs As List(Of SIS.VR.vrctVehicleRequest) = SIS.VR.vrctVehicleRequest.vrctVehicleRequestSelectList(0, 999, "", False, "", Results.RequestNo)
+      For Each iref As SIS.VR.vrctVehicleRequest In POIrefs
+        If Convert.ToDecimal(iref.ProgressPercent) > 0 Or Convert.ToDecimal(iref.ProgressWeight) > 0 Then
+          NoProgress = False
+          Exit For
+        End If
+      Next
+      If POIrefs.Count > 0 Then
+        If NoProgress Then
+          Throw New Exception("Can not forward, Please enter Progress Percent.")
+        End If
+      End If
+      With Results
         .RequestStatus = RequestStates.UnderExecution
         .RequestedBy = HttpContext.Current.Session("LoginID")
         .RequestedOn = Now
@@ -92,52 +119,12 @@ Namespace SIS.VR
       Results = SIS.VR.vrVehicleRequest.UpdateData(Results)
       SendEMail(Results)
       Try
-        CT_VehicleRequested(Results)
+        SIS.CT.ctUpdates.CT_ManualVRRequest(Results)
       Catch ex As Exception
+        Throw New Exception(ex.Message)
       End Try
       Return Results
     End Function
-    Public Shared Sub CT_VehicleRequested(ByVal rq As SIS.VR.vrVehicleRequest)
-      Dim hndl As String = "CT_VEHICLEREQUESTRAISED"
-      Dim poElements As ArrayList = SIS.CT.ctPOLChild.GetPOElements(rq.ERPPONumber)
-      Dim SrNo As Integer = 0
-      For Each Str As String In poElements
-        SrNo += 1
-        Dim ctH As New SIS.CT.ctHeader
-        With ctH
-          .t_trdt = rq.RequestedOn
-          .t_bohd = hndl
-          .t_indv = rq.RequestNo
-          .t_srno = SrNo
-          .t_proj = rq.ProjectID
-          .t_elem = Str
-          .t_user = rq.RequestedBy
-          .t_stat = ""
-        End With
-        ctH = SIS.CT.ctHeader.InsertData(ctH)
-        Dim DSrn As Integer = 0
-        Dim Chlds As ArrayList = SIS.CT.ctPOLChild.GetPODocuments(rq.ERPPONumber)
-        If Chlds.Count > 0 Then
-          For Each chld As String In Chlds
-            DSrn += 1
-            Dim ctD As New SIS.CT.ctDetail
-            With ctD
-              .t_trdt = rq.RequestedOn
-              .t_bohd = hndl
-              .t_indv = rq.RequestNo
-              .t_srno = ctH.t_srno
-              .t_dsno = DSrn
-              .t_dwno = chld
-              .t_elem = Str
-              .t_proj = rq.ProjectID
-              .t_wght = 0
-              .t_pitc = 0
-            End With
-            ctD = SIS.CT.ctDetail.InsertData(ctD)
-          Next
-        End If
-      Next
-    End Sub
     Public Shared Function UZ_vrVehicleRequestSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal SupplierID As String, ByVal ProjectID As String, ByVal RequestStatus As Int32) As List(Of SIS.VR.vrVehicleRequest)
       Dim Results As List(Of SIS.VR.vrVehicleRequest) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
@@ -258,8 +245,26 @@ Namespace SIS.VR
       Return Record
     End Function
     Public Shared Function UZ_vrVehicleRequestInsert(ByVal Record As SIS.VR.vrVehicleRequest) As SIS.VR.vrVehicleRequest
-      Dim _Result As SIS.VR.vrVehicleRequest = vrVehicleRequestInsert(Record)
-      Return LG_UpdateODConsignment(_Result)
+      Record = vrVehicleRequestInsert(Record)
+      Record = LG_UpdateODConsignment(Record)
+      Dim tmpCTs As List(Of SIS.VR.vrctVehicleRequest) = SIS.VR.vrctVehicleRequest.GetERPItemReference(Record.ProjectID, Record.ERPPONumber, "CT_VEHICLEREQUESTRAISED")
+      Dim cnt As Integer = 0
+      For Each tmp As SIS.VR.vrctVehicleRequest In tmpCTs
+        cnt += 1
+        With tmp
+          .VRRequestNo = Record.RequestNo
+          .SerialNo = cnt
+          .Project = Record.ProjectID
+          .PONumber = Record.ERPPONumber
+          .Handle = "CT_VEHICLEREQUESTRAISED"
+          .PartialOrFull = "PARTIAL"
+          .ProgressWeight = 0.0000
+          .ProgressPercent = 0.0000
+          .GridLineStatus = 0
+        End With
+        tmp = SIS.VR.vrctVehicleRequest.InsertData(tmp)
+      Next
+      Return Record
     End Function
     Public Shared Function UZ_vrVehicleRequestUpdate(ByVal Record As SIS.VR.vrVehicleRequest) As SIS.VR.vrVehicleRequest
       Dim _Result As SIS.VR.vrVehicleRequest = vrVehicleRequestUpdate(Record)
@@ -278,6 +283,7 @@ Namespace SIS.VR
       Return UZ_vrVehicleRequestGetByID(RequestNo)
     End Function
     Public Shared Function SendEMail(ByVal oRq As SIS.VR.vrVehicleRequest) As String
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then Return ""
       Dim oAD As MailAddress = Nothing
       Dim mRet As String = ""
       'Get Requester
@@ -345,13 +351,31 @@ Namespace SIS.VR
     End Function
   End Class
   Public Class vrERPPo
-    Public ERPPoNumber As String = ""
-    Public SupplierID As String = ""
-    Public SupplierName As String = ""
-    Public SupplierAddress As String = ""
-    Public BuyerID As String = ""
-    Public BuyerName As String = ""
-    Public BuyerEMailID As String = ""
+    Public Property ERPPoNumber As String = ""
+    Public Property SupplierID As String = ""
+    Public Property SupplierName As String = ""
+    Public Property SupplierAddress As String = ""
+    Public Property ProjectAddress As String = ""
+    Private _BuyerID As String = ""
+    Public Property BuyerID As String
+      Get
+        Return _BuyerID
+      End Get
+      Set(value As String)
+        If value.Length > 4 Then
+          _BuyerID = value
+        Else
+          _BuyerID = Right("0000" & value, 4)
+        End If
+
+      End Set
+    End Property
+    Public Property BuyerName As String = ""
+    Public Property BuyerEMailID As String = ""
+    Public Property DeliveryTerm As String = ""
+    Public Property ProjectType As String = ""
+    Public Property ProjectID As String = ""
+    Public Property ProjectName As String = ""
     Public Shared Function vrERPPoGetByID(ByVal PONumber As String) As SIS.VR.vrERPPo
       Dim mSql As String = ""
       Dim mComp As String = "200"
@@ -362,11 +386,15 @@ Namespace SIS.VR
       mSql = mSql & "ordh.t_orno as ERPPoNumber,"
       mSql = mSql & "ordh.t_otbp as SupplierID,"
       mSql = mSql & "ordh.t_ccon as BuyerID,    "
-      mSql = mSql & "'' as SupplierAddress,    "
+      mSql = mSql & "ordh.t_cdec as DeliveryTerm,    "
+      mSql = mSql & " lpo.t_cprj as ProjectID,"
+      mSql = mSql & "  (select top 1 (case when xx.t_bptc='IN' then 'Domestic' else 'Export' end) as tmp from ttppdm740" & mComp & " as xx where xx.t_cprj = lpo.t_cprj ) As ProjectType,"
       mSql = mSql & "emp3.t_nama as BuyerName,"
       mSql = mSql & "bpe3.t_mail as BuyerEMailID, "
       mSql = mSql & "bp01.t_nama as SupplierName "
       mSql = mSql & "from ttdpur400" & mComp & " as ordh "
+      mSql = mSql & "  cross apply (select top 1 tmp.t_cprj from ttdpur401" & mComp & " tmp where tmp.t_orno=ordh.t_orno   "
+      mSql = mSql & "              ) lpo "
       mSql = mSql & "left outer join ttccom001" & mComp & " as emp3 on ordh.t_ccon=emp3.t_emno "
       mSql = mSql & "left outer join tbpmdm001" & mComp & " as bpe3 on ordh.t_ccon=bpe3.t_emno "
       mSql = mSql & "left outer join ttccom100" & mComp & " as bp01 on ordh.t_otbp=bp01.t_bpid "
@@ -384,26 +412,69 @@ Namespace SIS.VR
           Reader.Close()
         End Using
       End Using
+      If Results IsNot Nothing Then
+        Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(Results.SupplierID)
+        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(Results.SupplierID)
+        Results.SupplierAddress = oVar.Address1.Trim & " " & oVar.Address2 & " " & oVar.Address3 & " " & oVar.Address4
+        Dim oPVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(Results.ProjectID)
+        If oPVar Is Nothing Then oPVar = SIS.QCM.qcmProjects.GetProjectFromERP(Results.ProjectID)
+        Results.ProjectName = oPVar.Description
+        Results.ProjectAddress = oPVar.Address1.Trim & " " & oPVar.Address2 & " " & oPVar.Address3 & " " & oPVar.Address4
+      End If
       Return Results
     End Function
-    Sub New(ByVal Reader As SqlDataReader)
-      If Convert.IsDBNull(Reader("ERPPoNumber")) Then ERPPoNumber = String.Empty Else ERPPoNumber = CType(Reader("ERPPoNumber"), String)
-      If Convert.IsDBNull(Reader("SupplierID")) Then SupplierID = String.Empty Else SupplierID = CType(Reader("SupplierID"), String)
-      If Convert.IsDBNull(Reader("SupplierName")) Then SupplierName = String.Empty Else SupplierName = CType(Reader("SupplierName"), String)
-      If Convert.IsDBNull(Reader("SupplierAddress")) Then SupplierAddress = String.Empty Else SupplierAddress = CType(Reader("SupplierAddress"), String)
-      If Convert.IsDBNull(Reader("BuyerID")) Then
-        BuyerID = String.Empty
-      Else
-        Dim X As String = Reader("BuyerID")
-        If X.Length > 4 Then
-          BuyerID = X
-        Else
-          BuyerID = Right("0000" & X, 4)
-        End If
-      End If
-      If Convert.IsDBNull(Reader("BuyerName")) Then BuyerName = String.Empty Else BuyerName = CType(Reader("BuyerName"), String)
-      If Convert.IsDBNull(Reader("BuyerEMailID")) Then BuyerEMailID = String.Empty Else BuyerEMailID = CType(Reader("BuyerEMailID"), String)
+    Public Sub New(ByVal Reader As SqlDataReader)
+      Try
+        For Each pi As System.Reflection.PropertyInfo In Me.GetType.GetProperties
+          If pi.MemberType = Reflection.MemberTypes.Property Then
+            Try
+              Dim Found As Boolean = False
+              For I As Integer = 0 To Reader.FieldCount - 1
+                If Reader.GetName(I).ToLower = pi.Name.ToLower Then
+                  Found = True
+                  Exit For
+                End If
+              Next
+              If Found Then
+                If Convert.IsDBNull(Reader(pi.Name)) Then
+                  Select Case Reader.GetDataTypeName(Reader.GetOrdinal(pi.Name))
+                    Case "decimal"
+                      CallByName(Me, pi.Name, CallType.Let, "0.00")
+                    Case "bit"
+                      CallByName(Me, pi.Name, CallType.Let, Boolean.FalseString)
+                    Case Else
+                      CallByName(Me, pi.Name, CallType.Let, String.Empty)
+                  End Select
+                Else
+                  CallByName(Me, pi.Name, CallType.Let, Reader(pi.Name))
+                End If
+              End If
+            Catch ex As Exception
+            End Try
+          End If
+        Next
+      Catch ex As Exception
+      End Try
     End Sub
+
+    'Sub New(ByVal Reader As SqlDataReader)
+    '  If Convert.IsDBNull(Reader("ERPPoNumber")) Then ERPPoNumber = String.Empty Else ERPPoNumber = CType(Reader("ERPPoNumber"), String)
+    '  If Convert.IsDBNull(Reader("SupplierID")) Then SupplierID = String.Empty Else SupplierID = CType(Reader("SupplierID"), String)
+    '  If Convert.IsDBNull(Reader("SupplierName")) Then SupplierName = String.Empty Else SupplierName = CType(Reader("SupplierName"), String)
+    '  If Convert.IsDBNull(Reader("SupplierAddress")) Then SupplierAddress = String.Empty Else SupplierAddress = CType(Reader("SupplierAddress"), String)
+    '  If Convert.IsDBNull(Reader("BuyerID")) Then
+    '    BuyerID = String.Empty
+    '  Else
+    '    Dim X As String = Reader("BuyerID")
+    '    If X.Length > 4 Then
+    '      BuyerID = X
+    '    Else
+    '      BuyerID = Right("0000" & X, 4)
+    '    End If
+    '  End If
+    '  If Convert.IsDBNull(Reader("BuyerName")) Then BuyerName = String.Empty Else BuyerName = CType(Reader("BuyerName"), String)
+    '  If Convert.IsDBNull(Reader("BuyerEMailID")) Then BuyerEMailID = String.Empty Else BuyerEMailID = CType(Reader("BuyerEMailID"), String)
+    'End Sub
     Sub New()
       'dummy
     End Sub

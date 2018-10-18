@@ -271,38 +271,54 @@ Namespace SIS.CT
     Public Shared Function ctPOLChildGetNewRecord() As SIS.CT.ctPOLChild
       Return New SIS.CT.ctPOLChild()
 		End Function
-		Public Shared Function GetPOElements(ByVal t_orno As String) As ArrayList
-			Dim Results As New ArrayList
-			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
-				Using Cmd As SqlCommand = Con.CreateCommand()
-					Cmd.CommandType = CommandType.Text
-					Cmd.CommandText = "select distinct t_cspa as cspa from ttdpur401200 where t_orno='" & t_orno & "'"
-					Con.Open()
-					Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					While Reader.Read()
-						Results.Add(Reader("cspa"))
-					End While
-					Reader.Close()
-				End Using
-			End Using
-			Return Results
-		End Function
-		Public Shared Function GetPODocuments(ByVal t_orno As String) As ArrayList
-			Dim Results As New ArrayList
-			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
-				Using Cmd As SqlCommand = Con.CreateCommand()
-					Cmd.CommandType = CommandType.Text
-					Cmd.CommandText = "select distinct t_docn as docn from ttdisg002200 where t_orno='" & t_orno & "'"
-					Con.Open()
-					Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					While Reader.Read()
-						Results.Add(Reader("docn"))
-					End While
-					Reader.Close()
-				End Using
-			End Using
-			Return Results
-		End Function
+    Public Shared Function GetPOLineChildItems(ByVal t_orno As String, ByVal t_pono As Integer) As List(Of SIS.CT.ctPOLChild)
+      Dim Results As New List(Of SIS.CT.ctPOLChild)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "select t_docn, sum(t_wght) as t_wght, count(t_item) as t_qoor from ttdisg002200 where t_orno='" & t_orno & "' and t_pono=" & t_pono & " group by t_docn"
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          While Reader.Read()
+            Results.Add(New SIS.CT.ctPOLChild(Reader))
+          End While
+          Reader.Close()
+        End Using
+      End Using
+      Return Results
+    End Function
+    '  Public Shared Function GetPOElements(ByVal t_orno As String) As ArrayList
+    '    Dim Results As New ArrayList
+    '    Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+    '      Using Cmd As SqlCommand = Con.CreateCommand()
+    '        Cmd.CommandType = CommandType.Text
+    '        Cmd.CommandText = "select distinct t_cspa as cspa from ttdpur401200 where t_orno='" & t_orno & "'"
+    '        Con.Open()
+    '        Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+    '        While Reader.Read()
+    '          Results.Add(Reader("cspa"))
+    '        End While
+    '        Reader.Close()
+    '      End Using
+    '    End Using
+    '    Return Results
+    '  End Function
+    '  Public Shared Function GetPODocuments(ByVal t_orno As String) As ArrayList
+    '	Dim Results As New ArrayList
+    '	Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+    '		Using Cmd As SqlCommand = Con.CreateCommand()
+    '			Cmd.CommandType = CommandType.Text
+    '			Cmd.CommandText = "select distinct t_docn as docn from ttdisg002200 where t_orno='" & t_orno & "'"
+    '			Con.Open()
+    '			Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+    '			While Reader.Read()
+    '				Results.Add(Reader("docn"))
+    '			End While
+    '			Reader.Close()
+    '		End Using
+    '	End Using
+    '	Return Results
+    'End Function
 
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function ctPOLChildGetByID(ByVal t_orno As String, ByVal t_vrsn As Int32, ByVal t_pono As Int32, ByVal t_item As String) As SIS.CT.ctPOLChild

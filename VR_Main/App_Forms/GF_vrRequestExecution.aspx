@@ -152,7 +152,7 @@
                       <ItemStyle VerticalAlign="Top" />
                       <HeaderStyle Width="80px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="GR NO" SortExpression="GRNo">
+<%--                    <asp:TemplateField HeaderText="GR NO" SortExpression="GRNo">
                       <ItemTemplate>
                         <asp:Label ID="LabelGRNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("GRNo") %>'></asp:Label>
                       </ItemTemplate>
@@ -165,7 +165,7 @@
                       </ItemTemplate>
                       <ItemStyle VerticalAlign="Top" />
                       <HeaderStyle Width="80px" />
-                    </asp:TemplateField>
+                    </asp:TemplateField>--%>
                     <asp:TemplateField HeaderText="Sanction Balance" SortExpression="">
                       <ItemTemplate>
                         <asp:Label ID="L_SanctionBalance" runat="server" ForeColor='<%# EVal("SanctionColor") %>' Title='<%# EVal("POValue") %>' Text='<%# Eval("SanctionBalance") %>'></asp:Label>
@@ -192,6 +192,13 @@
                         <asp:ImageButton ID="cmdInitiateWF" runat="server" Visible='<%# EVal("InitiateWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Send Confirmation by E-Mail" SkinID="forward" OnClientClick='<%# "return confirm(""Vehicle Requester and Transporter will be notified through E-Mail. Continue ?"");" %>' CommandName="InitiateWF" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
                       <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle HorizontalAlign="Center" Width="40px" />
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="VEHICLE PLACED">
+                      <ItemTemplate>
+                        <asp:ImageButton ID="cmdVehiclePlacedWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("VehiclePlacedWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Click to update CT, when Vehicle is arrived at Supplier's Location." SkinID="revise" OnClientClick='<%# "return Page_ClientValidate(""Approve" & Container.DataItemIndex & """) && confirm(""Update CT for Vehicle Placed Activity ?"");" %>' CommandName="VehiclePlacedWF" CommandArgument='<%# Container.DataItemIndex %>' />
+                      </ItemTemplate>
+                      <ItemStyle CssClass="alignCenter"/>
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="CANCEL VEHICLE">
@@ -226,8 +233,8 @@
                       <ItemTemplate>
                         </td></tr>
 						            <tr style="background-color: AntiqueWhite; color: DeepPink">
-                          <td colspan="9"></td>
-                          <td colspan="7">
+                          <td colspan="8"></td>
+                          <td colspan="8">
                             <asp:Label ID="LabelNotification" runat="server" Text='<%# Eval("Notification") %>'></asp:Label>
                           </td>
                         </tr>

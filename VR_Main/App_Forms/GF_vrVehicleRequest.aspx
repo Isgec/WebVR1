@@ -12,7 +12,7 @@
       ID = "TBLvrVehicleRequest"
       ToolType = "lgNMGrid"
       EditUrl = "~/VR_Main/App_Edit/EF_vrVehicleRequest.aspx"
-      AddUrl = "~/VR_Main/App_Create/AF_vrVehicleRequest.aspx?skip=1"
+      AddUrl = "~/VR_Main/App_Create/AF_vrVehicleRequest.aspx"
       ValidationGroup = "vrVehicleRequest"
       runat = "server" />
     <asp:UpdateProgress ID="UPGSvrVehicleRequest" runat="server" AssociatedUpdatePanelID="UPNLvrVehicleRequest" DisplayAfter="100">
@@ -202,16 +202,26 @@
     <asp:Label ID="LabelErrMsg" runat="server" Font-Bold="true" ForeColor="Red" Font-Size="Larger" Text="" ></asp:Label>
     <asp:GridView ID="GVvrVehicleRequest" SkinID="gv_silver" BorderColor="#A9A9A9" width="100%" runat="server" AllowPaging="True" AllowSorting="True" AutoGenerateColumns="False" DataSourceID="ODSvrVehicleRequest" DataKeyNames="RequestNo">
       <Columns>
-        <asp:TemplateField>
+        <asp:TemplateField  HeaderText="EDIT">
           <ItemTemplate>
-						<table ><tr>
-              <td style="vertical-align:top"><asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' /></td>
-              <td style="vertical-align:top"><asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" /></td>
-              <td style="vertical-align:top"><asp:ImageButton ID="cmdCopy" runat="server"  AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Copy to a new record." SkinID="copy" OnClientClick="return confirm('Copy to new request ?');" CommandName="lgCopy" CommandArgument='<%# Container.DataItemIndex %>' /></td>
-						</tr></table>
+              <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
           </ItemTemplate>
-          <ItemStyle VerticalAlign="Top" />
-          <HeaderStyle Width="60px" />
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="30px" />
+        </asp:TemplateField>
+        <asp:TemplateField  HeaderText="Prnt.">
+          <ItemTemplate>
+              <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="30px" />
+        </asp:TemplateField>
+        <asp:TemplateField  HeaderText="COPY">
+          <ItemTemplate>
+              <asp:ImageButton ID="cmdCopy" runat="server"  AlternateText='<%# Eval("PrimaryKey") %>' ToolTip="Copy to a new record." SkinID="copy" OnClientClick="return confirm('Copy to new request ?');" CommandName="lgCopy" CommandArgument='<%# Container.DataItemIndex %>' />
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="30px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="REQ.NO" SortExpression="RequestNo">
           <ItemTemplate>
@@ -289,14 +299,8 @@
           <ItemTemplate>
 						</td></tr>
 						<tr style="background-color:AntiqueWhite; color:DeepPink">
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td colspan="3">
+              <td colspan="9"></td>
+              <td colspan="5">
                 <asp:Label ID="LabelNotification" runat="server" Text='<%# Eval("Notification") %>'></asp:Label>
               </td>
 						</tr>

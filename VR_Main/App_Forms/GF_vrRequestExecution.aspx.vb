@@ -29,8 +29,19 @@ Partial Class GF_vrRequestExecution
 			Catch ex As Exception
 			End Try
 		End If
-		'For Approval
-		If e.CommandName.ToLower = "forapproval".ToLower Then
+    If e.CommandName.ToLower = "VehiclePlacedwf".ToLower Then
+      Try
+        Dim SRNNo As Int32 = GVvrRequestExecution.DataKeys(e.CommandArgument).Values("SRNNo")
+        SIS.VR.vrRequestExecution.VehiclePlacedWF(SRNNo)
+        GVvrRequestExecution.DataBind()
+      Catch ex As Exception
+        Dim message As String = New JavaScriptSerializer().Serialize(ex.Message)
+        Dim script As String = String.Format("alert({0});", message)
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+      End Try
+    End If
+    'For Approval
+    If e.CommandName.ToLower = "forapproval".ToLower Then
 			Try
 				Dim SRNNo As Int32 = GVvrRequestExecution.DataKeys(e.CommandArgument).Values("SRNNo")
 				SIS.VR.vrRequestExecution.SendForApproval(SRNNo)

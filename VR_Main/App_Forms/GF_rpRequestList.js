@@ -336,42 +336,6 @@ var script_vrReports = {
 		    o.focus();
 		  }
 		},
-		validate_S_F_ProjectID: function(sender) {
-		  var Prefix = sender.id.replace('S_F_ProjectID','');
-		  this.validated_FK_VR_Reports_S_F_ProjectID_main = true;
-		  this.validate_FK_VR_Reports_S_F_ProjectID(sender,Prefix);
-		},
-		validate_FK_VR_Reports_S_F_ProjectID: function(o,Prefix) {
-		  var value = o.id;
-		  var S_F_Project = $get(Prefix + 'S_F_ProjectID');
-		  if(S_F_Project.value==''){
-		    if(this.validated_FK_VR_Reports_S_F_ProjectID_main){
-		      var o_d = $get(Prefix + 'S_F_ProjectID' + '_Display');
-		      try{o_d.innerHTML = '';}catch(ex){}
-		    }
-		    return true;
-		  }
-		  value = value + ',' + S_F_Project.value ;
-		  o.style.backgroundImage  = 'url(../../images/pkloader.gif)';
-		  o.style.backgroundRepeat= 'no-repeat';
-		  o.style.backgroundPosition = 'right';
-		  PageMethods.validate_FK_VR_Reports_S_F_ProjectID(value, this.validated_FK_VR_Reports_S_F_ProjectID);
-		},
-		validated_FK_VR_Reports_S_F_ProjectID_main: false,
-		validated_FK_VR_Reports_S_F_ProjectID: function(result) {
-		  var p = result.split('|');
-		  var o = $get(p[1]);
-		  if(script_vrReports.validated_FK_VR_Reports_S_F_ProjectID_main){
-		    var o_d = $get(p[1]+'_Display');
-		    try{o_d.innerHTML = p[2];}catch(ex){}
-		  }
-		  o.style.backgroundImage  = 'none';
-		  if(p[0]=='1'){
-		    o.value='';
-		    o.focus();
-		  }
-		},
-
 		temp: function() {
 		}
 		}

@@ -26,7 +26,11 @@ Public Enum RequestStates
 	DetentionUnderApproval = 23
 	DetentionRejected = 24
 	DetentionApproved = 25
-	RequestBlocked = 26
+  RequestBlocked = 26
+  SanctionApprovalRejected = 27
+  UnderSanctionApproval = 28
+  SanctionApproved = 29
+  VehiclePlaced = 30
 End Enum
 Public Enum BillStatus
 	Free = 1

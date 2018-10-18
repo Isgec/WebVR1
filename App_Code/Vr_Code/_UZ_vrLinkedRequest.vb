@@ -5,15 +5,25 @@ Imports System.Data.SqlClient
 Imports System.ComponentModel
 Namespace SIS.VR
   Partial Public Class vrLinkedRequest
+    Public Shadows Function GetColor() As System.Drawing.Color
+      Dim mRet As System.Drawing.Color = Drawing.Color.Black
+      Select Case RequestStatus
+        Case RequestStates.RequestLinked
+          mRet = Drawing.Color.Green
+        Case Else
+          mRet = Drawing.Color.DarkGoldenrod
+      End Select
+      Return mRet
+    End Function
     Public ReadOnly Property RejectWFVisible() As Boolean
       Get
         Dim mRet As Boolean = False
         Try
-					If Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.UnderExecution _
-					Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.RequestLinked _
-					Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.ODCRejected Then
-						mRet = True
-					End If
+          If Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.UnderExecution _
+          Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.RequestLinked _
+          Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.ODCRejected Then
+            mRet = True
+          End If
         Catch ex As Exception
         End Try
         Return mRet

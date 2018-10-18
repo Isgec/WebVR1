@@ -17,11 +17,6 @@
   EnableClientScript = "true"
   ValidationGroup = "none"
   SetFocusOnError = "true" />
-<AJX:ListSearchExtender
-  ID="DDSEvrODCReasons"
-  runat = "server"
-  TargetControlID = "DDLvrODCReasons"
-  PromptCssClass="ddsearchprompt">
 </AJX:ListSearchExtender>
 <asp:ObjectDataSource 
   ID = "OdsDdlvrODCReasons"

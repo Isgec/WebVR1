@@ -21,8 +21,8 @@
             DefaultMode="Insert" CssClass="sis_formview">
             <InsertItemTemplate>
               <div id="frmdiv" class="ui-widget-content minipage">
-                <asp:Label ID="L_ErrMsgvrVehicleRequest" runat="server" ForeColor="Red" Font-Bold="true" Text=""></asp:Label>
-                <table>
+                <asp:Label ID="L_ErrMsgvrVehicleRequest" runat="server" ClientIDMode="Static" ForeColor="Red" BackColor="Yellow" BorderColor="Orange" BorderStyle="Solid" BorderWidth="1pt" Font-Bold="true"  Text=""></asp:Label>
+                 <table style="margin:auto;border: solid 1pt lightgrey">
                   <tr>
                     <td class="alignright">
                       <b>
@@ -46,15 +46,16 @@
                               ValidationGroup="vrVehicleRequest"
                               onblur="script_vrVehicleRequest.validate_ERPPONumber(this);"
                               ToolTip="Enter value for ERP PO Number."
-                              MaxLength="10"
+                              MaxLength="9"
                               Width="70px"
                               runat="server" />
                             <asp:RequiredFieldValidator
                               ID="RFVERPPONumber"
                               runat="server"
                               ControlToValidate="F_ERPPONumber"
-                              Text="**"
+                              Text="<div class='errorLG'>Required!</div>"
                               ErrorMessage="**"
+                              ForeColor="red"
                               Display="Dynamic"
                               EnableClientScript="true"
                               ValidationGroup="vrVehicleRequest"
@@ -84,10 +85,11 @@
                         ID="RFVRequestDescription"
                         runat="server"
                         ControlToValidate="F_RequestDescription"
-                        Text="Request Description is required."
+                        Text="<div class='errorLG'>Required!</div>"
                         ErrorMessage="[Required!]"
                         Display="Dynamic"
                         EnableClientScript="true"
+                              ForeColor="red"
                         ValidationGroup="vrVehicleRequest"
                         SetFocusOnError="true" />
                     </td>
@@ -100,47 +102,16 @@
                     <td>
                       <asp:TextBox
                         ID="F_SupplierID"
-                        CssClass="myfktxt"
+                        CssClass="dmytxt"
                         Width="92px"
                         Text='<%# Bind("SupplierID") %>'
-                        AutoCompleteType="None"
-                        onfocus="return this.select();"
-                        ToolTip="Enter value for Supplier ID."
-                        ValidationGroup="vrVehicleRequest"
-                        onblur="script_vrVehicleRequest.validate_SupplierID(this);"
+                        ClientIDMode="Static"
+                        Enabled="False"
                         runat="Server" />
                       <asp:Label
                         ID="F_SupplierID_Display"
                         Text='<%# Eval("IDM_Vendors5_Description") %>'
-                        runat="Server" />
-                      <asp:RequiredFieldValidator
-                        ID="RFVSupplierID"
-                        runat="server"
-                        ControlToValidate="F_SupplierID"
-                        Text="Supplier ID is required."
-                        ErrorMessage="[Required!]"
-                        Display="Dynamic"
-                        EnableClientScript="true"
-                        ValidationGroup="vrVehicleRequest"
-                        SetFocusOnError="true" />
-                      <AJX:AutoCompleteExtender
-                        ID="ACESupplierID"
-                        BehaviorID="B_ACESupplierID"
-                        ContextKey=""
-                        UseContextKey="true"
-                        ServiceMethod="SupplierIDCompletionList"
-                        TargetControlID="F_SupplierID"
-                        EnableCaching="false"
-                        CompletionInterval="100"
-                        FirstRowSelected="true"
-                        MinimumPrefixLength="1"
-                        OnClientItemSelected="script_vrVehicleRequest.ACESupplierID_Selected"
-                        OnClientPopulating="script_vrVehicleRequest.ACESupplierID_Populating"
-                        OnClientPopulated="script_vrVehicleRequest.ACESupplierID_Populated"
-                        CompletionSetCount="10"
-                        CompletionListCssClass="autocomplete_completionListElement"
-                        CompletionListItemCssClass="autocomplete_listItem"
-                        CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
+                        ClientIDMode="Static"
                         runat="Server" />
                     </td>
                     <td class="alignright">
@@ -149,31 +120,35 @@
                       </b>
                     </td>
                     <td>
-                      <asp:TextBox ID="F_ProjectID" runat="Server" AutoCompleteType="None"
-                        CssClass="myfktxt" onblur="script_vrVehicleRequest.validate_ProjectID(this);"
-                        onfocus="return this.select();" Text='<%# Bind("ProjectID") %>'
-                        ToolTip="Enter value for Project ID." ValidationGroup="vrVehicleRequest"
+                      <asp:TextBox 
+                        ID="F_ProjectID" 
+                        runat="Server" 
+                        Text='<%# Bind("ProjectID") %>'
+                        Enabled="false"
+                        CssClass="dmytxt" 
+                        ClientIDMode="Static"
                         Width="62px" />
-                      <asp:Label ID="F_ProjectID_Display" runat="Server"
+                      <asp:Label 
+                        ID="F_ProjectID_Display" 
+                        runat="Server" 
+                        ClientIDMode="Static"
                         Text='<%# Eval("IDM_Projects4_Description") %>' />
-                      <asp:RequiredFieldValidator ID="RFVProjectID" runat="server"
-                        ControlToValidate="F_ProjectID" Display="Dynamic" EnableClientScript="true"
-                        ErrorMessage="[Required!]" SetFocusOnError="true"
-                        Text="Project ID is required." ValidationGroup="vrVehicleRequest" />
-                      <AJX:AutoCompleteExtender ID="ACEProjectID" runat="Server"
-                        BehaviorID="B_ACEProjectID" CompletionInterval="100"
-                        CompletionListCssClass="autocomplete_completionListElement"
-                        CompletionListHighlightedItemCssClass="autocomplete_highlightedListItem"
-                        CompletionListItemCssClass="autocomplete_listItem" CompletionSetCount="10"
-                        ContextKey="" EnableCaching="false" FirstRowSelected="true"
-                        MinimumPrefixLength="1"
-                        OnClientItemSelected="script_vrVehicleRequest.ACEProjectID_Selected"
-                        OnClientPopulated="script_vrVehicleRequest.ACEProjectID_Populated"
-                        OnClientPopulating="script_vrVehicleRequest.ACEProjectID_Populating"
-                        ServiceMethod="ProjectIDCompletionList" TargetControlID="F_ProjectID"
-                        UseContextKey="true" />
+                      <asp:DropDownList 
+                        ID="F_ProjectType" 
+                        runat="Server" 
+                        CssClass="dmyddl" 
+                        ClientIDMode="Static"
+                        SelectedValue='<%# Bind("ProjectType") %>' 
+                        ValidationGroup="vrVehicleRequest" 
+                        Enabled="false"
+                        Width="100px">
+                        <asp:ListItem Value="Domestic">Domestic</asp:ListItem>
+                        <asp:ListItem Value="Export">Export</asp:ListItem>
+                      </asp:DropDownList>
+
                     </td>
                   </tr>
+                  <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>
                   <tr>
                     <td class="alignright">
                       <b>
@@ -181,15 +156,31 @@
                       </b>
                     </td>
                     <td>
-                      <asp:TextBox ID="F_SupplierLocation" runat="server" CssClass="mytxt"
-                        Height="40px" MaxLength="250" onblur="this.value=this.value.replace(/\'/g,'');"
-                        onfocus="return this.select();" Text='<%# Bind("SupplierLocation") %>'
-                        TextMode="MultiLine" ToolTip="Enter value for Supplier Location."
-                        ValidationGroup="vrVehicleRequest" Width="350px" />
-                      <asp:RequiredFieldValidator ID="RFVSupplierLocation" runat="server"
-                        ControlToValidate="F_SupplierLocation" Display="Dynamic"
-                        EnableClientScript="true" ErrorMessage="[Required!]" SetFocusOnError="true"
-                        Text="Supplier Location is required." ValidationGroup="vrVehicleRequest" />
+                      <asp:TextBox 
+                        ID="F_SupplierLocation" 
+                        runat="server" 
+                        CssClass="mytxt" 
+                        ClientIDMode="Static"
+                        Height="40px" 
+                        MaxLength="250" 
+                        onblur="this.value=this.value.replace(/\'/g,'');"
+                        onfocus="return this.select();" 
+                        Text='<%# Bind("SupplierLocation") %>'
+                        TextMode="MultiLine" 
+                        ToolTip="Enter Loading Point Address."
+                        ValidationGroup="vrVehicleRequest" 
+                        Width="350px" />
+                      <asp:RequiredFieldValidator 
+                        ID="RFVSupplierLocation" 
+                        runat="server"
+                        ControlToValidate="F_SupplierLocation" 
+                        Display="Dynamic"
+                        EnableClientScript="true" 
+                        ErrorMessage="[Required!]" 
+                        SetFocusOnError="true"
+                        ForeColor="red"
+                        Text="<div class='errorLG'>Required!</div>" 
+                        ValidationGroup="vrVehicleRequest" />
                     </td>
                     <td class="alignright">
                       <b>
@@ -197,15 +188,31 @@
                       </b>
                     </td>
                     <td>
-                      <asp:TextBox ID="F_DeliveryLocation" runat="server" CssClass="mytxt"
-                        Height="40px" MaxLength="400" onblur="this.value=this.value.replace(/\'/g,'');"
-                        onfocus="return this.select();" Text='<%# Bind("DeliveryLocation") %>'
-                        TextMode="MultiLine" ToolTip="Enter value for Delivery Location."
-                        ValidationGroup="vrVehicleRequest" Width="350px" />
-                      <asp:RequiredFieldValidator ID="RFVDeliveryLocation" runat="server"
-                        ControlToValidate="F_DeliveryLocation" Display="Dynamic"
-                        EnableClientScript="true" ErrorMessage="[Required!]" SetFocusOnError="true"
-                        Text="Delivery Location is required." ValidationGroup="vrVehicleRequest" />
+                      <asp:TextBox 
+                        ID="F_DeliveryLocation" 
+                        runat="server" 
+                        CssClass="mytxt" 
+                        ClientIDMode="Static"
+                        Height="40px" 
+                        MaxLength="400" 
+                        onblur="this.value=this.value.replace(/\'/g,'');"
+                        onfocus="return this.select();" 
+                        Text='<%# Bind("DeliveryLocation") %>'
+                        TextMode="MultiLine" 
+                        ToolTip="Enter value for Delivery Location."
+                        ValidationGroup="vrVehicleRequest" 
+                        Width="350px" />
+                      <asp:RequiredFieldValidator 
+                        ID="RFVDeliveryLocation" 
+                        runat="server"
+                        ControlToValidate="F_DeliveryLocation" 
+                        Display="Dynamic"
+                        ForeColor="red"
+                        EnableClientScript="true" 
+                        ErrorMessage="[Required!]" 
+                        SetFocusOnError="true"
+                        Text="<div class='errorLG'>Required!</div>" 
+                        ValidationGroup="vrVehicleRequest" />
                     </td>
                   </tr>
                   <tr>
@@ -228,8 +235,9 @@
                         ID="RFVFromLocation"
                         runat="server"
                         ControlToValidate="F_FromLocation"
-                        Text="From Location is required."
+                        Text="<div class='errorLG'>Required!</div>"
                         ErrorMessage="[Required!]"
+                        ForeColor="red"
                         Display="Dynamic"
                         EnableClientScript="true"
                         ValidationGroup="vrVehicleRequest"
@@ -254,14 +262,16 @@
                         ID="RFVToLocation"
                         runat="server"
                         ControlToValidate="F_ToLocation"
-                        Text="To Location is required."
+                        Text="<div class='errorLG'>Required!</div>"
                         ErrorMessage="[Required!]"
                         Display="Dynamic"
+                        ForeColor="red"
                         EnableClientScript="true"
                         ValidationGroup="vrVehicleRequest"
                         SetFocusOnError="true" />
                     </td>
                   </tr>
+                  <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>
                   <tr>
                     <td class="alignright">
                       <b>
@@ -269,34 +279,34 @@
                       </b>
                     </td>
                     <td>
-                      <asp:TextBox ID="F_ItemDescription" runat="server" CssClass="mytxt"
-                        Height="40px" MaxLength="500" onblur="this.value=this.value.replace(/\'/g,'');"
-                        onfocus="return this.select();" Text='<%# Bind("ItemDescription") %>'
-                        TextMode="MultiLine" ToolTip="Enter value for Item Description."
-                        ValidationGroup="vrVehicleRequest" Width="350px" />
-                      <asp:RequiredFieldValidator ID="RFVItemDescription" runat="server"
-                        ControlToValidate="F_ItemDescription" Display="Dynamic"
-                        EnableClientScript="true" ErrorMessage="[Required!]" SetFocusOnError="true"
-                        Text="Item Description is required." ValidationGroup="vrVehicleRequest" />
+                      <asp:TextBox 
+                        ID="F_ItemDescription" 
+                        runat="server" 
+                        CssClass="mytxt"
+                        Height="40px"
+                        MaxLength="500" 
+                        onblur="this.value=this.value.replace(/\'/g,'');"
+                        onfocus="return this.select();" 
+                        Text='<%# Bind("ItemDescription") %>'
+                        TextMode="MultiLine" 
+                        ToolTip="Enter value for Item Description."
+                        ValidationGroup="vrVehicleRequest" 
+                        Width="350px" />
+                      <asp:RequiredFieldValidator 
+                        ID="RFVItemDescription" 
+                        runat="server"
+                        ControlToValidate="F_ItemDescription" 
+                        Display="Dynamic"
+                        ForeColor="red"
+                        EnableClientScript="true" 
+                        ErrorMessage="[Required!]" 
+                        SetFocusOnError="true"
+                        Text="<div class='errorLG'>Required!</div>" 
+                        ValidationGroup="vrVehicleRequest" />
                     </td>
                     <td></td>
                     <td>
-                      <table width="100%">
-                        <tr>
-                          <td>
-                            <b>
-                              <asp:Label ID="L_ProjectType" runat="server" Text="Project Type :" />
-                            </b>
-                          </td>
-                          <td>
-                            <asp:DropDownList ID="F_ProjectType" runat="Server" CssClass="myddl"
-                              SelectedValue='<%# Bind("ProjectType") %>' ValidationGroup="vrVehicleRequest"
-                              Width="200px">
-                              <asp:ListItem Value="Domestic">Domestic</asp:ListItem>
-                              <asp:ListItem Value="Export">Export</asp:ListItem>
-                            </asp:DropDownList>
-                          </td>
-                        </tr>
+                      <table>
                         <tr>
                           <td>
                             <b>
@@ -318,13 +328,14 @@
                       </table>
                     </td>
                   </tr>
+                  <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>
                   <tr>
-                    <td>
+                    <td style="text-align:center;">
                       <b>
                         <asp:Label ID="Label2" runat="server" Text="Cargo Dimension :" /></b>
                     </td>
                     <td>
-                      <table width="100%" style="border: solid 1pt brown; background-color: aqua">
+                      <table width="100%" style="border: solid 1pt brown; background-color: gainsboro">
                         <tr>
                           <td>
                             <b>
@@ -401,7 +412,7 @@
                         <asp:Label ID="Label1" runat="server" Text="Cargo Weight :" /></b>
                     </td>
                     <td>
-                      <table width="500px" style="border: solid 1pt brown; background-color: aqua">
+                      <table width="500px" style="border: solid 1pt brown; background-color: gainsboro">
                         <tr>
                           <td class="alignright">
                             <b>
@@ -496,6 +507,7 @@
                               EnableClientScript="true"
                               ValidationGroup="vrVehicleRequest"
                               IsValidEmpty="false"
+                              ForeColor="red"
                               SetFocusOnError="true" />
                           </td>
                         </tr>
@@ -503,6 +515,7 @@
                       </table>
                     </td>
                   </tr>
+                  <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>
                   <tr>
                     <td class="alignright">
                       <b>
@@ -520,7 +533,8 @@
                         Width="400px"
                         CssClass="myddl"
                         ValidationGroup="vrVehicleRequest"
-                        RequiredFieldErrorMessage="*"
+                        RequiredFieldErrorMessage="<div class='errorLG'>Required!</div>"
+                        ForeColor="red"
                         runat="Server" />
                     </td>
                     <td class="alignright">
@@ -552,7 +566,6 @@
                         CssClass="mytxt"
                         onfocus="return this.select();"
                         onblur="this.value=this.value.replace(/\'/g,'');"
-                        ToolTip="Enter value for Custom Invoice No."
                         MaxLength="100"
                         Width="350px" Height="40px" TextMode="MultiLine"
                         runat="server" />
@@ -567,7 +580,6 @@
                         CssClass="mytxt"
                         onfocus="return this.select();"
                         onblur="this.value=this.value.replace(/\'/g,'');"
-                        ToolTip="Enter value for Remarks."
                         MaxLength="500"
                         Width="350px" Height="40px" TextMode="MultiLine"
                         runat="server" />
@@ -597,6 +609,7 @@
                         runat="server" />
                     </td>
                   </tr>
+                  <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>
                   <tr>
                     <td colspan="2">
                       <table>

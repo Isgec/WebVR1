@@ -65,8 +65,8 @@ Partial Class GF_vrVehicleRequest
 				Dim RequestNo As Int32 = GVvrVehicleRequest.DataKeys(e.CommandArgument).Values("RequestNo")
 				Dim Err As Boolean = False
 				Dim oRq As SIS.VR.vrVehicleRequest = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(RequestNo)
-				SIS.VR.vrVehicleRequest.CT_VehicleRequested(oRq)
-			Catch ex As Exception
+        'SIS.VR.vrVehicleRequest.CT_VehicleRequested(oRq)
+      Catch ex As Exception
 				ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)
 			End Try
 		End If
@@ -342,4 +342,65 @@ Partial Class GF_vrVehicleRequest
 		End If
 		Return mRet
 	End Function
+
+  'Private Sub TBLvrVehicleRequest_AddClicked(sender As Object, e As ImageClickEventArgs) Handles TBLvrVehicleRequest.AddClicked
+  '  Dim tmp As New SIS.VR.vrVehicleRequest
+  '  With tmp
+  '    .RequestNo = 0
+  '    .RequestDescription = ""
+  '    .SupplierID = ""
+  '    .SupplierLocation = ""
+  '    .ProjectID = ""
+  '    .ProjectType = "Domestic"
+  '    .DeliveryLocation = ""
+  '    .ItemDescription = ""
+  '    .MaterialSize = ""
+  '    .SizeUnit = ""
+  '    .Height = 0
+  '    .Width = 0
+  '    .Length = 0
+  '    .MaterialWeight = 0
+  '    .WeightUnit = ""
+  '    .NoOfPackages = 0
+  '    .VehicleTypeID = ""
+  '    .VehicleRequiredOn = ""
+  '    .OverDimentionConsignement = False
+  '    .ODCReasonID = ""
+  '    .MICN = False
+  '    .CustomInvoiceNo = ""
+  '    .Remarks = ""
+  '    .RequestedBy = HttpContext.Current.Session("LoginID")
+  '    .RequestedOn = Now
+  '    .RequesterDivisionID = "" 'Division will be updated Internally
+  '    .RequestStatus = 3
+  '    .ReturnedOn = ""
+  '    .ReturnedBy = ""
+  '    .ReturnRemarks = ""
+  '    .SRNNo = ""
+  '    .ValidRequest = True
+  '    .ODCAtSupplierLoading = False
+  '    .FromLocation = ""
+  '    .ToLocation = ""
+  '    .CustomInvoiceIssued = False
+  '    .CT1Issued = False
+  '    .ARE1Issued = False
+  '    .DIIssued = False
+  '    .PaymentChecked = False
+  '    .GoodsPacked = False
+  '    .POApproved = False
+  '    .WayBill = False
+  '    .MarkingDetails = False
+  '    .TarpaulineRequired = False
+  '    .PackageStckable = False
+  '    .InvoiceValue = 0
+  '    .OutOfContract = False
+  '    .ERPPONumber = ""
+  '    .BuyerInERP = ""
+  '    '.ExecuterReasonID = ""
+  '    '.ExecuterID = ""
+  '    '.ReasonEneteredOn = ""
+  '  End With
+  '  tmp = SIS.VR.vrVehicleRequest.vrVehicleRequestInsert(tmp)
+  '  TBLvrVehicleRequest.AddUrl &= "?RequestNo=" & tmp.RequestNo
+  'End Sub
 End Class

@@ -58,8 +58,6 @@ Partial Class AF_vrLorryReceiptDetails
     If Request.QueryString("MRNNo") IsNot Nothing Then
       CType(FVvrLorryReceiptDetails.FindControl("F_MRNNo"), TextBox).Text = Request.QueryString("MRNNo")
       CType(FVvrLorryReceiptDetails.FindControl("F_MRNNo"), TextBox).Enabled = False
-      Dim tmp As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(Request.QueryString("ProjectID"), Request.QueryString("MRNNo"))
-      CType(FVvrLorryReceiptDetails.FindControl("F_TransporterID"), TextBox).Text = tmp.TransporterID
     End If
     If Request.QueryString("SerialNo") IsNot Nothing Then
       CType(FVvrLorryReceiptDetails.FindControl("F_SerialNo"), TextBox).Text = Request.QueryString("SerialNo")
@@ -118,24 +116,6 @@ Partial Class AF_vrLorryReceiptDetails
       mRet = "1|" & aVal(0) & "|Record not found." 
     Else
       mRet = "0|" & aVal(0) & "|" & oVar.DisplayField 
-    End If
-    Return mRet
-  End Function
-  <System.Web.Services.WebMethod()>
-  <System.Web.Script.Services.ScriptMethod()>
-  Public Shared Function GRorLRNoCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
-    Return SIS.TFISG.tfisg003.Selecttfisg003AutoCompleteList(prefixText, count, contextKey)
-  End Function
-  <System.Web.Services.WebMethod()>
-  Public Shared Function validate_FK_VR_LorryReceiptDetails_GRNo(ByVal value As String) As String
-    Dim aVal() As String = value.Split(",".ToCharArray)
-    Dim mRet As String = "0|" & aVal(0)
-    Dim GRorLRNo As String = CType(aVal(1), String)
-    Dim oVar As SIS.TFISG.tfisg003 = SIS.TFISG.tfisg003.tfisg003GetByID(GRorLRNo)
-    If oVar Is Nothing Then
-      mRet = "0|" & aVal(0) & "|||"
-    Else
-      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField & "|" & oVar.t_grdt & "|" & oVar.SupplierID
     End If
     Return mRet
   End Function

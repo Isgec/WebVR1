@@ -9,15 +9,17 @@ Namespace SIS.VR
   Partial Public Class vrRequestExecution
 		Public Function GetColor() As System.Drawing.Color
       Dim mRet As System.Drawing.Color = Drawing.Color.Black
-			If RequestStatusID = RequestStates.ODCRejected Then
-				mRet = Drawing.Color.Red
-			ElseIf RequestStatusID = RequestStates.RequestLinked Then
-				mRet = Drawing.Color.DarkGoldenrod
-			ElseIf RequestStatusID = RequestStates.ODCUnderApproval Then
-				mRet = Drawing.Color.DarkOrange
-			ElseIf RequestStatusID = RequestStates.VehicleArranged Then
-				mRet = Drawing.Color.Green
-			ElseIf RequestStatusID = RequestStates.GRLinked Then
+      If RequestStatusID = RequestStates.ODCRejected Then
+        mRet = Drawing.Color.Red
+      ElseIf RequestStatusID = RequestStates.RequestLinked Then
+        mRet = Drawing.Color.DarkGoldenrod
+      ElseIf RequestStatusID = RequestStates.ODCUnderApproval Then
+        mRet = Drawing.Color.DarkOrange
+      ElseIf RequestStatusID = RequestStates.VehicleArranged Then
+        mRet = Drawing.Color.Tomato
+      ElseIf RequestStatusID = RequestStates.VehiclePlaced Then
+        mRet = Drawing.Color.Green
+      ElseIf RequestStatusID = RequestStates.GRLinked Then
 				mRet = Drawing.Color.DarkGoldenrod
 			End If
       Return mRet
@@ -140,7 +142,9 @@ Namespace SIS.VR
 			Get
 				Dim mRet As Boolean = False
 				Try
-          If _RequestStatusID = RequestStates.RequestLinked Or _RequestStatusID = 29 Or _RequestStatusID = 27 Then 'Or _RequestStatusID = 28 Then '29=Sanction Approved
+          If _RequestStatusID = RequestStates.RequestLinked _
+            Or _RequestStatusID = 29 _
+            Or _RequestStatusID = 27 Then
             If _Linked Then
               If _SRNNo.ToString = _LinkID Then
                 mRet = True
@@ -168,12 +172,13 @@ Namespace SIS.VR
       Get
         Dim mRet As Boolean = False
         Try
-					If _RequestStatusID = RequestStates.VehicleArranged _
-					Or _RequestStatusID = RequestStates.SelfRejected _
-					Or _RequestStatusID = RequestStates.ODCRejected _
-					Or _RequestStatusID = RequestStates.GRLinked Then
-						mRet = True
-					End If
+          If _RequestStatusID = RequestStates.VehicleArranged _
+          Or _RequestStatusID = RequestStates.SelfRejected _
+          Or _RequestStatusID = RequestStates.ODCRejected _
+          Or _RequestStatusID = RequestStates.VehiclePlaced _
+          Or _RequestStatusID = RequestStates.GRLinked Then
+            mRet = True
+          End If
         Catch ex As Exception
         End Try
         Return mRet
@@ -193,22 +198,23 @@ Namespace SIS.VR
 			Get
 				Dim mRet As Boolean = False
 				Try
-					If _RequestStatusID = RequestStates.VehicleArranged _
-					Or _RequestStatusID = RequestStates.SelfRejected _
-					Or _RequestStatusID = RequestStates.VehicleNotPlacedRejected _
-					Or _RequestStatusID = RequestStates.DelayedPlacementRejected _
-					Or _RequestStatusID = RequestStates.EmptyReturnRejected _
-					Or _RequestStatusID = RequestStates.DetentionRejected _
-					Or _RequestStatusID = RequestStates.ODCRejected Then
-						If _Linked Then
-							If _SRNNo.ToString = _LinkID Then
-								mRet = True
-							End If
-						Else
-							mRet = True
-						End If
-					End If
-				Catch ex As Exception
+          If _RequestStatusID = RequestStates.VehicleArranged _
+          Or _RequestStatusID = RequestStates.SelfRejected _
+          Or _RequestStatusID = RequestStates.VehicleNotPlacedRejected _
+          Or _RequestStatusID = RequestStates.DelayedPlacementRejected _
+          Or _RequestStatusID = RequestStates.EmptyReturnRejected _
+          Or _RequestStatusID = RequestStates.DetentionRejected _
+          Or _RequestStatusID = RequestStates.VehiclePlaced _
+          Or _RequestStatusID = RequestStates.ODCRejected Then
+            If _Linked Then
+              If _SRNNo.ToString = _LinkID Then
+                mRet = True
+              End If
+            Else
+              mRet = True
+            End If
+          End If
+        Catch ex As Exception
 				End Try
 				Return mRet
 			End Get
@@ -223,25 +229,43 @@ Namespace SIS.VR
 				Return mRet
 			End Get
 		End Property
-		Public ReadOnly Property CompleteWFVisible() As Boolean
-			Get
-				Dim mRet As Boolean = False
-				Try
-					If _RequestStatusID = RequestStates.ODCApproved _
-					Or _RequestStatusID = RequestStates.VehicleNotPlacedApproved _
-					Or _RequestStatusID = RequestStates.DelayedPlacementApproved _
-					Or _RequestStatusID = RequestStates.EmptyReturnApproved _
-					Or _RequestStatusID = RequestStates.DetentionApproved _
-					Or _RequestStatusID = RequestStates.SelfApproved Then
-						'If Linked:To Be discussed with Ajay Gupta
-						mRet = True
-					End If
-				Catch ex As Exception
-				End Try
-				Return mRet
-			End Get
-		End Property
-		Public ReadOnly Property CompleteWFEnable() As Boolean
+    Public ReadOnly Property VehiclePlacedWFVisible() As Boolean
+      Get
+        Dim mRet As Boolean = False
+        Try
+          If _RequestStatusID = RequestStates.VehicleArranged Then
+            If _Linked Then
+              If _SRNNo.ToString = _LinkID Then
+                mRet = True
+              End If
+            Else
+              mRet = True
+            End If
+          End If
+        Catch ex As Exception
+        End Try
+        Return mRet
+      End Get
+    End Property
+    Public ReadOnly Property CompleteWFVisible() As Boolean
+      Get
+        Dim mRet As Boolean = False
+        Try
+          If _RequestStatusID = RequestStates.ODCApproved _
+          Or _RequestStatusID = RequestStates.VehicleNotPlacedApproved _
+          Or _RequestStatusID = RequestStates.DelayedPlacementApproved _
+          Or _RequestStatusID = RequestStates.EmptyReturnApproved _
+          Or _RequestStatusID = RequestStates.DetentionApproved _
+          Or _RequestStatusID = RequestStates.SelfApproved Then
+            'If Linked:To Be discussed with Ajay Gupta
+            mRet = True
+          End If
+        Catch ex As Exception
+        End Try
+        Return mRet
+      End Get
+    End Property
+    Public ReadOnly Property CompleteWFEnable() As Boolean
 			Get
 				Dim mRet As Boolean = True
 				Try
@@ -255,45 +279,47 @@ Namespace SIS.VR
 		Public Shared Function InitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
 			Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
 			Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Results.SRNNo, "")
-			'Checking of Estimated Amount Entered or NOT is Mandatory is pending
-			'===========Commented====================
-			If Not Results.SanctionExceededApproved Then
-				If Not Results.SanctionExceeded Then
-					'Check Sanction First
-					Dim SanctionExceeded As Boolean = False
-					Results = SIS.VR.vrRequestExecution.ValidateSanction(SRNNo, "")
-					SIS.VR.vrRequestExecution.UpdateData(Results)
-					If Results.SanctionBalance < 0 Then
-						SanctionExceeded = True
-					Else
-						For Each le As SIS.VR.vrRequestExecution In oLEs
-							le = SIS.VR.vrRequestExecution.ValidateSanction(le.SRNNo, "")
-							SIS.VR.vrRequestExecution.UpdateData(le)
-							If le.SanctionBalance < 0 Then
-								SanctionExceeded = True
-							End If
-						Next
-					End If
-					'If any exceeded found
-					'Assign in all Linked
-					If SanctionExceeded Then
-						Results.SanctionExceeded = True
-						Results.RequestStatusID = 28
-						SIS.VR.vrRequestExecution.UpdateData(Results)
-						For Each le As SIS.VR.vrRequestExecution In oLEs
-							le.SanctionExceeded = True
-							le.RequestStatusID = 28
-							SIS.VR.vrRequestExecution.UpdateData(le)
-						Next
-					End If
-					If SanctionExceeded Then
-						SendEMailSanctionApproval(Results)
-						Return Results
-					End If
-				End If
-			End If
-			'Checking Sanction Consumed Percent And Alert
-			Dim ProjectID As String = Results.Project.ProjectID
+      'Checking of Estimated Amount Entered or NOT is Mandatory is pending
+      '===========Commented====================
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("CheckSanction")) Then
+        If Not Results.SanctionExceededApproved Then
+          If Not Results.SanctionExceeded Then
+            'Check Sanction First
+            Dim SanctionExceeded As Boolean = False
+            Results = SIS.VR.vrRequestExecution.ValidateSanction(SRNNo, "")
+            SIS.VR.vrRequestExecution.UpdateData(Results)
+            If Results.SanctionBalance < 0 Then
+              SanctionExceeded = True
+            Else
+              For Each le As SIS.VR.vrRequestExecution In oLEs
+                le = SIS.VR.vrRequestExecution.ValidateSanction(le.SRNNo, "")
+                SIS.VR.vrRequestExecution.UpdateData(le)
+                If le.SanctionBalance < 0 Then
+                  SanctionExceeded = True
+                End If
+              Next
+            End If
+            'If any exceeded found
+            'Assign in all Linked
+            If SanctionExceeded Then
+              Results.SanctionExceeded = True
+              Results.RequestStatusID = 28
+              SIS.VR.vrRequestExecution.UpdateData(Results)
+              For Each le As SIS.VR.vrRequestExecution In oLEs
+                le.SanctionExceeded = True
+                le.RequestStatusID = 28
+                SIS.VR.vrRequestExecution.UpdateData(le)
+              Next
+            End If
+            If SanctionExceeded Then
+              SendEMailSanctionApproval(Results)
+              Return Results
+            End If
+          End If
+        End If
+      End If
+      'Checking Sanction Consumed Percent And Alert
+      Dim ProjectID As String = Results.Project.ProjectID
 			Dim tmpCon As Decimal = 0
 			Try
 				tmpCon = (Results.EstimatedPOBalance / Results.POValue) * 100
@@ -369,42 +395,37 @@ Namespace SIS.VR
 			'=====================
 			'Main Execution
 			Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
-			If oVRs.Count > 0 Then
-				Dim ODCFound As Boolean = False
-				For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-					If oVR.OverDimentionConsignement Then
-						ODCFound = True
-					End If
-					oVR.RequestStatus = RequestStates.VehicleArranged
-					SIS.VR.vrVehicleRequest.UpdateData(oVR)
-				Next
-				With Results
-					.RequestStatusID = RequestStates.VehicleArranged
-					.ArrangedBy = HttpContext.Current.Session("LoginID")
-					.ArrangedOn = Now
-					.ODCByRequest = ODCFound
-				End With
-				Results = SIS.VR.vrRequestExecution.UpdateData(Results)
-				Try
-					CT_RequestExecuted(Results)
-				Catch ex As Exception
-				End Try
-
-			End If
-			'Linked Executions
-			For Each le As SIS.VR.vrRequestExecution In oLEs
+      If oVRs.Count > 0 Then
+        Dim ODCFound As Boolean = False
+        For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+          If oVR.OverDimentionConsignement Then
+            ODCFound = True
+          End If
+          oVR.RequestStatus = RequestStates.VehicleArranged
+          SIS.VR.vrVehicleRequest.UpdateData(oVR)
+        Next
+        With Results
+          .RequestStatusID = RequestStates.VehicleArranged
+          .ArrangedBy = HttpContext.Current.Session("LoginID")
+          .ArrangedOn = Now
+          .ODCByRequest = ODCFound
+        End With
+        Results = SIS.VR.vrRequestExecution.UpdateData(Results)
+      End If
+      'Linked Executions
+      For Each le As SIS.VR.vrRequestExecution In oLEs
 				If le.SRNNo.ToString = Results.SRNNo Then Continue For
 				oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
 				If oVRs.Count > 0 Then
 					Dim ODCFound As Boolean = False
-					For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-						If oVR.OverDimentionConsignement Then
-							ODCFound = True
-						End If
-						oVR.RequestStatus = RequestStates.VehicleArranged
-						SIS.VR.vrVehicleRequest.UpdateData(oVR)
-					Next
-					With le
+          For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+            If oVR.OverDimentionConsignement Then
+              ODCFound = True
+            End If
+            oVR.RequestStatus = RequestStates.VehicleArranged
+            SIS.VR.vrVehicleRequest.UpdateData(oVR)
+          Next
+          With le
 						.RequestStatusID = RequestStates.VehicleArranged
 						.ArrangedBy = HttpContext.Current.Session("LoginID")
 						.ArrangedOn = Now
@@ -416,196 +437,178 @@ Namespace SIS.VR
 			SendEMail(Results)
 			Return Results
 		End Function
-		Public Shared Sub CT_RequestExecuted(ByVal rE As SIS.VR.vrRequestExecution)
-			Dim hndl As String = "CT_VEHICLEREQUESTPLACED"
-			Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(rE.SRNNo, "")
-			If oVRs.Count > 0 Then
-				Dim ODCFound As Boolean = False
-				For Each rq As SIS.VR.vrVehicleRequest In oVRs
-					Dim poElements As ArrayList = SIS.CT.ctPOLChild.GetPOElements(rq.ERPPONumber)
-					Dim SrNo As Integer = 0
-					For Each Str As String In poElements
-						SrNo += 1
-						Dim ctH As New SIS.CT.ctHeader
-						With ctH
-							.t_trdt = rE.ArrangedOn
-							.t_bohd = hndl
-							.t_indv = rE.SRNNo
-							.t_srno = SrNo
-							.t_proj = rq.ProjectID
-							.t_elem = Str
-							.t_user = re.ArrangedBy
-							.t_stat = ""
-						End With
-						ctH = SIS.CT.ctHeader.InsertData(ctH)
-						Dim DSrn As Integer = 0
-						Dim Chlds As ArrayList = SIS.CT.ctPOLChild.GetPODocuments(rq.ERPPONumber)
-						If Chlds.Count > 0 Then
-							For Each chld As String In Chlds
-								DSrn += 1
-								Dim ctD As New SIS.CT.ctDetail
-								With ctD
-									.t_trdt = rE.ArrangedOn
-									.t_bohd = hndl
-									.t_indv = rE.SRNNo
-									.t_srno = ctH.t_srno
-									.t_dsno = DSrn
-									.t_dwno = chld
-									.t_elem = Str
-									.t_proj = rq.ProjectID
-									.t_wght = 0
-									.t_pitc = 0
-								End With
-								ctD = SIS.CT.ctDetail.InsertData(ctD)
-							Next
-						End If
-					Next
-				Next
-			End If
 
-		End Sub
+    'Cancel Vehicle
+    Public Shared Function CancelWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
+      Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+      Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(Results.SRNNo, "")
+      If oVRs.Count > 0 Then
+        For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+          oVR.RequestStatus = RequestStates.RequestLinked
+          SIS.VR.vrVehicleRequest.UpdateData(oVR)
+        Next
+        With Results
+          .RequestStatusID = RequestStates.RequestLinked
+          .ArrangedBy = HttpContext.Current.Session("LoginID")
+          .ArrangedOn = Now
+          .ODCByRequest = False
+          'Remove GR Entry
+          .VehicleNo = ""
+          .GRNo = ""
+          .GRDate = ""
+          .LoadedAtSupplier = False
+          .LoadedOn = ""
+          .ReachedAtSupplierOn = ""
+          .SizeUnit = ""
+          .Height = 0
+          .Width = 0
+          .Length = 0
+          .MaterialWeight = 0
+          .WeightUnit = ""
+          .NoOfPackages = 0
+          .OverDimentionConsignement = False
+          .GRRemarks = ""
+        End With
+        Results = SIS.VR.vrRequestExecution.UpdateData(Results)
+      End If
+      'Linked Executions
+      Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Results.SRNNo, "")
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = Results.SRNNo Then Continue For
+        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+        If oVRs.Count > 0 Then
+          For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+            oVR.RequestStatus = RequestStates.RequestLinked
+            SIS.VR.vrVehicleRequest.UpdateData(oVR)
+          Next
+          With le
+            .RequestStatusID = RequestStates.RequestLinked
+            .ArrangedBy = HttpContext.Current.Session("LoginID")
+            .ArrangedOn = Now
+            .ODCByRequest = False
+            'Remove GR Entry
+            .VehicleNo = ""
+            .GRNo = ""
+            .GRDate = ""
+            .LoadedAtSupplier = False
+            .LoadedOn = ""
+            .ReachedAtSupplierOn = ""
+            .SizeUnit = ""
+            .Height = 0
+            .Width = 0
+            .Length = 0
+            .MaterialWeight = 0
+            .WeightUnit = ""
+            .NoOfPackages = 0
+            .OverDimentionConsignement = False
+            .GRRemarks = ""
+          End With
+          le = SIS.VR.vrRequestExecution.UpdateData(le)
+        End If
+      Next
+      SendEMail(Results, True)
+      Return Results
+    End Function
 
-		'Cancel Vehicle
-		Public Shared Function CancelWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
-			Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
-			Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(Results.SRNNo, "")
-			If oVRs.Count > 0 Then
-				For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-					oVR.RequestStatus = RequestStates.RequestLinked
-					SIS.VR.vrVehicleRequest.UpdateData(oVR)
-				Next
-				With Results
-					.RequestStatusID = RequestStates.RequestLinked
-					.ArrangedBy = HttpContext.Current.Session("LoginID")
-					.ArrangedOn = Now
-					.ODCByRequest = False
-					'Remove GR Entry
-					.VehicleNo = ""
-					.GRNo = ""
-					.GRDate = ""
-					.LoadedAtSupplier = False
-					.LoadedOn = ""
-					.ReachedAtSupplierOn = ""
-					.SizeUnit = ""
-					.Height = 0
-					.Width = 0
-					.Length = 0
-					.MaterialWeight = 0
-					.WeightUnit = ""
-					.NoOfPackages = 0
-					.OverDimentionConsignement = False
-					.GRRemarks = ""
-				End With
-				Results = SIS.VR.vrRequestExecution.UpdateData(Results)
-			End If
-			'Linked Executions
-			Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Results.SRNNo, "")
-			For Each le As SIS.VR.vrRequestExecution In oLEs
-				If le.SRNNo.ToString = Results.SRNNo Then Continue For
-				oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
-				If oVRs.Count > 0 Then
-					For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-						oVR.RequestStatus = RequestStates.RequestLinked
-						SIS.VR.vrVehicleRequest.UpdateData(oVR)
-					Next
-					With le
-						.RequestStatusID = RequestStates.RequestLinked
-						.ArrangedBy = HttpContext.Current.Session("LoginID")
-						.ArrangedOn = Now
-						.ODCByRequest = False
-						'Remove GR Entry
-						.VehicleNo = ""
-						.GRNo = ""
-						.GRDate = ""
-						.LoadedAtSupplier = False
-						.LoadedOn = ""
-						.ReachedAtSupplierOn = ""
-						.SizeUnit = ""
-						.Height = 0
-						.Width = 0
-						.Length = 0
-						.MaterialWeight = 0
-						.WeightUnit = ""
-						.NoOfPackages = 0
-						.OverDimentionConsignement = False
-						.GRRemarks = ""
-					End With
-					le = SIS.VR.vrRequestExecution.UpdateData(le)
-				End If
-			Next
-			SendEMail(Results, True)
-			Return Results
-		End Function
-		'Old Send For Approval As soon as GR Linked and saved
-		'Public Shared Function ApproveWF(ByVal oRE As SIS.VR.vrRequestExecution) As SIS.VR.vrRequestExecution
-		'	If oRE.OverDimentionConsignement Then
-		'		oRE.RequestStatusID = RequestStates.ODCUnderApproval
-		'	Else
-		'		oRE.RequestStatusID = RequestStates.UnderSelfApproval
-		'	End If
-		'	oRE.ApprovalRemarks = ""
-		'	oRE.ApprovedBy = ""
-		'	oRE.ApprovedOn = ""
-		'	Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.UpdateData(oRE)
-		'	Return Results
-		'End Function
-		'Send For Approval
-		Public Shared Function SendForApproval(ByVal SRNNo As Int32) As Boolean
-			Dim oRE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
-			If oRE.Linked Then
-				Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(oRE.SRNNo, "")
-				For Each le As SIS.VR.vrRequestExecution In oLEs
-					With le
-						If .OverDimentionConsignement Then
-							.RequestStatusID = RequestStates.ODCUnderApproval
-						ElseIf .DetentionAtSupplier Then
-							.RequestStatusID = RequestStates.DetentionUnderApproval
-						ElseIf .DelayedPlacement Then
-							.RequestStatusID = RequestStates.DelayedPlacementUnderApproval
-						ElseIf .EmptyReturn Then
-							.RequestStatusID = RequestStates.EmptyReturnRUnderApproval
-						ElseIf .VehicleNotPlaced Then
-							.RequestStatusID = RequestStates.VehicleNotPlacedUnderApproval
-						Else
-							.RequestStatusID = RequestStates.UnderSelfApproval
-						End If
-						.ApprovalRemarks = ""
-						.ApprovedBy = ""
-						.ApprovedOn = ""
-					End With
-					le = SIS.VR.vrRequestExecution.UpdateData(oRE)
-					If le.VehicleNotPlaced Or le.EmptyReturn Then
-						BlockExecution(le)
-					End If
-				Next
-			Else 'Not Linked
-				With oRE
-					If .OverDimentionConsignement Then
-						.RequestStatusID = RequestStates.ODCUnderApproval
-					ElseIf .DetentionAtSupplier Then
-						.RequestStatusID = RequestStates.DetentionUnderApproval
-					ElseIf .DelayedPlacement Then
-						.RequestStatusID = RequestStates.DelayedPlacementUnderApproval
-					ElseIf .EmptyReturn Then
-						.RequestStatusID = RequestStates.EmptyReturnRUnderApproval
-					ElseIf .VehicleNotPlaced Then
-						.RequestStatusID = RequestStates.VehicleNotPlacedUnderApproval
-					Else
-						.RequestStatusID = RequestStates.UnderSelfApproval
-					End If
-					.ApprovalRemarks = ""
-					.ApprovedBy = ""
-					.ApprovedOn = ""
-				End With
-				oRE = SIS.VR.vrRequestExecution.UpdateData(oRE)
-				If oRE.VehicleNotPlaced Or oRE.EmptyReturn Then
-					DelinkRequestsOfBlockedExecution(oRE)
-				End If
-			End If
-			'SendForApprovalEMail(oRE)
-			Return True
-		End Function
-		Public Shared Function BlockExecution(ByVal oRE As SIS.VR.vrRequestExecution) As Boolean
+    'Vehicle Placed
+    Public Shared Function VehiclePlacedWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
+      Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+      Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Results.SRNNo, "")
+      '=====================
+      'Main Execution
+      Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
+      If oVRs.Count > 0 Then
+        For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+          oVR.RequestStatus = RequestStates.VehiclePlaced
+          SIS.VR.vrVehicleRequest.UpdateData(oVR)
+          Try
+            SIS.CT.ctUpdates.CT_VehiclePlaced(oVR)
+          Catch ex As Exception
+          End Try
+        Next
+        With Results
+          .RequestStatusID = RequestStates.VehiclePlaced
+        End With
+        Results = SIS.VR.vrRequestExecution.UpdateData(Results)
+      End If
+      'Linked Executions
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = Results.SRNNo Then Continue For
+        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+        If oVRs.Count > 0 Then
+          For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+            oVR.RequestStatus = RequestStates.VehiclePlaced
+            SIS.VR.vrVehicleRequest.UpdateData(oVR)
+            Try
+              SIS.CT.ctUpdates.CT_VehiclePlaced(oVR)
+            Catch ex As Exception
+            End Try
+          Next
+          With le
+            .RequestStatusID = RequestStates.VehiclePlaced
+          End With
+          le = SIS.VR.vrRequestExecution.UpdateData(le)
+        End If
+      Next
+      Return Results
+    End Function
+
+    Public Shared Function SendForApproval(ByVal SRNNo As Int32) As Boolean
+      Dim oRE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+      If oRE.Linked Then
+        Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(oRE.SRNNo, "")
+        For Each le As SIS.VR.vrRequestExecution In oLEs
+          With le
+            If .OverDimentionConsignement Then
+              .RequestStatusID = RequestStates.ODCUnderApproval
+            ElseIf .DetentionAtSupplier Then
+              .RequestStatusID = RequestStates.DetentionUnderApproval
+            ElseIf .DelayedPlacement Then
+              .RequestStatusID = RequestStates.DelayedPlacementUnderApproval
+            ElseIf .EmptyReturn Then
+              .RequestStatusID = RequestStates.EmptyReturnRUnderApproval
+            ElseIf .VehicleNotPlaced Then
+              .RequestStatusID = RequestStates.VehicleNotPlacedUnderApproval
+            Else
+              .RequestStatusID = RequestStates.UnderSelfApproval
+            End If
+            .ApprovalRemarks = ""
+            .ApprovedBy = ""
+            .ApprovedOn = ""
+          End With
+          le = SIS.VR.vrRequestExecution.UpdateData(oRE)
+          If le.VehicleNotPlaced Or le.EmptyReturn Then
+            BlockExecution(le)
+          End If
+        Next
+      Else 'Not Linked
+        With oRE
+          If .OverDimentionConsignement Then
+            .RequestStatusID = RequestStates.ODCUnderApproval
+          ElseIf .DetentionAtSupplier Then
+            .RequestStatusID = RequestStates.DetentionUnderApproval
+          ElseIf .DelayedPlacement Then
+            .RequestStatusID = RequestStates.DelayedPlacementUnderApproval
+          ElseIf .EmptyReturn Then
+            .RequestStatusID = RequestStates.EmptyReturnRUnderApproval
+          ElseIf .VehicleNotPlaced Then
+            .RequestStatusID = RequestStates.VehicleNotPlacedUnderApproval
+          Else
+            .RequestStatusID = RequestStates.UnderSelfApproval
+          End If
+          .ApprovalRemarks = ""
+          .ApprovedBy = ""
+          .ApprovedOn = ""
+        End With
+        oRE = SIS.VR.vrRequestExecution.UpdateData(oRE)
+        If oRE.VehicleNotPlaced Or oRE.EmptyReturn Then
+          DelinkRequestsOfBlockedExecution(oRE)
+        End If
+      End If
+      'SendForApprovalEMail(oRE)
+      Return True
+    End Function
+    Public Shared Function BlockExecution(ByVal oRE As SIS.VR.vrRequestExecution) As Boolean
 			Dim LinkID As String = oRE.LinkID
 			Dim IsMain As Boolean = IIf(oRE.SRNNo.ToString = oRE.LinkID, True, False)
 			'Delink From Execution
@@ -1024,8 +1027,9 @@ Namespace SIS.VR
 			Return Results
 		End Function
 		Public Shared Shadows Function SendEMail(ByVal oRE As SIS.VR.vrRequestExecution, Optional ByVal CancellationEMail As Boolean = False) As String
-			Dim mRet As String = ""
-			Dim First As Boolean = True
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then Return ""
+      Dim mRet As String = ""
+      Dim First As Boolean = True
 			Dim Cnt As Integer = 0
 			Dim mRecipients As New StringBuilder
 			Dim maySend As Boolean = False
@@ -1432,66 +1436,10 @@ Namespace SIS.VR
 			End Using
 			Return Results
 		End Function
-    Public Shared Function UZ_vrRequestExecutionLinkedSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal LinkID As Int32) As Integer
-      Return _RecordCount
-    End Function
-    Public Shared Function GetHTMLForProjectID(ByVal ProjectID As String) As String
-      Dim mRet As Boolean = False
-      Dim Company As String = GetProjectFinanceCompany(ProjectID)
-      If ProjectID.StartsWith("BS") Then
-        Company = "700"
-      End If
-      Dim SanctionAmount As Decimal = GetSanctionFromERPLN(ProjectID, Company)
-      Dim ConsumedInMaterial As Decimal = GetConsumedInMaterial(ProjectID, Company)
-      Dim StartDate As String = GetVRSystemStartDate(ProjectID)
-      Dim ConsumedBeforeVRSystem As Decimal = GetConsumedBeforeVRSystem(ProjectID, StartDate)
-
-      Dim AvailableSanction As Decimal = SanctionAmount '- ConsumedInMaterial - ConsumedBeforeVRSystem
-      Dim ConsumedInVehicleRequests As Decimal = 0
-      'FOR CONSUMED IN VRs
-      '1. Select Executions
-      Dim oREs As List(Of vrExecutions) = GetExecutions(ProjectID)
-      '2. Select IRs
-      Dim oIRs As List(Of vrIRs) = GetIRs(ProjectID)
-      '3. Remove Execution, If Linked IR is Picked (may be Linked to Multiple Executions)
-      For Each tmp As vrIRs In oIRs
-        For I As Integer = oREs.Count - 1 To 0 Step -1
-          Dim tm As vrExecutions = oREs(I)
-          If tmp.SRNNo = tm.SRNNo Then
-            oREs.RemoveAt(I)
-          End If
-        Next
-      Next
-      '3. As oIRs contains dulicate IR, because One stransporter bill contains multiple execution 			
-      oIRs = GetDistinctIRs(ProjectID)
-
-      '4. Select PTR
-      For Each tmp As vrIRs In oIRs
-        '5. Update IR Bill Amount with PTR Amount, If Linked PTR is picked (1 IR = 1 PTR NO Multiple Linking)
-        tmp.BillAmount = GetPTRFromERPLN(tmp.IRNo, tmp.BillAmount, Company)
-      Next
-      'Calculate consumed
-      For Each tmp As vrIRs In oIRs
-        ConsumedInVehicleRequests += tmp.BillAmount
-      Next
-      For Each tmp As vrExecutions In oREs
-        ConsumedInVehicleRequests += tmp.Amount
-      Next
-
-      Dim TotalConsumed As Decimal = ConsumedInVehicleRequests + ConsumedInMaterial + ConsumedBeforeVRSystem
-      'Update Vehicle Execution record
-      Dim strHTML As String = ""
-      strHTML = "<table>"
-      strHTML &= "<tr><td>" & ProjectID & "</td><td>" & SanctionAmount & "</td></tr>"
-      strHTML &= "<tr><td> P.O. </td><td>" & ConsumedInMaterial & "</td></tr>"
-      strHTML &= "<tr><td> Vehicle Requests </td><td>" & ConsumedInVehicleRequests & "</td></tr>"
-      strHTML &= "<tr><td> Total Consumed </td><td>" & TotalConsumed & "</td></tr>"
-      strHTML &= "<tr><td> Balance Available </td><td>" & AvailableSanction - TotalConsumed & "</td></tr>"
-      strHTML &= "</table>"
-      Return strHTML
-    End Function
-
-    Public Shared Function ValidateSanction(ByVal SRNNO As Integer, ByRef strHTML As String) As SIS.VR.vrRequestExecution
+		Public Shared Function UZ_vrRequestExecutionLinkedSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal LinkID As Int32) As Integer
+			Return _RecordCount
+		End Function
+		Public Shared Function ValidateSanction(ByVal SRNNO As Integer, ByRef strHTML As String) As SIS.VR.vrRequestExecution
 			Dim mRet As Boolean = False
 			Dim oRE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNO)
 			Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNO, "")
@@ -1806,8 +1754,9 @@ Namespace SIS.VR
 			Return mRet
 		End Function
 		Public Shared Shadows Function SendEMailSanctionApproval(ByVal oRE As SIS.VR.vrRequestExecution) As String
-			Dim mRet As String = ""
-			Dim First As Boolean = True
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then Return ""
+      Dim mRet As String = ""
+      Dim First As Boolean = True
 			Dim Cnt As Integer = 0
 			Dim mRecipients As New StringBuilder
 			Dim maySend As Boolean = False
@@ -1965,175 +1914,176 @@ Namespace SIS.VR
 			Return mRet
 		End Function
 
-		Public Shared Shadows Function SendEMailSanctionConsumption(ByVal oRE As SIS.VR.vrRequestExecution, ByVal ConsumedPercent As Decimal) As String
-			Dim mRet As String = ""
-			Dim First As Boolean = True
-			Dim Cnt As Integer = 0
-			Dim mRecipients As New StringBuilder
-			Dim maySend As Boolean = False
+    Public Shared Shadows Function SendEMailSanctionConsumption(ByVal oRE As SIS.VR.vrRequestExecution, ByVal ConsumedPercent As Decimal) As String
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then Return ""
+      Dim mRet As String = ""
+      Dim First As Boolean = True
+      Dim Cnt As Integer = 0
+      Dim mRecipients As New StringBuilder
+      Dim maySend As Boolean = False
 
-			Dim oClient As SmtpClient = New SmtpClient()
-			Dim oMsg As System.Net.Mail.MailMessage = New System.Net.Mail.MailMessage()
-			Dim ad As MailAddress = Nothing
-			'From EMail
-			If oRE.FK_VR_RequestExecution_ArrangedBy.EMailID <> String.Empty Then
-				ad = New MailAddress(oRE.FK_VR_RequestExecution_ArrangedBy.EMailID, oRE.FK_VR_RequestExecution_ArrangedBy.UserFullName)
-				oMsg.From = ad
-				oMsg.CC.Add(ad)
-			End If
-			'Executers of Linked Executions
-			Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(oRE.SRNNo, "")
-			For Each le As SIS.VR.vrRequestExecution In oLEs
-				If le.SRNNo.ToString = oRE.SRNNo Then Continue For
-				If le.FK_VR_RequestExecution_ArrangedBy.EMailID <> String.Empty Then
-					ad = New MailAddress(le.FK_VR_RequestExecution_ArrangedBy.EMailID, le.FK_VR_RequestExecution_ArrangedBy.UserFullName)
-					If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-				End If
-			Next
-			'Requester, Buyer and Executers of Execution
-			Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(oRE.SRNNo, "")
-			For Each vr As SIS.VR.vrVehicleRequest In oVRs
-				If vr.FK_VR_VehicleRequest_RequestedBy.EMailID <> String.Empty Then
-					ad = New MailAddress(vr.FK_VR_VehicleRequest_RequestedBy.EMailID, vr.FK_VR_VehicleRequest_RequestedBy.UserFullName)
-					If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-				End If
-				'Contracts of Requester's division
-				Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
-				Select Case GroupID
-					Case 1 ' boiler
-						oMsg.CC.Add("boilerprojects@isgec.co.in")
-					Case 2 'smd
-						oMsg.CC.Add("smdprojects@isgec.co.in")
-					Case 4 'EPC
-						oMsg.CC.Add("epcprojects@isgec.co.in")
-					Case 5 'APCE
-						oMsg.CC.Add("apceprojects@isgec.co.in")
-				End Select
-				'Buyers in Request, in old requests buyer may be null
-				Try
-					If vr.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then
-						ad = New MailAddress(vr.FK_VR_VehicleRequest_BuyerInERP.EMailID, vr.FK_VR_VehicleRequest_BuyerInERP.UserFullName)
-						If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-					End If
-				Catch ex As Exception
-				End Try
-				'Executers of the Requester's Group
-				Dim oUG As List(Of SIS.VR.vrUserGroup) = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)
-				Dim oExec As List(Of SIS.VR.vrUserGroup) = Nothing
-				If vr.OutOfContract Then
-					oExec = SIS.VR.vrUserGroup.GetOutOfContractByRoleID("Executer")
-				Else
-					oExec = SIS.VR.vrUserGroup.GetUsersByGroupIDRoleID(oUG(0).GroupID, "Executer")
-				End If
-				For Each exe As SIS.VR.vrUserGroup In oExec
-					If exe.FK_VR_UserGroup_UserID.EMailID <> String.Empty Then
-						ad = New MailAddress(exe.FK_VR_UserGroup_UserID.EMailID, exe.FK_VR_UserGroup_UserID.UserFullName)
-						If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-					End If
-				Next
-			Next
-			'Requester, Buyer and Executers of Linked Executions
-			For Each le As SIS.VR.vrRequestExecution In oLEs
-				If le.SRNNo.ToString = oRE.SRNNo Then Continue For
-				oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
-				For Each vr As SIS.VR.vrVehicleRequest In oVRs
-					If vr.FK_VR_VehicleRequest_RequestedBy.EMailID <> String.Empty Then
-						ad = New MailAddress(vr.FK_VR_VehicleRequest_RequestedBy.EMailID, vr.FK_VR_VehicleRequest_RequestedBy.UserFullName)
-						If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-					End If
-					'Buyers in Request, in old requests buyer may be null
-					Try
-						If vr.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then
-							ad = New MailAddress(vr.FK_VR_VehicleRequest_BuyerInERP.EMailID, vr.FK_VR_VehicleRequest_BuyerInERP.UserFullName)
-							If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-						End If
-					Catch ex As Exception
-					End Try
-					'Executers of the Requester's Group
-					Dim oUG As List(Of SIS.VR.vrUserGroup) = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)
-					Dim oExec As List(Of SIS.VR.vrUserGroup) = Nothing
-					If vr.OutOfContract Then
-						oExec = SIS.VR.vrUserGroup.GetOutOfContractByRoleID("Executer")
-					Else
-						oExec = SIS.VR.vrUserGroup.GetUsersByGroupIDRoleID(oUG(0).GroupID, "Executer")
-					End If
-					For Each exe As SIS.VR.vrUserGroup In oExec
-						If exe.FK_VR_UserGroup_UserID.EMailID <> String.Empty Then
-							ad = New MailAddress(exe.FK_VR_UserGroup_UserID.EMailID, exe.FK_VR_UserGroup_UserID.UserFullName)
-							If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-						End If
-					Next
-				Next
-			Next
-			'E-Mail ID from Sanction Alert Configuration
-			Dim oSPC As SIS.VR.vrSanctionAlert = SIS.VR.vrSanctionAlert.vrSanctionAlertGetByID(oRE.Project.ProjectID)
-			If oSPC IsNot Nothing Then
-				If oSPC.EMailIDs <> String.Empty Then
-					Dim aIDs() As String = oSPC.EMailIDs.Split(",".ToCharArray)
-					For Each id As String In aIDs
-						ad = New MailAddress(id)
-						Try
-							If Not oMsg.To.Contains(ad) Then oMsg.To.Add(ad)
-						Catch ex As Exception
-						End Try
-					Next
-				End If
-			End If
-			oMsg.IsBodyHtml = True
-			oMsg.Subject = "Sanction " & ConsumedPercent.ToString("n") & " % Consumed in " & oRE.Project.ProjectID
+      Dim oClient As SmtpClient = New SmtpClient()
+      Dim oMsg As System.Net.Mail.MailMessage = New System.Net.Mail.MailMessage()
+      Dim ad As MailAddress = Nothing
+      'From EMail
+      If oRE.FK_VR_RequestExecution_ArrangedBy.EMailID <> String.Empty Then
+        ad = New MailAddress(oRE.FK_VR_RequestExecution_ArrangedBy.EMailID, oRE.FK_VR_RequestExecution_ArrangedBy.UserFullName)
+        oMsg.From = ad
+        oMsg.CC.Add(ad)
+      End If
+      'Executers of Linked Executions
+      Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(oRE.SRNNo, "")
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = oRE.SRNNo Then Continue For
+        If le.FK_VR_RequestExecution_ArrangedBy.EMailID <> String.Empty Then
+          ad = New MailAddress(le.FK_VR_RequestExecution_ArrangedBy.EMailID, le.FK_VR_RequestExecution_ArrangedBy.UserFullName)
+          If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+        End If
+      Next
+      'Requester, Buyer and Executers of Execution
+      Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(oRE.SRNNo, "")
+      For Each vr As SIS.VR.vrVehicleRequest In oVRs
+        If vr.FK_VR_VehicleRequest_RequestedBy.EMailID <> String.Empty Then
+          ad = New MailAddress(vr.FK_VR_VehicleRequest_RequestedBy.EMailID, vr.FK_VR_VehicleRequest_RequestedBy.UserFullName)
+          If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+        End If
+        'Contracts of Requester's division
+        Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
+        Select Case GroupID
+          Case 1 ' boiler
+            oMsg.CC.Add("boilerprojects@isgec.co.in")
+          Case 2 'smd
+            oMsg.CC.Add("smdprojects@isgec.co.in")
+          Case 4 'EPC
+            oMsg.CC.Add("epcprojects@isgec.co.in")
+          Case 5 'APCE
+            oMsg.CC.Add("apceprojects@isgec.co.in")
+        End Select
+        'Buyers in Request, in old requests buyer may be null
+        Try
+          If vr.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then
+            ad = New MailAddress(vr.FK_VR_VehicleRequest_BuyerInERP.EMailID, vr.FK_VR_VehicleRequest_BuyerInERP.UserFullName)
+            If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+          End If
+        Catch ex As Exception
+        End Try
+        'Executers of the Requester's Group
+        Dim oUG As List(Of SIS.VR.vrUserGroup) = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)
+        Dim oExec As List(Of SIS.VR.vrUserGroup) = Nothing
+        If vr.OutOfContract Then
+          oExec = SIS.VR.vrUserGroup.GetOutOfContractByRoleID("Executer")
+        Else
+          oExec = SIS.VR.vrUserGroup.GetUsersByGroupIDRoleID(oUG(0).GroupID, "Executer")
+        End If
+        For Each exe As SIS.VR.vrUserGroup In oExec
+          If exe.FK_VR_UserGroup_UserID.EMailID <> String.Empty Then
+            ad = New MailAddress(exe.FK_VR_UserGroup_UserID.EMailID, exe.FK_VR_UserGroup_UserID.UserFullName)
+            If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+          End If
+        Next
+      Next
+      'Requester, Buyer and Executers of Linked Executions
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = oRE.SRNNo Then Continue For
+        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+        For Each vr As SIS.VR.vrVehicleRequest In oVRs
+          If vr.FK_VR_VehicleRequest_RequestedBy.EMailID <> String.Empty Then
+            ad = New MailAddress(vr.FK_VR_VehicleRequest_RequestedBy.EMailID, vr.FK_VR_VehicleRequest_RequestedBy.UserFullName)
+            If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+          End If
+          'Buyers in Request, in old requests buyer may be null
+          Try
+            If vr.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then
+              ad = New MailAddress(vr.FK_VR_VehicleRequest_BuyerInERP.EMailID, vr.FK_VR_VehicleRequest_BuyerInERP.UserFullName)
+              If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+            End If
+          Catch ex As Exception
+          End Try
+          'Executers of the Requester's Group
+          Dim oUG As List(Of SIS.VR.vrUserGroup) = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)
+          Dim oExec As List(Of SIS.VR.vrUserGroup) = Nothing
+          If vr.OutOfContract Then
+            oExec = SIS.VR.vrUserGroup.GetOutOfContractByRoleID("Executer")
+          Else
+            oExec = SIS.VR.vrUserGroup.GetUsersByGroupIDRoleID(oUG(0).GroupID, "Executer")
+          End If
+          For Each exe As SIS.VR.vrUserGroup In oExec
+            If exe.FK_VR_UserGroup_UserID.EMailID <> String.Empty Then
+              ad = New MailAddress(exe.FK_VR_UserGroup_UserID.EMailID, exe.FK_VR_UserGroup_UserID.UserFullName)
+              If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+            End If
+          Next
+        Next
+      Next
+      'E-Mail ID from Sanction Alert Configuration
+      Dim oSPC As SIS.VR.vrSanctionAlert = SIS.VR.vrSanctionAlert.vrSanctionAlertGetByID(oRE.Project.ProjectID)
+      If oSPC IsNot Nothing Then
+        If oSPC.EMailIDs <> String.Empty Then
+          Dim aIDs() As String = oSPC.EMailIDs.Split(",".ToCharArray)
+          For Each id As String In aIDs
+            ad = New MailAddress(id)
+            Try
+              If Not oMsg.To.Contains(ad) Then oMsg.To.Add(ad)
+            Catch ex As Exception
+            End Try
+          Next
+        End If
+      End If
+      oMsg.IsBodyHtml = True
+      oMsg.Subject = "Sanction " & ConsumedPercent.ToString("n") & " % Consumed in " & oRE.Project.ProjectID
 
-			Dim sb As New StringBuilder
-			With sb
-				oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(oRE.SRNNo, "")
-				.AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
-				.AppendLine("<tr><td colspan=""2"" align=""center""><h3><b>" & "SANCTION " & ConsumedPercent.ToString("n") & " % CONSUMED</b></h2></td></tr>")
-				'Main Execution
-				.AppendLine("<tr><td bgcolor=""lightgray""><b>Execution No.</b></td>")
-				.AppendLine("<td>" & oRE.SRNNo & "</td></tr>")
-				.AppendLine("<tr><td><b>Project Name &  Code</b></td>")
-				.AppendLine("<td>" & oVRs(0).FK_VR_VehicleRequest_ProjectID.Description & " [" & oVRs(0).ProjectID & "]" & "</td></tr>")
-				.AppendLine("<tr><td><b>Sanction Amount</b></td>")
-				.AppendLine("<td>" & (oRE.POValue).ToString("n") & "</td></tr>")
-				'Consumed Amount should be picked from Linked Executions, where it is exceeded
-				.AppendLine("<tr><td><b>Consumed Sanction</b></td>")
-				.AppendLine("<td>" & (oRE.EstimatedPOBalance).ToString("n") & "</td></tr>")
-				.AppendLine("<tr><td><b>Balance Sanction</b></td>")
-				.AppendLine("<td>" & (oRE.POValue - oRE.EstimatedPOBalance).ToString("n") & "</td></tr>")
-				'End of Linked Executions
-				.AppendLine("</table>")
+      Dim sb As New StringBuilder
+      With sb
+        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(oRE.SRNNo, "")
+        .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
+        .AppendLine("<tr><td colspan=""2"" align=""center""><h3><b>" & "SANCTION " & ConsumedPercent.ToString("n") & " % CONSUMED</b></h2></td></tr>")
+        'Main Execution
+        .AppendLine("<tr><td bgcolor=""lightgray""><b>Execution No.</b></td>")
+        .AppendLine("<td>" & oRE.SRNNo & "</td></tr>")
+        .AppendLine("<tr><td><b>Project Name &  Code</b></td>")
+        .AppendLine("<td>" & oVRs(0).FK_VR_VehicleRequest_ProjectID.Description & " [" & oVRs(0).ProjectID & "]" & "</td></tr>")
+        .AppendLine("<tr><td><b>Sanction Amount</b></td>")
+        .AppendLine("<td>" & (oRE.POValue).ToString("n") & "</td></tr>")
+        'Consumed Amount should be picked from Linked Executions, where it is exceeded
+        .AppendLine("<tr><td><b>Consumed Sanction</b></td>")
+        .AppendLine("<td>" & (oRE.EstimatedPOBalance).ToString("n") & "</td></tr>")
+        .AppendLine("<tr><td><b>Balance Sanction</b></td>")
+        .AppendLine("<td>" & (oRE.POValue - oRE.EstimatedPOBalance).ToString("n") & "</td></tr>")
+        'End of Linked Executions
+        .AppendLine("</table>")
 
-			End With
-			Try
-				Dim Header As String = ""
-				Header = Header & "<html xmlns=""http://www.w3.org/1999/xhtml"">"
-				Header = Header & "<head>"
-				Header = Header & "<title></title>"
-				Header = Header & "<style>"
-				Header = Header & "table{"
+      End With
+      Try
+        Dim Header As String = ""
+        Header = Header & "<html xmlns=""http://www.w3.org/1999/xhtml"">"
+        Header = Header & "<head>"
+        Header = Header & "<title></title>"
+        Header = Header & "<style>"
+        Header = Header & "table{"
 
-				Header = Header & "border: solid 1pt black;"
-				Header = Header & "border-collapse:collapse;"
-				Header = Header & "font-family: Tahoma;}"
+        Header = Header & "border: solid 1pt black;"
+        Header = Header & "border-collapse:collapse;"
+        Header = Header & "font-family: Tahoma;}"
 
-				Header = Header & "td{"
-				Header = Header & "border: solid 1pt black;"
-				Header = Header & "font-family: Tahoma;"
-				Header = Header & "font-size: 12px;"
-				Header = Header & "vertical-align:top;}"
+        Header = Header & "td{"
+        Header = Header & "border: solid 1pt black;"
+        Header = Header & "font-family: Tahoma;"
+        Header = Header & "font-size: 12px;"
+        Header = Header & "vertical-align:top;}"
 
-				Header = Header & "</style>"
-				Header = Header & "</head>"
-				Header = Header & "<body>"
-				Header = Header & sb.ToString
-				Header = Header & "</body></html>"
-				oMsg.Body = Header
+        Header = Header & "</style>"
+        Header = Header & "</head>"
+        Header = Header & "<body>"
+        Header = Header & sb.ToString
+        Header = Header & "</body></html>"
+        oMsg.Body = Header
 
-				oClient.Send(oMsg)
-			Catch ex As Exception
-				mRet = ex.Message
-			End Try
-			Return mRet
-		End Function
+        oClient.Send(oMsg)
+      Catch ex As Exception
+        mRet = ex.Message
+      End Try
+      Return mRet
+    End Function
 
-	End Class
+  End Class
 End Namespace

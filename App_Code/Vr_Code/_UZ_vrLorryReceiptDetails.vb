@@ -5,11 +5,6 @@ Imports System.Data.SqlClient
 Imports System.ComponentModel
 Namespace SIS.VR
   Partial Public Class vrLorryReceiptDetails
-    Public ReadOnly Property TransporterID As String
-      Get
-        Return FK_VR_LorryReceiptDetails_MRNNo.TransporterID
-      End Get
-    End Property
     Public ReadOnly Property xl_GRorLRDate As String
       Get
         Dim mRet As String = ""
@@ -73,23 +68,23 @@ Namespace SIS.VR
     Public Shared Function SetDefaultValues(ByVal sender As System.Web.UI.WebControls.FormView, ByVal e As System.EventArgs) As System.Web.UI.WebControls.FormView
       With sender
         Try
-          CType(.FindControl("F_ProjectID"), TextBox).Text = ""
-          CType(.FindControl("F_ProjectID_Display"), Label).Text = ""
-          CType(.FindControl("F_MRNNo"), TextBox).Text = ""
-          CType(.FindControl("F_MRNNo_Display"), Label).Text = ""
-          CType(.FindControl("F_SerialNo"), TextBox).Text = ""
-          CType(.FindControl("F_GRorLRNo"), TextBox).Text = ""
-          CType(.FindControl("F_GRorLRDate"), TextBox).Text = ""
-          CType(.FindControl("F_SupplierID"), TextBox).Text = ""
-          CType(.FindControl("F_SupplierID_Display"), Label).Text = ""
-          CType(.FindControl("F_SupplierInvoiceNo"), TextBox).Text = ""
-          CType(.FindControl("F_SupplierInvoiceDate"), TextBox).Text = ""
-          CType(.FindControl("F_WeightAsPerInvoiceInKG"), TextBox).Text = 0
-          CType(.FindControl("F_WeightReceived"), TextBox).Text = 0
-          CType(.FindControl("F_NoOfPackagesAsPerInvoice"), TextBox).Text = 0
-          CType(.FindControl("F_NoOfPackagesReceived"), TextBox).Text = 0
-          CType(.FindControl("F_CenvatInvoiceReceived"), TextBox).Text = ""
-          CType(.FindControl("F_Remarks"), TextBox).Text = ""
+        CType(.FindControl("F_ProjectID"), TextBox).Text = ""
+        CType(.FindControl("F_ProjectID_Display"), Label).Text = ""
+        CType(.FindControl("F_MRNNo"), TextBox).Text = ""
+        CType(.FindControl("F_MRNNo_Display"), Label).Text = ""
+        CType(.FindControl("F_SerialNo"), TextBox).Text = ""
+        CType(.FindControl("F_GRorLRNo"), TextBox).Text = ""
+        CType(.FindControl("F_GRorLRDate"), TextBox).Text = ""
+        CType(.FindControl("F_SupplierID"), TextBox).Text = ""
+        CType(.FindControl("F_SupplierID_Display"), Label).Text = ""
+        CType(.FindControl("F_SupplierInvoiceNo"), TextBox).Text = ""
+        CType(.FindControl("F_SupplierInvoiceDate"), TextBox).Text = ""
+        CType(.FindControl("F_WeightAsPerInvoiceInKG"), TextBox).Text = 0
+        CType(.FindControl("F_WeightReceived"), TextBox).Text = 0
+        CType(.FindControl("F_NoOfPackagesAsPerInvoice"), TextBox).Text = 0
+        CType(.FindControl("F_NoOfPackagesReceived"), TextBox).Text = 0
+        CType(.FindControl("F_CenvatInvoiceReceived"), TextBox).Text = ""
+        CType(.FindControl("F_Remarks"), TextBox).Text = ""
         Catch ex As Exception
         End Try
       End With

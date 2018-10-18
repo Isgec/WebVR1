@@ -26,7 +26,6 @@
           <b><asp:Label ID="L_ProjectID" runat="server" ForeColor="#CC6633" Text="Project ID :" /><span style="color:red">*</span></b>
         </td>
         <td>
-          <asp:TextBox runat="server" ID="F_TransporterID" style="display:none;"></asp:TextBox>
           <asp:TextBox
             ID = "F_ProjectID"
             Width="42px"
@@ -82,17 +81,16 @@
           <asp:Label ID="L_GRorLRNo" runat="server" Text="GR / LR No :" /><span style="color:red">*</span>
         </td>
         <td>
-          <asp:TextBox
-            ID = "F_GRorLRNo"
-            CssClass = "myfktxt"
-            Width="350px"
+          <asp:TextBox ID="F_GRorLRNo"
             Text='<%# Bind("GRorLRNo") %>'
-            AutoCompleteType = "None"
+            Width="350px"
+            CssClass = "mytxt"
             onfocus = "return this.select();"
+            ValidationGroup="vrLorryReceiptDetails"
+            onblur= "this.value=this.value.replace(/\'/g,'');"
             ToolTip="Enter value for GR / LR No."
-            ValidationGroup = "vrLorryReceiptDetails"
-            onblur= "script_vrLorryReceiptDetails.validate_GRorLRNo(this);"
-            Runat="Server" />
+            MaxLength="50"
+            runat="server" />
           <asp:RequiredFieldValidator 
             ID = "RFVGRorLRNo"
             runat = "server"
@@ -102,30 +100,6 @@
             EnableClientScript = "true"
             ValidationGroup = "vrLorryReceiptDetails"
             SetFocusOnError="true" />
-          <asp:Label
-            ID = "F_GRorLRNo_Display"
-            Text=""
-            CssClass="myLbl"
-            Runat="Server" />
-          <AJX:AutoCompleteExtender
-            ID="ACEGRorLRNo"
-            BehaviorID="B_ACEGRorLRNo"
-            ContextKey=""
-            UseContextKey="true"
-            ServiceMethod="GRorLRNoCompletionList"
-            TargetControlID="F_GRorLRNo"
-            EnableCaching="false"
-            CompletionInterval="100"
-            FirstRowSelected="true"
-            MinimumPrefixLength="1"
-            OnClientItemSelected="script_vrLorryReceiptDetails.ACEGRorLRNo_Selected"
-            OnClientPopulating="script_vrLorryReceiptDetails.ACEGRorLRNo_Populating"
-            OnClientPopulated="script_vrLorryReceiptDetails.ACEGRorLRNo_Populated"
-            CompletionSetCount="10"
-            CompletionListCssClass = "autocomplete_completionListElement"
-            CompletionListItemCssClass = "autocomplete_listItem"
-            CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
-            Runat="Server" />
         </td>
         <td class="alignright">
           <asp:Label ID="L_GRorLRDate" runat="server" Text="GR / LR Date :" /><span style="color:red">*</span>
