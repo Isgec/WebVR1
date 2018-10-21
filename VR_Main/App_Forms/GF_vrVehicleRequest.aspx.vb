@@ -26,9 +26,13 @@ Partial Class GF_vrVehicleRequest
 					.SRNNo = ""
 					.VehicleRequiredOn = ""
 				End With
-				oVR = SIS.VR.vrVehicleRequest.InsertData(oVR)
-				RequestNo = oVR.RequestNo
-				Dim RedirectUrl As String = TBLvrVehicleRequest.EditUrl & "?RequestNo=" & RequestNo
+        oVR = SIS.VR.vrVehicleRequest.InsertData(oVR)
+        Try
+          SIS.VR.vrVehicleRequest.CreateItemReference(oVR)
+        Catch ex As Exception
+        End Try
+        RequestNo = oVR.RequestNo
+        Dim RedirectUrl As String = TBLvrVehicleRequest.EditUrl & "?RequestNo=" & RequestNo
 				Response.Redirect(RedirectUrl)
 			Catch ex As Exception
 				ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)

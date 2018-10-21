@@ -247,6 +247,10 @@ Namespace SIS.VR
     Public Shared Function UZ_vrVehicleRequestInsert(ByVal Record As SIS.VR.vrVehicleRequest) As SIS.VR.vrVehicleRequest
       Record = vrVehicleRequestInsert(Record)
       Record = LG_UpdateODConsignment(Record)
+      CreateItemReference(Record)
+      Return Record
+    End Function
+    Public Shared Sub CreateItemReference(ByVal Record As SIS.VR.vrVehicleRequest)
       Dim tmpCTs As List(Of SIS.VR.vrctVehicleRequest) = SIS.VR.vrctVehicleRequest.GetERPItemReference(Record.ProjectID, Record.ERPPONumber, "CT_VEHICLEREQUESTRAISED")
       Dim cnt As Integer = 0
       For Each tmp As SIS.VR.vrctVehicleRequest In tmpCTs
@@ -264,8 +268,8 @@ Namespace SIS.VR
         End With
         tmp = SIS.VR.vrctVehicleRequest.InsertData(tmp)
       Next
-      Return Record
-    End Function
+    End Sub
+
     Public Shared Function UZ_vrVehicleRequestUpdate(ByVal Record As SIS.VR.vrVehicleRequest) As SIS.VR.vrVehicleRequest
       Dim _Result As SIS.VR.vrVehicleRequest = vrVehicleRequestUpdate(Record)
       Return LG_UpdateODConsignment(_Result)
