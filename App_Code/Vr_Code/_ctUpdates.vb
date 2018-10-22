@@ -10,6 +10,9 @@ Namespace SIS.CT
       Dim trdt As String = Now.ToString("dd/MM/yyyy HH:mm:ss")
       Dim POIrefs As List(Of SIS.VR.vrctVehicleRequest) = SIS.VR.vrctVehicleRequest.vrctVehicleRequestSelectList(0, 99999, "", False, "", pp.RequestNo)
       For Each iref As SIS.VR.vrctVehicleRequest In POIrefs
+        If iref.ProgressPercent = "" Then iref.ProgressPercent = "0"
+        If iref.ProgressWeight = "" Then iref.ProgressWeight = "0"
+        If Convert.ToDecimal(iref.ProgressPercent) = 0 AndAlso Convert.ToDecimal(iref.ProgressWeight) = 0 Then Continue For
         Dim tmp As New SIS.TPISG.tpisg207
         With tmp
           .t_bohd = hndl
@@ -34,6 +37,9 @@ Namespace SIS.CT
       Dim trdt As String = Now.ToString("dd/MM/yyyy HH:mm:ss")
       Dim POIrefs As List(Of SIS.VR.vrctVehicleRequest) = SIS.VR.vrctVehicleRequest.vrctVehicleRequestSelectList(0, 99999, "", False, "", pp.RequestNo)
       For Each iref As SIS.VR.vrctVehicleRequest In POIrefs
+        If iref.ProgressPercent = "" Then iref.ProgressPercent = "0"
+        If iref.ProgressWeight = "" Then iref.ProgressWeight = "0"
+        If Convert.ToDecimal(iref.ProgressPercent) = 0 AndAlso Convert.ToDecimal(iref.ProgressWeight) = 0 Then Continue For
         Dim tmp As New SIS.TPISG.tpisg207
         With tmp
           .t_bohd = hndl

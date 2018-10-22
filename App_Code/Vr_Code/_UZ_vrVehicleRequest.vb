@@ -417,11 +417,12 @@ Namespace SIS.VR
         End Using
       End Using
       If Results IsNot Nothing Then
+        If Results.BuyerID.Length < 4 Then Results.BuyerID = Results.BuyerID.PadLeft(4, "0")
         Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(Results.SupplierID)
-        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(Results.SupplierID)
+        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(Results.SupplierID, mComp)
         Results.SupplierAddress = oVar.Address1.Trim & " " & oVar.Address2 & " " & oVar.Address3 & " " & oVar.Address4
         Dim oPVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(Results.ProjectID)
-        If oPVar Is Nothing Then oPVar = SIS.QCM.qcmProjects.GetProjectFromERP(Results.ProjectID)
+        If oPVar Is Nothing Then oPVar = SIS.QCM.qcmProjects.GetProjectFromERP(Results.ProjectID, mComp)
         Results.ProjectName = oPVar.Description
         Results.ProjectAddress = oPVar.Address1.Trim & " " & oPVar.Address2 & " " & oPVar.Address3 & " " & oPVar.Address4
       End If

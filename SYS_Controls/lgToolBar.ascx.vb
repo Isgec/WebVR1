@@ -630,17 +630,9 @@
 	Protected Sub _PageSizeButton_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles _PageSizeButton.Click
 		RaisePageChanged(Convert.ToInt32(_CurrentPage.Text) - 1, Convert.ToInt32(_PageSize.Text))
 	End Sub
-	Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-		If Not Page.IsPostBack And Not Page.IsCallback Then
-			Try
-				SIS.SYS.Utilities.SessionManager.PushNavBar(System.IO.Path.GetFileName(System.Web.HttpContext.Current.Request.Url.AbsolutePath), Request.UrlReferrer.AbsoluteUri)
-			Catch ex As Exception
-				SIS.SYS.Utilities.SessionManager.DestroySessionEnvironement()
-				Response.Redirect("~/SISError.aspx")
-			End Try
-		End If
-	End Sub
-	Protected Sub CmdDelete_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles CmdDelete.Click
+  'Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+  'End Sub
+  Protected Sub CmdDelete_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles CmdDelete.Click
 		RaiseDeleteClicked(sender, e)
 	End Sub
 	Protected Sub Page_PreRender(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.PreRender
@@ -650,7 +642,24 @@
 				CmdAdd.PostBackUrl = _AddUrl
 			End If
 		End If
-	End Sub
+    If Not Page.IsPostBack And Not Page.IsCallback Then
+      Dim MayPush As Boolean = False
+      Try
+        If Request.UrlReferrer.AbsoluteUri IsNot Nothing Then
+          MayPush = True
+        End If
+      Catch ex As Exception
+      End Try
+      Try
+        If MayPush Then
+          SIS.SYS.Utilities.SessionManager.PushNavBar(System.Web.HttpContext.Current.Request.Url.ToString, Request.UrlReferrer.AbsoluteUri)
+        End If
+      Catch ex As Exception
+        SIS.SYS.Utilities.SessionManager.DestroySessionEnvironement()
+        Response.Redirect("~/SISError.aspx")
+      End Try
+    End If
+  End Sub
 
   Protected Sub cmdHome_Click(sender As Object, e As System.Web.UI.ImageClickEventArgs) Handles cmdHome.Click
     SIS.SYS.Utilities.SessionManager.InitNavBar()
