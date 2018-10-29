@@ -79,7 +79,7 @@
                         onblur="this.value=this.value.replace(/\'/g,'');"
                         ToolTip="Enter value for Request Description."
                         MaxLength="50"
-                        Width="350px"
+                        Width="250px"
                         runat="server" />
                       <asp:RequiredFieldValidator
                         ID="RFVRequestDescription"
@@ -89,9 +89,10 @@
                         ErrorMessage="[Required!]"
                         Display="Dynamic"
                         EnableClientScript="true"
-                              ForeColor="red"
+                        ForeColor="red"
                         ValidationGroup="vrVehicleRequest"
                         SetFocusOnError="true" />
+                      <asp:TextBox ID="F_DeliveryTerm" runat="server" ClientIDMode="static" CssClass="dmytxt" Width="60px" Enabled="false"></asp:TextBox>
                     </td>
                   </tr>
                   <tr>

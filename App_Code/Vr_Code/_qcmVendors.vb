@@ -229,23 +229,27 @@ Namespace SIS.QCM
     Public Shared Function qcmVendorsGetNewRecord() As SIS.QCM.qcmVendors
       Return New SIS.QCM.qcmVendors()
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function qcmVendorsGetByID(ByVal VendorID As String) As SIS.QCM.qcmVendors
       Dim Results As SIS.QCM.qcmVendors = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmVendorsSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VendorID",SqlDbType.NVarChar,VendorID.ToString.Length, VendorID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VendorID", SqlDbType.NVarChar, VendorID.ToString.Length, VendorID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Reader.Read() Then
-						Results = New SIS.QCM.qcmVendors(Reader)
-					End If
-					Reader.Close()
+          If Reader.Read() Then
+            Results = New SIS.QCM.qcmVendors(Reader)
+          End If
+          Reader.Close()
         End Using
       End Using
+      Try
+        If Results Is Nothing Then Results = SIS.QCM.qcmVendors.GetBPFromERP(VendorID, "200")
+      Catch ex As Exception
+      End Try
       Return Results
     End Function
     <DataObjectMethod(DataObjectMethodType.Select)> _

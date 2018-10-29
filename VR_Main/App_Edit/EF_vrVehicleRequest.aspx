@@ -97,7 +97,7 @@
                     <td>
                       <asp:TextBox ID="F_RequestDescription"
                         Text='<%# Bind("RequestDescription") %>'
-                        Width="350px"
+                        Width="250px"
                         CssClass="mytxt"
                         onfocus="return this.select();"
                         ValidationGroup="vrVehicleRequest"
@@ -115,6 +115,7 @@
                         EnableClientScript="true"
                         ValidationGroup="vrVehicleRequest"
                         SetFocusOnError="true" />
+                      <asp:TextBox ID="F_DeliveryTerm" runat="server" CssClass="dmytxt" Width="60px" Enabled="false"></asp:TextBox>
                     </td>
                   </tr>
                   <tr>

@@ -220,6 +220,7 @@ Namespace SIS.QCM
 					Reader.Close()
         End Using
       End Using
+      If Results Is Nothing Then Results = SIS.QCM.qcmProjects.GetProjectFromERP(ProjectID, "")
       Return Results
     End Function
     <DataObjectMethod(DataObjectMethodType.Select)> _

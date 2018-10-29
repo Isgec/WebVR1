@@ -157,6 +157,8 @@ Namespace SIS.PAK
     Public Shared Function ApproveWF(ByVal SerialNo As Int32, ByVal PkgNo As Int32) As SIS.PAK.pakPkgListH
       'Convert to Vehicle request
       Dim pkgH As SIS.PAK.pakPkgListH = pakPkgListHGetByID(SerialNo, PkgNo)
+      Dim oPO As SIS.VR.vrERPPo = SIS.VR.vrERPPo.vrERPPoGetByID(pkgH.FK_PAK_PkgListH_SerialNo.PONumber)
+
       Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(pkgH.SupplierID)
       If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(pkgH.SupplierID)
       Dim oPVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(pkgH.ProjectID)
@@ -214,6 +216,7 @@ Namespace SIS.PAK
         .OutOfContract = False
         .ERPPONumber = pkgH.FK_PAK_PkgListH_SerialNo.PONumber
         .BuyerInERP = pkgH.FK_PAK_PkgListH_SerialNo.BuyerID
+        .DeliveryTerm = oPO.DeliveryTerm
         '.ExecuterReasonID = ""
         '.ExecuterID = ""
         '.ReasonEneteredOn = ""

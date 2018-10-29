@@ -81,6 +81,7 @@ Namespace SIS.VR
     Private _FK_VR_VehicleRequest_ODCReasonID As SIS.VR.vrODCReasons = Nothing
     Private _FK_VR_VehicleRequest_WeightUnit As SIS.VR.vrUnits = Nothing
     Private _FK_VR_VehicleRequest_BuyerInERP As SIS.QCM.qcmUsers = Nothing
+    Public Property DeliveryTerm As String = ""
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -1076,6 +1077,7 @@ Namespace SIS.VR
         .OutOfContract = Record.OutOfContract
         .ERPPONumber = Record.ERPPONumber
         .BuyerInERP = Record.BuyerInERP
+        .DeliveryTerm = Record.DeliveryTerm
       End With
       Return SIS.VR.vrVehicleRequest.InsertData(_Rec)
     End Function
@@ -1133,6 +1135,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OutOfContract",SqlDbType.Bit,3, Record.OutOfContract)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ERPPONumber",SqlDbType.NVarChar,11, Iif(Record.ERPPONumber= "" ,Convert.DBNull, Record.ERPPONumber))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@BuyerInERP",SqlDbType.NVarChar,9, Iif(Record.BuyerInERP= "" ,Convert.DBNull, Record.BuyerInERP))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@DeliveryTerm", SqlDbType.NVarChar, 6, IIf(Record.DeliveryTerm = "", Convert.DBNull, Record.DeliveryTerm))
           Cmd.Parameters.Add("@Return_RequestNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestNo").Direction = ParameterDirection.Output
           Con.Open()
@@ -1249,6 +1252,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OutOfContract", SqlDbType.Bit, 3, Record.OutOfContract)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ERPPONumber", SqlDbType.NVarChar, 11, IIf(Record.ERPPONumber = "", Convert.DBNull, Record.ERPPONumber))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@BuyerInERP", SqlDbType.NVarChar, 9, IIf(Record.BuyerInERP = "", Convert.DBNull, Record.BuyerInERP))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@DeliveryTerm", SqlDbType.NVarChar, 6, IIf(Record.DeliveryTerm = "", Convert.DBNull, Record.DeliveryTerm))
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
