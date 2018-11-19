@@ -814,6 +814,36 @@ Partial Class GF_vrLorryReceipts
   '    End Try
   'over:
   '  End Sub
+  Private Function DuplicateMRN(ByVal Mrn As SIS.VR.vrLorryReceipts) As Boolean
+    Dim mRet As Boolean = False
+    Dim cnt As Integer = 0
+    Dim Sql As String = ""
+    Sql &= " select isnull(count(*),0) from vr_lorryreceipts where "
+    Sql &= " ProjectID = '" & Mrn.ProjectID & "'"
+    Sql &= " and MRNDate = Convert(DateTime,'" & Mrn.MRNDate & "',103)"
+    Sql &= " and VehicleInDate = Convert(DateTime,'" & Mrn.VehicleInDate & "',103)"
+    Sql &= " and VehicleOutDate = Convert(DateTime,'" & Mrn.VehicleOutDate & "',103)"
+    Sql &= " and TransporterID = '" & Mrn.TransporterID & "'"
+    Sql &= " and VehicleRegistrationNo = '" & Mrn.VehicleRegistrationNo & "'"
+    Sql &= " and WayBillFormNo = '" & Mrn.WayBillFormNo & "'"
+    Sql &= " and LRStatusID = '" & Mrn.LRStatusID & "'"
+    Sql &= " and VehicleTypeID = '" & Mrn.VehicleTypeID & "'"
+    Sql &= " and OverDimensionConsignment = '" & Mrn.OverDimensionConsignment & "'"
+    Sql &= " and DetentionAtSite = '" & Mrn.DetentionAtSite & "'"
+    Sql &= " and MaterialStateID = '" & Mrn.MaterialStateID & "'"
+    Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Cmd As SqlCommand = Con.CreateCommand()
+        Cmd.CommandType = CommandType.Text
+        Cmd.CommandText = Sql
+        Con.Open()
+        cnt = Cmd.ExecuteScalar()
+      End Using
+    End Using
+    If cnt > 0 Then
+      mRet = True
+    End If
+    Return mRet
+  End Function
   Protected Sub cmdFileUpload_Command(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.CommandEventArgs) Handles cmdFileUpload.Command
     Dim st As Long = HttpContext.Current.Server.ScriptTimeout
     HttpContext.Current.Server.ScriptTimeout = Integer.MaxValue
@@ -956,25 +986,34 @@ Partial Class GF_vrLorryReceipts
                 .LRStatusID = 2
                 .RequestExecutionNo = ""
               End With
-              Try
-                Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-                  Using Cmd As SqlCommand = Con.CreateCommand()
-                    Cmd.CommandType = CommandType.Text
-                    Cmd.CommandText = "select isnull(max(mrnno),0) from vr_lorryreceipts where projectid = '" & Mrn.ProjectID & "'"
-                    Con.Open()
-                    MrnNo = Cmd.ExecuteScalar()
-                    MrnNo = MrnNo + 1
+              '====================================
+              'Check Mrn Header for Duplicate Entry
+              If DuplicateMRN(Mrn) Then
+                wsD.Cells(I, 25).Value = "Already Exists.[Pl. download latest template.]"
+                Continue For
+              Else
+                Try
+                  Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+                    Using Cmd As SqlCommand = Con.CreateCommand()
+                      Cmd.CommandType = CommandType.Text
+                      Cmd.CommandText = "select isnull(max(mrnno),0) from vr_lorryreceipts where projectid = '" & Mrn.ProjectID & "'"
+                      Con.Open()
+                      MrnNo = Cmd.ExecuteScalar()
+                      MrnNo = MrnNo + 1
+                    End Using
                   End Using
-                End Using
-                Mrn.MRNNo = MrnNo
-                Mrn = SIS.VR.vrLorryReceipts.InsertData(Mrn)
-                wsD.Cells(I, 3).Value = Mrn.MRNNo
-                wsD.Cells(I, 25).Value = "Inserted"
-                MrnNo = Mrn.MRNNo
-              Catch ex As Exception
-                wsD.Cells(I, 25).Value = ex.Message.ToString
-                MrnNo = ""
-              End Try
+                  Mrn.MRNNo = MrnNo
+                  Mrn = SIS.VR.vrLorryReceipts.InsertData(Mrn)
+                  wsD.Cells(I, 3).Value = Mrn.MRNNo
+                  wsD.Cells(I, 25).Value = "Inserted"
+                  MrnNo = Mrn.MRNNo
+                Catch ex As Exception
+                  wsD.Cells(I, 25).Value = ex.Message.ToString
+                  MrnNo = ""
+                End Try
+
+              End If
+              '====================================
               'GR Entry of MRN
               If MrnNo = "" Then Continue For
               Dim mrnFound As Boolean = False
