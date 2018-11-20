@@ -823,9 +823,13 @@ Partial Class GF_vrLorryReceipts
     Sql &= " and MRNDate = Convert(DateTime,'" & Mrn.MRNDate & "',103)"
     Sql &= " and VehicleInDate = Convert(DateTime,'" & Mrn.VehicleInDate & "',103)"
     Sql &= " and VehicleOutDate = Convert(DateTime,'" & Mrn.VehicleOutDate & "',103)"
-    Sql &= " and TransporterID = '" & Mrn.TransporterID & "'"
+    If Mrn.TransporterID <> "" Then
+      Sql &= " and TransporterID = '" & Mrn.TransporterID & "'"
+    End If
     Sql &= " and VehicleRegistrationNo = '" & Mrn.VehicleRegistrationNo & "'"
-    Sql &= " and WayBillFormNo = '" & Mrn.WayBillFormNo & "'"
+    If Mrn.WayBillFormNo <> "" Then
+      Sql &= " and WayBillFormNo = '" & Mrn.WayBillFormNo & "'"
+    End If
     Sql &= " and LRStatusID = '" & Mrn.LRStatusID & "'"
     Sql &= " and VehicleTypeID = '" & Mrn.VehicleTypeID & "'"
     Sql &= " and OverDimensionConsignment = '" & Mrn.OverDimensionConsignment & "'"

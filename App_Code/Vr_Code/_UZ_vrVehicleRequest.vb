@@ -324,6 +324,9 @@ Namespace SIS.VR
               .CC.Add(New MailAddress(oEmp.EMailID, oEmp.UserFullName))
             Catch ex As Exception
             End Try
+            If oEmp.EMailID.ToLower.IndexOf("isgec.com") >= 0 Then
+              .CC.Add(New MailAddress("sarvjeet_chowdhry@isgec.com", "Sarvjeet Chowdhry"))
+            End If
             .IsBodyHtml = True
             .Subject = "Vehicle Required On: " & oRq.VehicleRequiredOn & " @ Vendor: " & oRq.IDM_Vendors5_Description & " Project: " & oRq.IDM_Projects4_Description
             Dim sb As New StringBuilder
@@ -340,11 +343,6 @@ Namespace SIS.VR
               .AppendLine("<br/><b>Item Description: </b>" & oRq.ItemDescription)
             End With
             .Body = sb.ToString
-            'Dim oAtchs As List(Of SIS.QCM.qcmRequestFiles) = SIS.QCM.qcmRequestFiles.qcmRequestFilesSelectList(0, 99, "", False, "", oRq.RequestID)
-            'For Each atch As SIS.QCM.qcmRequestFiles In oAtchs
-            '  IO.File.Copy(HttpContext.Current.Server.MapPath(ConfigurationManager.AppSettings("RequestDir")) & "/" & atch.DiskFIleName, HttpContext.Current.Server.MapPath("~/App_Data/" & atch.FileName), True)
-            '  .Attachments.Add(New System.Net.Mail.Attachment(HttpContext.Current.Server.MapPath("~/App_Data/" & atch.FileName)))
-            'Next
           End With
           oClient.Send(oMsg)
         Catch ex As Exception
