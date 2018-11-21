@@ -103,6 +103,16 @@ Namespace SIS.VR
     End Property
     Public Shared Function InitiateWF(ByVal ProjectID As String, ByVal MRNNo As Int32) As SIS.VR.vrLorryReceipts
       Dim Results As SIS.VR.vrLorryReceipts = vrLorryReceiptsGetByID(ProjectID, MRNNo)
+      'Validate MRN Dates
+      If Convert.ToDateTime(Results.MRNDate).Date > Now.Date Then
+        Throw New Exception("MRN can not be created for FUTURE Date.")
+      End If
+      If Convert.ToDateTime(Results.MRNDate).Date < Convert.ToDateTime(Results.VehicleInDate).Date Then
+        Throw New Exception("MRN Date can NOT be less than Vehicle In Date.")
+      End If
+      If Convert.ToDateTime(Results.VehicleOutDate) < Convert.ToDateTime(Results.VehicleInDate) Then
+        Throw New Exception("Vehicle Out Date can not be less than vehicle in Date.")
+      End If
       With Results
         .LRStatusID = 2
         .CreatedBy = HttpContext.Current.Session("LoginID")

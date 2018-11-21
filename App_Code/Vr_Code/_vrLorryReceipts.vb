@@ -389,7 +389,7 @@ Namespace SIS.VR
     Public Property CreatedOn() As String
       Get
         If Not _CreatedOn = String.Empty Then
-          Return Convert.ToDateTime(_CreatedOn).ToString("dd/MM/yyyy")
+          Return Convert.ToDateTime(_CreatedOn).ToString("dd/MM/yyyy HH:mm")
         End If
         Return _CreatedOn
       End Get

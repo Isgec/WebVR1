@@ -22,6 +22,9 @@ Partial Class GF_vrLorryReceipts
         SIS.VR.vrLorryReceipts.InitiateWF(ProjectID, MRNNo)
         GVvrLorryReceipts.DataBind()
       Catch ex As Exception
+        Dim message As String = New JavaScriptSerializer().Serialize(ex.Message.ToString())
+        Dim script As String = String.Format("alert({0});", message)
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
       End Try
     End If
   End Sub
@@ -991,6 +994,10 @@ Partial Class GF_vrLorryReceipts
                 .RequestExecutionNo = ""
               End With
               '====================================
+              If Convert.ToDateTime(Mrn.MRNDate).Date > Now.Date Then
+                wsD.Cells(I, 25).Value = "Future Date MRN can NOT be uploaded."
+                Continue For
+              End If
               'Check Mrn Header for Duplicate Entry
               If DuplicateMRN(Mrn) Then
                 wsD.Cells(I, 25).Value = "Already Exists.[Pl. download latest template.]"
