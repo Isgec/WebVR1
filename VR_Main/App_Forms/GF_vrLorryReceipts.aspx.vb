@@ -998,9 +998,17 @@ Partial Class GF_vrLorryReceipts
                 wsD.Cells(I, 25).Value = "Future Date MRN can NOT be uploaded."
                 Continue For
               End If
+              If Convert.ToDateTime(Mrn.MRNDate).Date < Convert.ToDateTime(Mrn.VehicleInDate).Date Then
+                wsD.Cells(I, 25).Value = "MRN Date can NOT be less than Vehicle In date."
+                Continue For
+              End If
+              If Convert.ToDateTime(Mrn.VehicleOutDate).Date < Convert.ToDateTime(Mrn.VehicleInDate).Date Then
+                wsD.Cells(I, 25).Value = "Vehicle Out Date can NOT be less than Vehicle In date."
+                Continue For
+              End If
               'Check Mrn Header for Duplicate Entry
               If DuplicateMRN(Mrn) Then
-                wsD.Cells(I, 25).Value = "Already Exists.[Pl. download latest template.]"
+                wsD.Cells(I, 25).Value = "Already Exists.[Pl. download latest template for Project.]"
                 Continue For
               Else
                 Try
