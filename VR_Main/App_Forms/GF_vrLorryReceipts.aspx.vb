@@ -1002,7 +1002,7 @@ Partial Class GF_vrLorryReceipts
                 wsD.Cells(I, 25).Value = "MRN Date can NOT be less than Vehicle In date."
                 Continue For
               End If
-              If Convert.ToDateTime(Mrn.VehicleOutDate).Date < Convert.ToDateTime(Mrn.VehicleInDate).Date Then
+              If Convert.ToDateTime(Mrn.VehicleOutDate) < Convert.ToDateTime(Mrn.VehicleInDate) Then
                 wsD.Cells(I, 25).Value = "Vehicle Out Date can NOT be less than Vehicle In date."
                 Continue For
               End If

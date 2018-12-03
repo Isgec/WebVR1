@@ -1,4 +1,4 @@
-<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="False" CodeFile="GF_vrLorryReceiptsD.aspx.vb" Inherits="GF_vrLorryReceiptsD" title="Display: Site Receipt" %>
+<%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="False" CodeFile="GF_vrLorryReceiptsReturn.aspx.vb" Inherits="GF_vrLorryReceiptsReturn" title="Display: Site Receipt" %>
 <asp:Content ID="CPHvrLorryReceiptsD" ContentPlaceHolderID="cph1" Runat="Server">
 <div class="ui-widget-content page">
 <div class="caption">
@@ -269,11 +269,35 @@
           </ItemTemplate>
           <HeaderStyle Width="300px" />
         </asp:TemplateField>
-        <asp:TemplateField HeaderText="LR Status" SortExpression="VR_LorryReceiptStatus4_Description">
+        <asp:TemplateField HeaderText="Remarks">
           <ItemTemplate>
-             <asp:Label ID="L_LRStatusID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("LRStatusID") %>' Text='<%# Eval("VR_LorryReceiptStatus4_Description") %>'></asp:Label>
+          <asp:TextBox ID="F_ReturnRemarks"
+            Width="100px"
+            CssClass = "mytxt"
+            onfocus = "return this.select();"
+            ValidationGroup='<%# "Reject" & Container.DataItemIndex %>'
+            onblur= "this.value=this.value.replace(/\'/g,'');"
+            MaxLength="500"
+            runat="server" />
+          <asp:RequiredFieldValidator 
+            ID = "RFVAccountsRemarks"
+            runat = "server"
+            ControlToValidate = "F_ReturnRemarks"
+            ErrorMessage = "<div class='errorLG'>Required!</div>"
+            Display = "Dynamic"
+            EnableClientScript = "true"
+            ValidationGroup = '<%# "Reject" & Container.DataItemIndex %>'
+            SetFocusOnError="true" />
           </ItemTemplate>
+          <ItemStyle CssClass="alignleft" />
           <HeaderStyle Width="100px" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="Return">
+          <ItemTemplate>
+            <asp:ImageButton ID="cmdRejectWF" ValidationGroup='<%# "Reject" & Container.DataItemIndex %>' CausesValidation="true" runat="server" AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Return" SkinID="reject" OnClientClick='<%# "return Page_ClientValidate(""Reject" & Container.DataItemIndex & """) && confirm(""Return record ?"");" %>' CommandName="RejectWF" CommandArgument='<%# Container.DataItemIndex %>' />
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle HorizontalAlign="Center" Width="30px" />
         </asp:TemplateField>
       </Columns>
       <EmptyDataTemplate>
