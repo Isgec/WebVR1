@@ -1278,8 +1278,9 @@ over:
   Protected Sub cmdDownload_Click(sender As Object, e As System.EventArgs) Handles cmdDownload.Click
     Dim st As Long = HttpContext.Current.Server.ScriptTimeout
     HttpContext.Current.Server.ScriptTimeout = Integer.MaxValue
+    'Creating Some change for GIT
 
-    Dim ProjectID As String = F_DownloadPrjID.Text
+    Dim ProjectID As String = F_DownloadPrjID.Text.ToUpper
     If ProjectID = String.Empty Then
       Dim message As String = New JavaScriptSerializer().Serialize("Project ID is required for Template download.")
       Dim script As String = String.Format("alert({0});", message)

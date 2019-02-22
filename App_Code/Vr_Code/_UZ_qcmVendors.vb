@@ -34,7 +34,7 @@ Namespace SIS.QCM
       Sql &= "  cnh.t_fuln as ContactPerson,                                   "
       Sql &= "  cnh.t_telp as ContactNo,                                       "
       Sql &= "  cnh.t_info as EMailID                                          "
-      Sql &= "  from ttccom100200 as suh                                       "
+      Sql &= "  from ttccom100" & mComp & " as suh                             "
       Sql &= "  left outer join ttccom130" & mComp & " as adh on suh.t_cadr = adh.t_cadr "
       Sql &= "  left outer join ttccom140" & mComp & " as cnh on suh.t_ccnt = cnh.t_ccnt "
       Sql &= "  where suh.t_bpid ='" & BPID & "'"
@@ -51,6 +51,7 @@ Namespace SIS.QCM
         End Using
       End Using
       If Results IsNot Nothing Then
+        If mComp <> "200" Then Results.VendorID = "S" & mComp & Right(Results.VendorID, 5)
         Results = SIS.QCM.qcmVendors.InsertData(Results)
       End If
       Return Results
