@@ -1446,10 +1446,10 @@ Namespace SIS.VR
 			If oVRs.Count > 0 Then  Else Return Nothing
 			Dim ProjectID As String = oVRs(0).ProjectID
 			Dim Company As String = GetProjectFinanceCompany(ProjectID)
-			If ProjectID.StartsWith("BS") Then
-				Company = "700"
-			End If
-			Dim SanctionAmount As Decimal = GetSanctionFromERPLN(ProjectID, Company)
+      If ProjectID.StartsWith("BS") Or ProjectID.StartsWith("DS") Then
+        Company = "700"
+      End If
+      Dim SanctionAmount As Decimal = GetSanctionFromERPLN(ProjectID, Company)
 			Dim ConsumedInMaterial As Decimal = GetConsumedInMaterial(ProjectID, Company)
 			Dim StartDate As String = GetVRSystemStartDate(ProjectID)
 			Dim ConsumedBeforeVRSystem As Decimal = GetConsumedBeforeVRSystem(ProjectID, StartDate)
