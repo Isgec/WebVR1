@@ -29,6 +29,7 @@ Namespace SIS.VR
     Private _MaximumLength As Decimal = 0
     Private _cmba As String = ""
     Private _DailyRunning As Decimal = 0
+    Public Property Active As Boolean = False
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -362,6 +363,7 @@ Namespace SIS.VR
         .WidthInFt = Record.WidthInFt
         .LengthInFt = Record.LengthInFt
         .DailyRunning = Record.DailyRunning
+        .Active = True
       End With
       Return SIS.VR.vrVehicleTypes.InsertData(_Rec)
     End Function
@@ -390,6 +392,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumWidth",SqlDbType.Decimal,9, Record.MaximumWidth)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumLength",SqlDbType.Decimal,9, Record.MaximumLength)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@DailyRunning", SqlDbType.Decimal, 6, Record.DailyRunning)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Active", SqlDbType.Bit, 3, Record.Active)
           Cmd.Parameters.Add("@Return_VehicleTypeID", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_VehicleTypeID").Direction = ParameterDirection.Output
           Con.Open()
@@ -423,6 +426,7 @@ Namespace SIS.VR
         .MaximumWidth = Record.MaximumWidth
         .MaximumLength = Record.MaximumLength
         .DailyRunning = Record.DailyRunning
+        .Active = Record.Active
       End With
       Return SIS.VR.vrVehicleTypes.UpdateData(_Rec)
     End Function
@@ -452,6 +456,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumWidth",SqlDbType.Decimal,9, Record.MaximumWidth)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumLength",SqlDbType.Decimal,9, Record.MaximumLength)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@DailyRunning", SqlDbType.Decimal, 6, Record.DailyRunning)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Active", SqlDbType.Bit, 3, Record.Active)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -480,61 +485,35 @@ Namespace SIS.VR
       End Using
       Return _RecordCount
     End Function
-'		Autocomplete Method
-		Public Shared Function SelectvrVehicleTypesAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
-			Dim Results As List(Of String) = Nothing
+    '		Autocomplete Method
+    Public Shared Function SelectvrVehicleTypesAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
+      Dim Results As List(Of String) = Nothing
       Dim aVal() As String = contextKey.Split("|".ToCharArray)
-			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-				Using Cmd As SqlCommand = Con.CreateCommand()
-					Cmd.CommandType = CommandType.StoredProcedure
-					Cmd.CommandText = "spvrVehicleTypesAutoCompleteList"
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spvrVehicleTypesAutoCompleteList"
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@prefix", SqlDbType.NVarChar, 50, Prefix)
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@records", SqlDbType.Int, -1, count)
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@bycode", SqlDbType.Int, 1, IIf(IsNumeric(Prefix), 0, 1))
-					Results = New List(Of String)()
-					Con.Open()
-					Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Not Reader.HasRows Then
-					  Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem("---Select Value---".PadRight(63, " "),""))
-					End If
-					While (Reader.Read())
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@prefix", SqlDbType.NVarChar, 50, Prefix)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@records", SqlDbType.Int, -1, count)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@bycode", SqlDbType.Int, 1, IIf(IsNumeric(Prefix), 0, 1))
+          Results = New List(Of String)()
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          If Not Reader.HasRows Then
+            Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem("---Select Value---".PadRight(63, " "), ""))
+          End If
+          While (Reader.Read())
             Dim Tmp As SIS.VR.vrVehicleTypes = New SIS.VR.vrVehicleTypes(Reader)
-					  Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem(Tmp.DisplayField, Tmp.PrimaryKey))
-					End While
-					Reader.Close()
-				End Using
-			End Using
-			Return Results.ToArray
-		End Function
-    Public Sub New(ByVal Reader As SqlDataReader)
-      On Error Resume Next
-      _VehicleTypeID = Ctype(Reader("VehicleTypeID"),Int32)
-      _Description = Ctype(Reader("Description"),String)
-      _DefineCapacity = Ctype(Reader("DefineCapacity"),Boolean)
-      _CapacityInKG = Ctype(Reader("CapacityInKG"),Decimal)
-      _DefineDimention = Ctype(Reader("DefineDimention"),Boolean)
-      _HeightInFt = Ctype(Reader("HeightInFt"),Decimal)
-      _WidthInFt = Ctype(Reader("WidthInFt"),Decimal)
-      _LengthInFt = Ctype(Reader("LengthInFt"),Decimal)
-      _EnforceMinimumCapacity = Ctype(Reader("EnforceMinimumCapacity"),Boolean)
-      _MinimumCapacity = Ctype(Reader("MinimumCapacity"),Decimal)
-      _EnforceMaximumCapacity = Ctype(Reader("EnforceMaximumCapacity"),Boolean)
-      _MaximumCapacity = Ctype(Reader("MaximumCapacity"),Decimal)
-      _EnforceMinimumDimention = Ctype(Reader("EnforceMinimumDimention"),Boolean)
-      _MinimumHeight = Ctype(Reader("MinimumHeight"),Decimal)
-      _MinimumWidth = Ctype(Reader("MinimumWidth"),Decimal)
-      _MinimumLength = Ctype(Reader("MinimumLength"),Decimal)
-      _EnforceMaximumDimention = Ctype(Reader("EnforceMaximumDimention"),Boolean)
-      _MaximumHeight = Ctype(Reader("MaximumHeight"),Decimal)
-      _MaximumWidth = Ctype(Reader("MaximumWidth"),Decimal)
-      _MaximumLength = Ctype(Reader("MaximumLength"),Decimal)
-      If Convert.IsDBNull(Reader("cmba")) Then
-        _cmba = String.Empty
-      Else
-        _cmba = Ctype(Reader("cmba"), String)
-      End If
-      _DailyRunning = CType(Reader("DailyRunning"), Decimal)
+            Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem(Tmp.DisplayField, Tmp.PrimaryKey))
+          End While
+          Reader.Close()
+        End Using
+      End Using
+      Return Results.ToArray
+    End Function
+    Sub New(rd As SqlDataReader)
+      SIS.SYS.SQLDatabase.DBCommon.NewObj(Me, rd)
     End Sub
     Public Sub New()
     End Sub

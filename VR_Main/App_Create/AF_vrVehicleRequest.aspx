@@ -222,54 +222,118 @@
                         <asp:Label ID="L_FromLocation" runat="server" Text="From City :" /></b>
                     </td>
                     <td>
-                      <asp:TextBox ID="F_FromLocation"
-                        Text='<%# Bind("FromLocation") %>'
-                        CssClass="mytxt"
-                        onfocus="return this.select();"
-                        ValidationGroup="vrVehicleRequest"
-                        onblur="this.value=this.value.replace(/\'/g,'');"
-                        ToolTip="Enter value for From Location."
-                        MaxLength="50"
-                        Width="350px"
-                        runat="server" />
-                      <asp:RequiredFieldValidator
-                        ID="RFVFromLocation"
-                        runat="server"
-                        ControlToValidate="F_FromLocation"
-                        Text="<div class='errorLG'>Required!</div>"
-                        ErrorMessage="[Required!]"
-                        ForeColor="red"
-                        Display="Dynamic"
-                        EnableClientScript="true"
-                        ValidationGroup="vrVehicleRequest"
-                        SetFocusOnError="true" />
+                      <table>
+                        <tr>
+                          <td>
+                            <asp:TextBox ID="F_FromLocation"
+                              Text='<%# Bind("FromLocation") %>'
+                              CssClass="mytxt"
+                              onfocus="return this.select();"
+                              ValidationGroup="vrVehicleRequest"
+                              onblur="this.value=this.value.replace(/\'/g,'');"
+                              ToolTip="Enter value for From Location."
+                              MaxLength="50"
+                              Width="200px"
+                              runat="server" />
+                            <asp:RequiredFieldValidator
+                              ID="RFVFromLocation"
+                              runat="server"
+                              ControlToValidate="F_FromLocation"
+                              Text="<div class='errorLG'>Required!</div>"
+                              ErrorMessage="[Required!]"
+                              ForeColor="red"
+                              Display="Dynamic"
+                              EnableClientScript="true"
+                              ValidationGroup="vrVehicleRequest"
+                              SetFocusOnError="true" />
+                          </td>
+                          <td>
+                            <b>
+                              <asp:Label ID="L_fromPinCode" runat="server" Text="Pin :" /></b>
+                          </td>
+                          <td>
+                            <asp:TextBox ID="F_FromPinCode"
+                              Text='<%# Bind("FromPinCode") %>'
+                              CssClass="mytxt"
+                              onfocus="return this.select();"
+                              ValidationGroup="vrVehicleRequest"
+                              onblur="this.value=this.value.replace(/\'/g,'');"
+                              MaxLength="6"
+                              Width="72px"
+                              runat="server" />
+                            <asp:RequiredFieldValidator
+                              ID="RFVFromPinCode"
+                              runat="server"
+                              ControlToValidate="F_FromPinCode"
+                              Text="<div class='errorLG'>Required!</div>"
+                              ErrorMessage="[Required!]"
+                              ForeColor="red"
+                              Display="Dynamic"
+                              EnableClientScript="true"
+                              ValidationGroup="vrVehicleRequest"
+                              SetFocusOnError="true" />
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                     <td class="alignright">
                       <b>
                         <asp:Label ID="L_ToLocation" runat="server" Text="To City :" /></b>
                     </td>
                     <td>
-                      <asp:TextBox ID="F_ToLocation"
-                        Text='<%# Bind("ToLocation") %>'
-                        CssClass="mytxt"
-                        onfocus="return this.select();"
-                        ValidationGroup="vrVehicleRequest"
-                        onblur="this.value=this.value.replace(/\'/g,'');"
-                        ToolTip="Enter value for To Location."
-                        MaxLength="50"
-                        Width="350px"
-                        runat="server" />
-                      <asp:RequiredFieldValidator
-                        ID="RFVToLocation"
-                        runat="server"
-                        ControlToValidate="F_ToLocation"
-                        Text="<div class='errorLG'>Required!</div>"
-                        ErrorMessage="[Required!]"
-                        Display="Dynamic"
-                        ForeColor="red"
-                        EnableClientScript="true"
-                        ValidationGroup="vrVehicleRequest"
-                        SetFocusOnError="true" />
+                      <table>
+                        <tr>
+                          <td>
+                            <asp:TextBox ID="F_ToLocation"
+                              Text='<%# Bind("ToLocation") %>'
+                              CssClass="mytxt"
+                              onfocus="return this.select();"
+                              ValidationGroup="vrVehicleRequest"
+                              onblur="this.value=this.value.replace(/\'/g,'');"
+                              ToolTip="Enter value for To Location."
+                              MaxLength="50"
+                              Width="200px"
+                              runat="server" />
+                            <asp:RequiredFieldValidator
+                              ID="RFVToLocation"
+                              runat="server"
+                              ControlToValidate="F_ToLocation"
+                              Text="<div class='errorLG'>Required!</div>"
+                              ErrorMessage="[Required!]"
+                              Display="Dynamic"
+                              ForeColor="red"
+                              EnableClientScript="true"
+                              ValidationGroup="vrVehicleRequest"
+                              SetFocusOnError="true" />
+                          </td>
+                          <td>
+                            <b>
+                              <asp:Label ID="L_ToPinCode" runat="server" Text="Pin :" /></b>
+                          </td>
+                          <td>
+                            <asp:TextBox ID="F_ToPinCode"
+                              Text='<%# Bind("F_ToPinCode") %>'
+                              CssClass="mytxt"
+                              onfocus="return this.select();"
+                              ValidationGroup="vrVehicleRequest"
+                              onblur="this.value=this.value.replace(/\'/g,'');"
+                              MaxLength="6"
+                              Width="72px"
+                              runat="server" />
+                            <asp:RequiredFieldValidator
+                              ID="RFVToPinCode"
+                              runat="server"
+                              ControlToValidate="F_ToPinCode"
+                              Text="<div class='errorLG'>Required!</div>"
+                              ErrorMessage="[Required!]"
+                              ForeColor="red"
+                              Display="Dynamic"
+                              EnableClientScript="true"
+                              ValidationGroup="vrVehicleRequest"
+                              SetFocusOnError="true" />
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                   <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>
@@ -634,7 +698,7 @@
                               runat="server" />
                           </td>
                         </tr>
-                        <tr>
+<%--                        <tr>
                           <td class="alignright">
                             <b>
                               <asp:Label ID="L_CT1Issued" runat="server" Text="CT-1 Attended :" /></b>
@@ -653,7 +717,7 @@
                               Checked='<%# Bind("ARE1Issued") %>'
                               runat="server" />
                           </td>
-                        </tr>
+                        </tr>--%>
                         <tr>
                           <td class="alignright">
                             <b>
@@ -749,7 +813,70 @@
                         </tr>
                       </table>
                     </td>
-                    <td colspan="2"></td>
+                    <td style="vertical-align:top;">
+                      <b>
+                        <asp:Label ID="Label3" ForeColor="#CC6633" runat="server" Text="Site Person :" /></b>
+                    </td>
+                    <td style="vertical-align:top;" >
+                      <table>
+                        <tr>
+                          <td>
+                            <b>
+                              <asp:Label ID="Label4" ForeColor="#CC6633" runat="server" Text="Name :" /></b>
+                          </td>
+                          <td>
+                            <asp:TextBox ID="F_SitePersonName"
+                              Text='<%# Bind("SitePersonName") %>'
+                              CssClass="mytxt"
+                              onfocus="return this.select();"
+                              ValidationGroup="vrVehicleRequest"
+                              onblur="this.value=this.value.replace(/\'/g,'');"
+                              MaxLength="50"
+                              Width="200px"
+                              runat="server" />
+                            <asp:RequiredFieldValidator
+                              ID="RFVSitePersonName"
+                              runat="server"
+                              ControlToValidate="F_SitePersonName"
+                              Text="<div class='errorLG'>Required!</div>"
+                              ErrorMessage="[Required!]"
+                              Display="Dynamic"
+                              ForeColor="red"
+                              EnableClientScript="true"
+                              ValidationGroup="vrVehicleRequest"
+                              SetFocusOnError="true" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <b>
+                              <asp:Label ID="Label5" ForeColor="#CC6633" runat="server" Text="Contact No :" /></b>
+                          </td>
+                          <td>
+                            <asp:TextBox ID="F_SitePersonContact"
+                              Text='<%# Bind("SitePersonContact") %>'
+                              CssClass="mytxt"
+                              onfocus="return this.select();"
+                              ValidationGroup="vrVehicleRequest"
+                              onblur="this.value=this.value.replace(/\'/g,'');"
+                              MaxLength="50"
+                              Width="200px"
+                              runat="server" />
+                            <asp:RequiredFieldValidator
+                              ID="RFVSitePersonContact"
+                              runat="server"
+                              ControlToValidate="F_SitePersonContact"
+                              Text="<div class='errorLG'>Required!</div>"
+                              ErrorMessage="[Required!]"
+                              Display="Dynamic"
+                              ForeColor="red"
+                              EnableClientScript="true"
+                              ValidationGroup="vrVehicleRequest"
+                              SetFocusOnError="true" />
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
                   </tr>
                   </table>
               </div>

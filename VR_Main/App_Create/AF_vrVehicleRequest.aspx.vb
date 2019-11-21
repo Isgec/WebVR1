@@ -123,8 +123,8 @@ Partial Class AF_vrVehicleRequest
     Else
       mRet = "0|" & aVal(0) & "|" & oVar.BuyerID & "|" & oVar.BuyerName & "|" & New JavaScriptSerializer().Serialize(oVar)
       If oVar.DeliveryTerm <> "" Then
-        If oVar.DeliveryTerm <> "FOT" AndAlso oVar.DeliveryTerm <> "EXW" Then
-          mRet = "1|" & aVal(0) & "|PO Delivery term is neither FOT nor Ex-Works, Vehicle Request can NOT be raised."
+        If oVar.DeliveryTerm <> "FOT" AndAlso oVar.DeliveryTerm <> "EXW" AndAlso oVar.DeliveryTerm <> "CIF" Then
+          mRet = "1|" & aVal(0) & "|PO Delivery term is must be FOT/EXW/CIF. Vehicle Request can NOT be raised."
         End If
       End If
       End If

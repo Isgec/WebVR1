@@ -51,12 +51,16 @@ Partial Class GF_vrVehicleRequest
 						LabelErrMsg.Text = "In DOMESTIC Projects MICN and DI must be Issued. Can not forward request."
 					End If
 				Else
-					If Not oRq.MICN Or Not oRq.CustomInvoiceIssued Or Not oRq.CT1Issued Or Not oRq.ARE1Issued Or Not oRq.DIIssued Then
-						Err = True
-						LabelErrMsg.Text = "In EXPORT Projects MICN, Custom Invoice, CT-1, ARE-1  and DI must be issued. Can not forward request."
-					End If
-				End If
-				If Not Err Then
+          'If Not oRq.MICN Or Not oRq.CustomInvoiceIssued Or Not oRq.CT1Issued Or Not oRq.ARE1Issued Or Not oRq.DIIssued Then
+          '  Err = True
+          '  LabelErrMsg.Text = "In EXPORT Projects MICN, Custom Invoice, CT-1, ARE-1  and DI must be issued. Can not forward request."
+          'End If
+          If Not oRq.MICN Or Not oRq.CustomInvoiceIssued Or Not oRq.DIIssued Then
+            Err = True
+            LabelErrMsg.Text = "In EXPORT Projects MICN, Custom Invoice and DI must be issued. Can not forward request."
+          End If
+        End If
+        If Not Err Then
 					SIS.VR.vrVehicleRequest.InitiateWF(RequestNo)
 					GVvrVehicleRequest.DataBind()
 				End If

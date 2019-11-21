@@ -78,8 +78,8 @@ Public Class lgBP
 		Dim Results As List(Of lgBP) = Nothing
 		Dim Sql As String = ""
 		If Typ <> "PRJ" Then
-			Sql = Sql & "select t_bpid,t_nama from ttccom100200 where ltrim(t_nama)<>'' and t_prst=2 and substring(t_bpid,1,3) = '" & Typ & "' order by t_nama"
-		Else
+      Sql = Sql & "select t_bpid,t_nama from ttccom100200 where ltrim(t_nama)<>'' and t_prst=2 and substring(t_bpid,1,3) = '" & Typ & "' and t_crdt > dateadd(day,-35, getdate()) order by t_nama"
+    Else
 			Sql = Sql & "select aa.t_cprj as t_bpid, aa.t_dsca as t_nama, bb.t_ofbp as CustomerID, cc.t_nama as CustomerName from ttcmcs052200 aa inner join ttppdm740200 bb on aa.t_cprj = bb.t_cprj inner join ttccom100200 as cc on bb.t_ofbp = cc.t_bpid where aa.t_cprj='" & ProjectID & "'"
 		End If
 		Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())

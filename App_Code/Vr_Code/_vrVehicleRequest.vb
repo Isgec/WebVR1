@@ -82,6 +82,10 @@ Namespace SIS.VR
     Private _FK_VR_VehicleRequest_WeightUnit As SIS.VR.vrUnits = Nothing
     Private _FK_VR_VehicleRequest_BuyerInERP As SIS.QCM.qcmUsers = Nothing
     Public Property DeliveryTerm As String = ""
+    Public Property FromPinCode As String = ""
+    Public Property ToPinCode As String = ""
+    Public Property SitePersonName As String = ""
+    Public Property SitePersonContact As String = ""
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -1078,6 +1082,10 @@ Namespace SIS.VR
         .ERPPONumber = Record.ERPPONumber
         .BuyerInERP = Record.BuyerInERP
         .DeliveryTerm = Record.DeliveryTerm
+        .FromPinCode = Record.FromPinCode
+        .ToPinCode = Record.ToPinCode
+        .SitePersonContact = Record.SitePersonContact
+        .SitePersonName = Record.SitePersonName
       End With
       Return SIS.VR.vrVehicleRequest.InsertData(_Rec)
     End Function
@@ -1136,6 +1144,10 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ERPPONumber",SqlDbType.NVarChar,11, Iif(Record.ERPPONumber= "" ,Convert.DBNull, Record.ERPPONumber))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@BuyerInERP",SqlDbType.NVarChar,9, Iif(Record.BuyerInERP= "" ,Convert.DBNull, Record.BuyerInERP))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@DeliveryTerm", SqlDbType.NVarChar, 6, IIf(Record.DeliveryTerm = "", Convert.DBNull, Record.DeliveryTerm))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@FromPinCode", SqlDbType.NVarChar, 11, IIf(Record.FromPinCode = "", Convert.DBNull, Record.FromPinCode))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ToPinCode", SqlDbType.NVarChar, 11, IIf(Record.ToPinCode = "", Convert.DBNull, Record.ToPinCode))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonName", SqlDbType.NVarChar, 51, IIf(Record.SitePersonName = "", Convert.DBNull, Record.SitePersonName))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonContact", SqlDbType.NVarChar, 51, IIf(Record.SitePersonContact = "", Convert.DBNull, Record.SitePersonContact))
           Cmd.Parameters.Add("@Return_RequestNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestNo").Direction = ParameterDirection.Output
           Con.Open()
@@ -1194,6 +1206,10 @@ Namespace SIS.VR
         .OutOfContract = Record.OutOfContract
         .ERPPONumber = Record.ERPPONumber
         .BuyerInERP = Record.BuyerInERP
+        .FromPinCode = Record.FromPinCode
+        .ToPinCode = Record.ToPinCode
+        .SitePersonContact = Record.SitePersonContact
+        .SitePersonName = Record.SitePersonName
       End With
       Return SIS.VR.vrVehicleRequest.UpdateData(_Rec)
     End Function
@@ -1253,6 +1269,10 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ERPPONumber", SqlDbType.NVarChar, 11, IIf(Record.ERPPONumber = "", Convert.DBNull, Record.ERPPONumber))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@BuyerInERP", SqlDbType.NVarChar, 9, IIf(Record.BuyerInERP = "", Convert.DBNull, Record.BuyerInERP))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@DeliveryTerm", SqlDbType.NVarChar, 6, IIf(Record.DeliveryTerm = "", Convert.DBNull, Record.DeliveryTerm))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@FromPinCode", SqlDbType.NVarChar, 11, IIf(Record.FromPinCode = "", Convert.DBNull, Record.FromPinCode))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ToPinCode", SqlDbType.NVarChar, 11, IIf(Record.ToPinCode = "", Convert.DBNull, Record.ToPinCode))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonName", SqlDbType.NVarChar, 51, IIf(Record.SitePersonName = "", Convert.DBNull, Record.SitePersonName))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonContact", SqlDbType.NVarChar, 51, IIf(Record.SitePersonContact = "", Convert.DBNull, Record.SitePersonContact))
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -1308,38 +1328,8 @@ Namespace SIS.VR
 			End Using
 			Return Results.ToArray
 		End Function
-    Public Sub New(ByVal Reader As SqlDataReader)
-      Try
-        For Each pi As System.Reflection.PropertyInfo In Me.GetType.GetProperties
-          If pi.MemberType = Reflection.MemberTypes.Property Then
-            Try
-              Dim Found As Boolean = False
-              For I As Integer = 0 To Reader.FieldCount - 1
-                If Reader.GetName(I).ToLower = pi.Name.ToLower Then
-                  Found = True
-                  Exit For
-                End If
-              Next
-              If Found Then
-                If Convert.IsDBNull(Reader(pi.Name)) Then
-                  Select Case Reader.GetDataTypeName(Reader.GetOrdinal(pi.Name))
-                    Case "decimal"
-                      CallByName(Me, pi.Name, CallType.Let, "0.00")
-                    Case "bit"
-                      CallByName(Me, pi.Name, CallType.Let, Boolean.FalseString)
-                    Case Else
-                      CallByName(Me, pi.Name, CallType.Let, String.Empty)
-                  End Select
-                Else
-                  CallByName(Me, pi.Name, CallType.Let, Reader(pi.Name))
-                End If
-              End If
-            Catch ex As Exception
-            End Try
-          End If
-        Next
-      Catch ex As Exception
-      End Try
+    Sub New(rd As SqlDataReader)
+      SIS.SYS.SQLDatabase.DBCommon.NewObj(Me, rd)
     End Sub
     Public Sub New()
     End Sub

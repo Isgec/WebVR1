@@ -785,6 +785,20 @@
 						SetFocusOnError="true" />
 				</td>
 			</tr>
+			<tr>
+				<td class="alignright">
+					<b><asp:Label ID="L_Active" runat="server" Text="Active :" /></b>
+				</td>
+				<td>
+          <asp:CheckBox ID="F_Active"
+					  Checked='<%# Bind("Active") %>'
+            runat="server" />
+				</td>
+				<td class="alignright">
+				</td>
+				<td>
+				</td>
+			</tr>
 		</table>
 	<br />
 	</EditItemTemplate>
