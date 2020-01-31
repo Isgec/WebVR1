@@ -1061,9 +1061,33 @@ Namespace SIS.VR
             Try
               If vr.FK_VR_VehicleRequest_RequestedBy.EMailID.ToLower.IndexOf("isgec.com") >= 0 Then
                 oMsg.CC.Add(New MailAddress("sarvjeet_chowdhry@isgec.com", "Sarvjeet Chowdhry"))
-                oMsg.CC.Add(New MailAddress("boilerprojects@isgec.co.in", "Boiler Projects"))
                 oMsg.CC.Add(New MailAddress("tmdproject@isgec.com", "TMD Projects-YNR"))
                 oMsg.CC.Add(New MailAddress("manoj.raghav@isgec.co.in", "Manoj Raghav"))
+
+                'Projects Employees Mapping
+                Dim prUsers As List(Of SIS.TPISG.tpisg046) = SIS.TPISG.tpisg046.GetUsersEMailIDs(vr.ProjectID)
+                Dim IDsFound As Boolean = False
+                For Each pu As SIS.TPISG.tpisg046 In prUsers
+                  If pu.EMailID.Trim <> "" Then
+                    IDsFound = True
+                    ad = New MailAddress(pu.EMailID.Trim, pu.UserName)
+                    If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+                  End If
+                Next
+                If Not IDsFound Then
+                  Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
+                  Select Case GroupID
+                    Case 1 ' boiler
+                      oMsg.CC.Add("boilerprojects@isgec.co.in")
+                    Case 2 'smd
+                      oMsg.CC.Add("smdprojects@isgec.co.in")
+                    Case 4 'EPC
+                      oMsg.CC.Add("epcprojects@isgec.co.in")
+                    Case 5 'APCE
+                      oMsg.CC.Add("apceprojects@isgec.co.in")
+                  End Select
+                End If
+
               End If
               ProjectsAdded = True
             Catch ex As Exception
@@ -1804,17 +1828,29 @@ Namespace SIS.VR
           ad = New MailAddress(vr.FK_VR_VehicleRequest_RequestedBy.EMailID, vr.FK_VR_VehicleRequest_RequestedBy.UserFullName)
           If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
         End If
-        Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
-        Select Case GroupID
-          Case 1 ' boiler
-            oMsg.CC.Add("boilerprojects@isgec.co.in")
-          Case 2 'smd
-            oMsg.CC.Add("smdprojects@isgec.co.in")
-          Case 4 'EPC
-            oMsg.CC.Add("epcprojects@isgec.co.in")
-          Case 5 'APCE
-            oMsg.CC.Add("apceprojects@isgec.co.in")
-        End Select
+        'Projects Employees Mapping
+        Dim prUsers As List(Of SIS.TPISG.tpisg046) = SIS.TPISG.tpisg046.GetUsersEMailIDs(vr.ProjectID)
+        Dim IDsFound As Boolean = False
+        For Each pu As SIS.TPISG.tpisg046 In prUsers
+          If pu.EMailID.Trim <> "" Then
+            IDsFound = True
+            ad = New MailAddress(pu.EMailID.Trim, pu.UserName)
+            If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+          End If
+        Next
+        If Not IDsFound Then
+          Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
+          Select Case GroupID
+            Case 1 ' boiler
+              oMsg.CC.Add("boilerprojects@isgec.co.in")
+            Case 2 'smd
+              oMsg.CC.Add("smdprojects@isgec.co.in")
+            Case 4 'EPC
+              oMsg.CC.Add("epcprojects@isgec.co.in")
+            Case 5 'APCE
+              oMsg.CC.Add("apceprojects@isgec.co.in")
+          End Select
+        End If
         'Buyers in Request, in old requests buyer may be null
         Try
           If vr.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then
@@ -1965,18 +2001,29 @@ Namespace SIS.VR
           ad = New MailAddress(vr.FK_VR_VehicleRequest_RequestedBy.EMailID, vr.FK_VR_VehicleRequest_RequestedBy.UserFullName)
           If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
         End If
-        'Contracts of Requester's division
-        Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
-        Select Case GroupID
-          Case 1 ' boiler
-            oMsg.CC.Add("boilerprojects@isgec.co.in")
-          Case 2 'smd
-            oMsg.CC.Add("smdprojects@isgec.co.in")
-          Case 4 'EPC
-            oMsg.CC.Add("epcprojects@isgec.co.in")
-          Case 5 'APCE
-            oMsg.CC.Add("apceprojects@isgec.co.in")
-        End Select
+        'Projects Employees Mapping
+        Dim prUsers As List(Of SIS.TPISG.tpisg046) = SIS.TPISG.tpisg046.GetUsersEMailIDs(vr.ProjectID)
+        Dim IDsFound As Boolean = False
+        For Each pu As SIS.TPISG.tpisg046 In prUsers
+          If pu.EMailID.Trim <> "" Then
+            IDsFound = True
+            ad = New MailAddress(pu.EMailID.Trim, pu.UserName)
+            If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
+          End If
+        Next
+        If Not IDsFound Then
+          Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
+          Select Case GroupID
+            Case 1 ' boiler
+              oMsg.CC.Add("boilerprojects@isgec.co.in")
+            Case 2 'smd
+              oMsg.CC.Add("smdprojects@isgec.co.in")
+            Case 4 'EPC
+              oMsg.CC.Add("epcprojects@isgec.co.in")
+            Case 5 'APCE
+              oMsg.CC.Add("apceprojects@isgec.co.in")
+          End Select
+        End If
         'Buyers in Request, in old requests buyer may be null
         Try
           If vr.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then

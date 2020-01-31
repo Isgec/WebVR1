@@ -203,24 +203,24 @@ Namespace SIS.QCM
     Public Shared Function qcmProjectsGetNewRecord() As SIS.QCM.qcmProjects
       Return New SIS.QCM.qcmProjects()
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function qcmProjectsGetByID(ByVal ProjectID As String) As SIS.QCM.qcmProjects
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function qcmProjectsGetByID(ByVal ProjectID As String, Optional mComp As String = "200") As SIS.QCM.qcmProjects
       Dim Results As SIS.QCM.qcmProjects = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmProjectsSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID",SqlDbType.NVarChar,ProjectID.ToString.Length, ProjectID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID", SqlDbType.NVarChar, ProjectID.ToString.Length, ProjectID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Reader.Read() Then
-						Results = New SIS.QCM.qcmProjects(Reader)
-					End If
-					Reader.Close()
+          If Reader.Read() Then
+            Results = New SIS.QCM.qcmProjects(Reader)
+          End If
+          Reader.Close()
         End Using
       End Using
-      If Results Is Nothing Then Results = SIS.QCM.qcmProjects.GetProjectFromERP(ProjectID, "")
+      If Results Is Nothing Then Results = SIS.QCM.qcmProjects.GetProjectFromERP(ProjectID, mComp)
       Return Results
     End Function
     <DataObjectMethod(DataObjectMethodType.Select)> _

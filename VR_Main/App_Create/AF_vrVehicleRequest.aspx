@@ -312,7 +312,7 @@
                           </td>
                           <td>
                             <asp:TextBox ID="F_ToPinCode"
-                              Text='<%# Bind("F_ToPinCode") %>'
+                              Text='<%# Bind("ToPinCode") %>'
                               CssClass="mytxt"
                               onfocus="return this.select();"
                               ValidationGroup="vrVehicleRequest"
