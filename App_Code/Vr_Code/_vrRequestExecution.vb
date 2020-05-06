@@ -128,8 +128,14 @@ Namespace SIS.VR
     Private _FK_VR_RequestExecution_WeightUnit As SIS.VR.vrUnits = Nothing
     Private _FK_VR_RequestExecution_LinkID As SIS.VR.vrLinkExecutions = Nothing
     Private _FK_VR_RequestExecution_ODCReasonID As SIS.VR.vrODCReasons = Nothing
-		Private _FK_VR_RequestExecution_SanctionApprovedBy As SIS.QCM.qcmUsers = Nothing
-		Public ReadOnly Property ForeColor() As System.Drawing.Color
+    Private _FK_VR_RequestExecution_SanctionApprovedBy As SIS.QCM.qcmUsers = Nothing
+    '=====================SP Integration===================
+    Public Property RequestNo As Integer = 0
+    Public Property SPRequestID As String = ""
+    Public Property SPLoadID As String = ""
+    Public Property SPExecutionStatus As Integer = 1
+    '======================================================
+    Public ReadOnly Property ForeColor() As System.Drawing.Color
 			Get
 				Dim mRet As System.Drawing.Color = Drawing.Color.Blue
 				Try
@@ -1476,15 +1482,39 @@ Namespace SIS.VR
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function GetByRequestStatusID(ByVal RequestStatusID As Int32, ByVal OrderBy as String) As List(Of SIS.VR.vrRequestExecution)
+    Public Shared Function vrRequestExecutionGetByRequestNo(ByVal RequestNo As Int32, ByVal OrderBy As String) As List(Of SIS.VR.vrRequestExecution)
+      Dim Results As List(Of SIS.VR.vrRequestExecution) = Nothing
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spvr_LG_RequestExecutionSelectByRequestNo"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestNo", SqlDbType.Int, 10, RequestNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
+          Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
+          Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
+          _RecordCount = -1
+          Results = New List(Of SIS.VR.vrRequestExecution)()
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          While (Reader.Read())
+            Results.Add(New SIS.VR.vrRequestExecution(Reader))
+          End While
+          Reader.Close()
+          _RecordCount = Cmd.Parameters("@RecordCount").Value
+        End Using
+      End Using
+      Return Results
+    End Function
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function GetByRequestStatusID(ByVal RequestStatusID As Int32, ByVal OrderBy As String) As List(Of SIS.VR.vrRequestExecution)
       Dim Results As List(Of SIS.VR.vrRequestExecution) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrRequestExecutionSelectByRequestStatusID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStatusID",SqlDbType.Int,RequestStatusID.ToString.Length, RequestStatusID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestStatusID", SqlDbType.Int, RequestStatusID.ToString.Length, RequestStatusID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
@@ -1652,8 +1682,12 @@ Namespace SIS.VR
 				.SanctionExceededApproved = Record.SanctionExceededApproved
 				.SanctionApprovalRemarks = Record.SanctionApprovalRemarks
 				.SanctionApprovedBy = Record.SanctionApprovedBy
-				.SanctionApprovedOn = Record.SanctionApprovedOn
-			End With
+        .SanctionApprovedOn = Record.SanctionApprovedOn
+        .RequestNo = Record.RequestNo
+        .SPRequestID = Record.SPRequestID
+        .SPLoadID = Record.SPLoadID
+        .SPExecutionStatus = Record.SPExecutionStatus
+      End With
       Return SIS.VR.vrRequestExecution.InsertData(_Rec)
     End Function
     Public Shared Function InsertData(ByVal Record As SIS.VR.vrRequestExecution) As SIS.VR.vrRequestExecution
@@ -1745,7 +1779,11 @@ Namespace SIS.VR
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SanctionApprovalRemarks", SqlDbType.NVarChar, 251, IIf(Record.SanctionApprovalRemarks = "", Convert.DBNull, Record.SanctionApprovalRemarks))
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SanctionApprovedBy", SqlDbType.NVarChar, 9, IIf(Record.SanctionApprovedBy = "", Convert.DBNull, Record.SanctionApprovedBy))
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SanctionApprovedOn", SqlDbType.DateTime, 21, IIf(Record.SanctionApprovedOn = "", Convert.DBNull, Record.SanctionApprovedOn))
-					Cmd.Parameters.Add("@Return_SRNNo", SqlDbType.Int, 11)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestNo", SqlDbType.Int, 11, IIf(Record.RequestNo = 0, Convert.DBNull, Record.RequestNo))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestID", SqlDbType.NVarChar, 51, IIf(Record.SPRequestID = "", Convert.DBNull, Record.SPRequestID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadID", SqlDbType.NVarChar, 51, IIf(Record.SPLoadID = "", Convert.DBNull, Record.SPLoadID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPExecutionStatus", SqlDbType.Int, 11, Record.SPExecutionStatus )
+          Cmd.Parameters.Add("@Return_SRNNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_SRNNo").Direction = ParameterDirection.Output
           Con.Open()
           Cmd.ExecuteNonQuery()
@@ -1883,7 +1921,11 @@ Namespace SIS.VR
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SanctionApprovalRemarks", SqlDbType.NVarChar, 251, IIf(Record.SanctionApprovalRemarks = "", Convert.DBNull, Record.SanctionApprovalRemarks))
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SanctionApprovedBy", SqlDbType.NVarChar, 9, IIf(Record.SanctionApprovedBy = "", Convert.DBNull, Record.SanctionApprovedBy))
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SanctionApprovedOn", SqlDbType.DateTime, 21, IIf(Record.SanctionApprovedOn = "", Convert.DBNull, Record.SanctionApprovedOn))
-					Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestNo", SqlDbType.Int, 11, IIf(Record.RequestNo = 0, Convert.DBNull, Record.RequestNo))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestID", SqlDbType.NVarChar, 51, IIf(Record.SPRequestID = "", Convert.DBNull, Record.SPRequestID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadID", SqlDbType.NVarChar, 51, IIf(Record.SPLoadID = "", Convert.DBNull, Record.SPLoadID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPExecutionStatus", SqlDbType.Int, 11, Record.SPExecutionStatus)
+          Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
           Con.Open()

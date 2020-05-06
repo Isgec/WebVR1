@@ -76,6 +76,13 @@
           </ItemTemplate>
         <HeaderStyle Width="100px" />
         </asp:TemplateField>
+        <asp:TemplateField HeaderText="Send To SuperProcure">
+          <ItemTemplate>
+             <asp:ImageButton ID="cmdSPRequest" runat="server" AlternateText='<%# Eval("PrimaryKey") %>' ToolTip="Send to Super Procure" SkinID="forward"  CommandName="SPRequest" CommandArgument='<%# Container.DataItemIndex %>' />
+          </ItemTemplate>
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle Width="30px" />
+        </asp:TemplateField>
       </Columns>
       <EmptyDataTemplate>
         <asp:Label ID="LabelEmpty" runat="server" Font-Size="Small" ForeColor="Red" Text="No record found !!!"></asp:Label>

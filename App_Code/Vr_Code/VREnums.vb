@@ -1,4 +1,22 @@
 ﻿Imports Microsoft.VisualBasic
+Public Enum enumSPExecutionStatus
+  Free = 1
+  UnderSPUpdation = 2
+  SPUpdated = 3
+End Enum
+Public Enum enumSPStatus
+  Free = 1
+  UnderSPRequestCreation = 2
+  SPRequestCreated = 3
+  UnderSPExecutionCreation = 4
+  SPExecutionCreated = 5
+End Enum
+Public Enum enumSPEdiStatus
+  Free = 1
+  SPError = 2
+  SPDone = 3
+
+End Enum
 
 Public Enum RequestStates
 	Cancelled = 1

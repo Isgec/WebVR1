@@ -39,14 +39,14 @@ Namespace SIS.VR
         ElseIf RequestStatus >= RequestStates.Free Then
           If OverDimentionConsignement Then
             If ODCReasonID = String.Empty Then
-              mRet = "<img alt='warning' src='../../images/Error.gif' style='height:14px; width:14px' /><b>Specify Reason for ODC/Under Utilization</b>"
+              mRet = "<img alt='warning' src='../../images/Error.gif' style='height:12px; width:12px' /><i>Specify Reason for ODC/Under Utilization</i>"
             Else
-              mRet = "<img alt='warning' src='../../images/warning.gif' style='height:14px; width:14px' /><b>ODC/Under Utilization Vehicle Request</b"
+              mRet = "<img alt='warning' src='../../images/warning.gif' style='height:12px; width:12px' /><i>ODC/Under Utilization Vehicle Request</i>"
             End If
           ElseIf ODCAtSupplierLoading Then
-            mRet = "<img alt='warning' src='../../images/warn-blink.gif' style='height:14px; width:14px' /><b>ODC/Under Utilization Vehicle Request</b"
+            mRet = "<img alt='warning' src='../../images/warn-blink.gif' style='height:12px; width:12px' /><i>ODC/Under Utilization Vehicle Request</i>"
           ElseIf RequestDescription = "" OrElse SupplierLocation = "" OrElse DeliveryLocation = "" OrElse FromLocation = "" OrElse ToLocation = "" OrElse ItemDescription = "" OrElse VehicleRequiredOn = "" OrElse VehicleTypeID = "" Then
-            mRet = "<img alt='warning' src='../../images/Error.gif' style='height:14px; width:14px' /><b>Incomplete Vehicle Request.</b>"
+            mRet = "<img alt='warning' src='../../images/Error.gif' style='height:12px; width:12px' /><i>Incomplete Vehicle Request.</i>"
           End If
         End If
         Return mRet

@@ -435,8 +435,30 @@ Namespace SIS.VR
         End If
       Next
       SendEMail(Results)
+      Try
+        CloseSPExecution(Results)
+      Catch ex As Exception
+      End Try
       Return Results
     End Function
+    Public Shared Sub CloseSPExecution(Results As SIS.VR.vrRequestExecution)
+      'Update SuperProcure
+      Dim isgE As New SPApi.ISGECExecution
+      With isgE
+        .loadId = Results.SPLoadID
+        .reqId = Results.SPRequestID
+        .memoNumber = Results.SRNNo
+        .transporterCode = Results.TransporterID
+        .placementDate = Results.VehiclePlacedOn
+        .vehicleCode = Results.VehicleTypeID
+        .materialWeight = Results.MaterialWeight
+        '.uom = Results.FK_VR_RequestExecution_WeightUnit.Description
+      End With
+      SPApi.PushISGECExecution(isgE, "")
+      'Update ERP-PO
+      SPApi.POData.UpdateGeneratePO(Results.SPLoadID)
+
+    End Sub
 
     'Cancel Vehicle
     Public Shared Function CancelWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
@@ -2148,6 +2170,24 @@ Namespace SIS.VR
         mRet = ex.Message
       End Try
       Return mRet
+    End Function
+    Public Shared Function vrRequestExecutionGetSPLoadByID(ByVal SPLoadID As String) As SIS.VR.vrRequestExecution
+      Dim Results As SIS.VR.vrRequestExecution = Nothing
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spvr_LG_RequestExecutionSelectBySPLoadID"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadID", SqlDbType.NVarChar, 51, SPLoadID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          If Reader.Read() Then
+            Results = New SIS.VR.vrRequestExecution(Reader)
+          End If
+          Reader.Close()
+        End Using
+      End Using
+      Return Results
     End Function
 
   End Class

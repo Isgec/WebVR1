@@ -86,6 +86,24 @@ Namespace SIS.VR
     Public Property ToPinCode As String = ""
     Public Property SitePersonName As String = ""
     Public Property SitePersonContact As String = ""
+    '======================SP=====================
+    Public Property SPStatus As Integer = 0
+    Public Property SPEdiStatus As Integer = 0
+    Public Property SPEdiMessage As String = ""
+    Public Property SPRequestCreatedOn As String = ""
+    Public Property SPRequestCreatedBy As String = ""
+    Public Property SPExecutionCreatedOn As String = ""
+    Public Property SPExecutionCreatedBy As String = ""
+    Public Property SPOrderCreatedOn As String = ""
+    Public Property SPOrderCreatedBy As String = ""
+    Public Property SPRequestID As String = ""
+    Public Property SPLoadData As String = ""
+    '==============================================
+    Public ReadOnly Property SPStatusName As String
+      Get
+        Return System.Enum.GetName(GetType(enumSPStatus), SPStatus)
+      End Get
+    End Property
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -1086,6 +1104,8 @@ Namespace SIS.VR
         .ToPinCode = Record.ToPinCode
         .SitePersonContact = Record.SitePersonContact
         .SitePersonName = Record.SitePersonName
+        .SPStatus = enumSPStatus.Free
+        .SPEdiStatus = enumSPEdiStatus.Free
       End With
       Return SIS.VR.vrVehicleRequest.InsertData(_Rec)
     End Function
@@ -1148,6 +1168,17 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ToPinCode", SqlDbType.NVarChar, 11, IIf(Record.ToPinCode = "", Convert.DBNull, Record.ToPinCode))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonName", SqlDbType.NVarChar, 51, IIf(Record.SitePersonName = "", Convert.DBNull, Record.SitePersonName))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonContact", SqlDbType.NVarChar, 51, IIf(Record.SitePersonContact = "", Convert.DBNull, Record.SitePersonContact))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPStatus", SqlDbType.Int, 11, Record.SPStatus)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPEdiStatus", SqlDbType.Int, 11, Record.SPEdiStatus)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPEdiMessage", SqlDbType.NVarChar, 1001, IIf(Record.SPEdiMessage = "", Convert.DBNull, Record.SPEdiMessage))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestCreatedOn", SqlDbType.NVarChar, 21, IIf(Record.SPRequestCreatedOn = "", Convert.DBNull, Record.SPRequestCreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPRequestCreatedBy = "", Convert.DBNull, Record.SPRequestCreatedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPExecutionCreatedOn", SqlDbType.NVarChar, 21, IIf(Record.SPExecutionCreatedOn = "", Convert.DBNull, Record.SPExecutionCreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPExecutionCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPExecutionCreatedBy = "", Convert.DBNull, Record.SPExecutionCreatedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPOrderCreatedOn", SqlDbType.NVarChar, 21, IIf(Record.SPOrderCreatedOn = "", Convert.DBNull, Record.SPOrderCreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPOrderCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPOrderCreatedBy = "", Convert.DBNull, Record.SPOrderCreatedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestID", SqlDbType.NVarChar, 51, IIf(Record.SPRequestID = "", Convert.DBNull, Record.SPRequestID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadData", SqlDbType.NVarChar, Integer.MaxValue, IIf(Record.SPLoadData = "", Convert.DBNull, Record.SPLoadData))
           Cmd.Parameters.Add("@Return_RequestNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestNo").Direction = ParameterDirection.Output
           Con.Open()
@@ -1273,6 +1304,17 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ToPinCode", SqlDbType.NVarChar, 11, IIf(Record.ToPinCode = "", Convert.DBNull, Record.ToPinCode))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonName", SqlDbType.NVarChar, 51, IIf(Record.SitePersonName = "", Convert.DBNull, Record.SitePersonName))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePersonContact", SqlDbType.NVarChar, 51, IIf(Record.SitePersonContact = "", Convert.DBNull, Record.SitePersonContact))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPStatus", SqlDbType.Int, 11, Record.SPStatus)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPEdiStatus", SqlDbType.Int, 11, Record.SPEdiStatus)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPEdiMessage", SqlDbType.NVarChar, 1001, IIf(Record.SPEdiMessage = "", Convert.DBNull, Record.SPEdiMessage))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestCreatedOn", SqlDbType.NVarChar, 21, IIf(Record.SPRequestCreatedOn = "", Convert.DBNull, Record.SPRequestCreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPRequestCreatedBy = "", Convert.DBNull, Record.SPRequestCreatedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPExecutionCreatedOn", SqlDbType.NVarChar, 21, IIf(Record.SPExecutionCreatedOn = "", Convert.DBNull, Record.SPExecutionCreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPExecutionCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPExecutionCreatedBy = "", Convert.DBNull, Record.SPExecutionCreatedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPOrderCreatedOn", SqlDbType.NVarChar, 21, IIf(Record.SPOrderCreatedOn = "", Convert.DBNull, Record.SPOrderCreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPOrderCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPOrderCreatedBy = "", Convert.DBNull, Record.SPOrderCreatedBy))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestID", SqlDbType.NVarChar, 51, IIf(Record.SPRequestID = "", Convert.DBNull, Record.SPRequestID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadData", SqlDbType.NVarChar, Integer.MaxValue, IIf(Record.SPLoadData = "", Convert.DBNull, Record.SPLoadData))
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
