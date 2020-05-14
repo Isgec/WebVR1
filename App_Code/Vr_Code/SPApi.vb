@@ -127,6 +127,7 @@ Public Class SPApi
     Dim Uri As Uri = New Uri(url)
     Dim xWebRequest As HttpWebRequest = WebRequest.Create(Uri)
     With xWebRequest
+      .Proxy = New WebProxy("192.9.200.20:3128")
       .Method = method
       .ContentType = "application/json"
       .Accept = "*/*"

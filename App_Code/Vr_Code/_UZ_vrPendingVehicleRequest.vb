@@ -154,7 +154,7 @@ Namespace SIS.VR
       With Results
         '.SPStatus = enumSPStatus.UnderSPExecutionCreation
         .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
-        .SPExecutionCreatedOn = Now
+        .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
         .SPEdiStatus = enumSPEdiStatus.Free
         .SPEdiMessage = ""
       End With
@@ -167,7 +167,7 @@ Namespace SIS.VR
           .SPEdiStatus = enumSPEdiStatus.SPError
           .SPEdiMessage = tmp.Message
           .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
-          .SPExecutionCreatedOn = Now
+          .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
       Else
@@ -176,7 +176,7 @@ Namespace SIS.VR
           .SPEdiStatus = enumSPEdiStatus.SPDone
           .SPEdiMessage = ""
           .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
-          .SPExecutionCreatedOn = Now
+          .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
           .SPLoadData = SPLoadData
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
@@ -212,7 +212,7 @@ Namespace SIS.VR
             .Remarks = "System created"
             '===============================
             .ArrangedBy = Global.System.Web.HttpContext.Current.Session("LoginID")
-            .ArrangedOn = Now
+            .ArrangedOn = Now.ToString("dd/MM/yyyy HH:mm")
             .RequestStatusID = 4
             '====================
             .RequestNo = Results.RequestNo
@@ -243,7 +243,7 @@ Namespace SIS.VR
       With Results
         '.SPStatus = enumSPStatus.UnderSPRequestCreation
         .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
-        .SPRequestCreatedOn = Now
+        .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
         .SPEdiStatus = enumSPEdiStatus.Free
         .SPEdiMessage = ""
       End With
@@ -260,7 +260,7 @@ Namespace SIS.VR
           .SPEdiStatus = enumSPEdiStatus.SPError
           .SPEdiMessage = tmp.Message
           .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
-          .SPRequestCreatedOn = Now
+          .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
       Else
@@ -268,10 +268,10 @@ Namespace SIS.VR
           .SPStatus = enumSPStatus.SPRequestCreated
           .SPEdiStatus = enumSPEdiStatus.SPDone
           .SPEdiMessage = ""
-          .SPRequestCreatedOn = Now
+          .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
           .SPRequestID = tmp.ReqId
           .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
-          .SPRequestCreatedOn = Now
+          .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
       End If
