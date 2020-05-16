@@ -326,7 +326,7 @@
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="SP Status">
                       <ItemTemplate>
-                        <asp:Label ID="L_spstatus" runat="server" ToolTip="SP Request Status" Text='<%# Eval("SpStatusName") %>' />
+                        <asp:Button ID="L_spstatus" runat="server" ToolTip="Click to change Cities" BorderStyle="None" BackColor="Transparent" style="cursor:pointer;" Font-Underline="true" Text='<%# Eval("SpStatusName") %>' CommandName="Cities" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle Width="30px" />
@@ -420,4 +420,58 @@
       </asp:UpdatePanel>
     </div>
   </div>
+
+  <asp:UpdatePanel runat="server">
+    <ContentTemplate>
+  <asp:Panel ID="pnl1" runat="server" Style="background-color:white;display: none;height:226px;border-radius:5px;" Width='400px'   >
+    <asp:Panel ID="pnlHeader" runat="server" style="width:100%;height:33px;padding-top:8px;text-align:center;border-bottom:1pt solid lightgray;" >
+      <asp:Label ID="HeaderText" runat="server" Font-Size="16px" Font-Bold="true" Text='My Modal Text'></asp:Label>
+    </asp:Panel>
+    <asp:Panel ID="modalContent" runat="server" style="width:100%;height:136px;padding:4px;">
+      <div style="display:flex;flex-direction:column;">
+        <div style="flex-direction:row;padding-top:10px;">
+          <div>
+            <asp:Label ID="L_FromCity" runat="server" Text="From City:" Font-Bold="true" Width="392px"></asp:Label>
+
+          </div>
+          <div>
+            <asp:TextBox ID="F_FromCity" runat="server" Width="386px" onfocus="this.select();"></asp:TextBox>
+          </div>
+        </div>
+        <div style="flex-direction:row;padding-top:20px;">
+          <div>
+            <asp:Label ID="L_ToCity" runat="server" Text="To City:" Font-Bold="true" Width="392px"></asp:Label>
+
+          </div>
+          <div>
+            <asp:TextBox ID="F_ToCity" runat="server" Width="386px" onfocus="this.select();"></asp:TextBox>
+
+          </div>
+        </div>
+      </div>
+    </asp:Panel>
+    <asp:Panel ID="pnlFooter" runat="server" style="width:100%;height:33px;padding-top:8px;text-align:right;border-top:1pt solid lightgray;">
+      <asp:Label ID="L_PrimaryKey" runat="server" style="display:none;"></asp:Label>
+      <asp:Button ID="cmdOK" runat="server" Width="70px" Text="OK" style="text-align:center;margin-right:30px;" />
+      <asp:Button ID="cmdCancel" runat="server" Width="70px" Text="Cancle" style="text-align:center;margin-right:30px;" />
+    </asp:Panel>
+  </asp:Panel>
+<asp:Button ID="dummy" runat="server" style="display:none;" Text="show"></asp:Button>
+<AJX:ModalPopupExtender 
+  ID="mPopup" 
+  BehaviorID="myMPE1"
+  TargetControlID="dummy" 
+  BackgroundCssClass="modalBackground" 
+  CancelControlID="cmdCancel" 
+  OkControlID="cmdCancel" 
+  PopupControlID="pnl1" 
+  PopupDragHandleControlID="pnlHeader" 
+  DropShadow="true"
+  runat="server">
+</AJX:ModalPopupExtender>
+    </ContentTemplate>
+  <Triggers>
+    <asp:AsyncPostBackTrigger ControlID="cmdOK" EventName="Click" />
+  </Triggers>
+  </asp:UpdatePanel>
 </asp:Content>

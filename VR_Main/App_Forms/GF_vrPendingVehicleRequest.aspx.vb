@@ -9,6 +9,8 @@ Partial Class GF_vrPendingVehicleRequest
       ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", String.Format("alert({0});", New JavaScriptSerializer().Serialize(ex.Message)), True)
     End Try
   End Sub
+  Private SerialNo As Integer = 0
+  Private ShowPopup As Boolean = False
 
   Protected Sub GVvrPendingVehicleRequest_RowCommand(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCommandEventArgs) Handles GVvrPendingVehicleRequest.RowCommand
     If e.CommandName.ToLower = "lgedit".ToLower Then
@@ -25,6 +27,23 @@ Partial Class GF_vrPendingVehicleRequest
         SIS.VR.vrPendingVehicleRequest.InitiateWF(RequestNo)
         GVvrPendingVehicleRequest.DataBind()
       Catch ex As Exception
+      End Try
+    End If
+    If e.CommandName.ToLower = "Cities".ToLower Then
+      Try
+        Dim RequestNo As Int32 = GVvrPendingVehicleRequest.DataKeys(e.CommandArgument).Values("RequestNo")
+        Dim Results As SIS.VR.vrVehicleRequest = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(RequestNo)
+        If Results.SPStatus = enumSPStatus.Free Then
+          L_PrimaryKey.Text = RequestNo
+          HeaderText.Text = "Vehicle Request No: " & RequestNo
+          F_FromCity.Text = Results.FromLocation
+          F_ToCity.Text = Results.ToLocation
+          mPopup.Show()
+        Else
+          ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", String.Format("alert({0});", New JavaScriptSerializer().Serialize("Data sent to super procure, cannot change city.")), True)
+        End If
+      Catch ex As Exception
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", String.Format("alert({0});", New JavaScriptSerializer().Serialize(ex.Message)), True)
       End Try
     End If
     If e.CommandName.ToLower = "sprequest".ToLower Then
@@ -62,6 +81,17 @@ Partial Class GF_vrPendingVehicleRequest
         GVvrPendingVehicleRequest.DataBind()
       Catch ex As Exception
       End Try
+    End If
+  End Sub
+  Private Sub cmdOK_Click(sender As Object, e As EventArgs) Handles cmdOK.Click
+    Dim RequestNo As String = L_PrimaryKey.Text
+    If F_FromCity.Text <> "" AndAlso F_ToCity.Text <> "" Then
+      Dim Results As SIS.VR.vrVehicleRequest = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(RequestNo)
+      With Results
+        .FromLocation = F_FromCity.Text
+        .ToLocation = F_ToCity.Text
+      End With
+      SIS.VR.vrVehicleRequest.UpdateData(Results)
     End If
   End Sub
   Protected Sub GVvrPendingVehicleRequest_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles GVvrPendingVehicleRequest.Init
