@@ -7,6 +7,22 @@ Imports System.Net.Mail
 Imports System.Web.Mail
 Namespace SIS.VR
   Partial Public Class vrVehicleRequest
+    Public Shared Function SPRequestIDExists(SPRequestID As String) As Boolean
+      Dim mRet As Boolean = False
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "Select isnull(count(*),0) as cnt from vr_vehicleRequest where sprequestid='" & SPRequestID & "'"
+          Con.Open()
+          Dim cnt As Integer = Cmd.ExecuteScalar
+          If cnt > 0 Then
+            mRet = True
+          End If
+        End Using
+      End Using
+      Return mRet
+    End Function
+
     Public Function GetColor() As System.Drawing.Color
       Dim mRet As System.Drawing.Color = Drawing.Color.Black
       Select Case RequestStatus

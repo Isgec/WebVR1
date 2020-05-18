@@ -933,14 +933,14 @@ Namespace SIS.VR
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function GetByVehicleTypeID(ByVal VehicleTypeID As Int32, ByVal OrderBy as String) As List(Of SIS.VR.vrVehicleRequest)
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function GetByVehicleTypeID(ByVal VehicleTypeID As Int32, ByVal OrderBy As String) As List(Of SIS.VR.vrVehicleRequest)
       Dim Results As List(Of SIS.VR.vrVehicleRequest) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrVehicleRequestSelectByVehicleTypeID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VehicleTypeID",SqlDbType.Int,VehicleTypeID.ToString.Length, VehicleTypeID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VehicleTypeID", SqlDbType.Int, VehicleTypeID.ToString.Length, VehicleTypeID)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
@@ -958,6 +958,7 @@ Namespace SIS.VR
       End Using
       Return Results
     End Function
+
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function GetByRequestStatus(ByVal RequestStatus As Int32, ByVal OrderBy as String) As List(Of SIS.VR.vrVehicleRequest)
       Dim Results As List(Of SIS.VR.vrVehicleRequest) = Nothing

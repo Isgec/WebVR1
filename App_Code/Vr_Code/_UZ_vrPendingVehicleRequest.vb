@@ -264,16 +264,29 @@ Namespace SIS.VR
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
       Else
-        With Results
-          .SPStatus = enumSPStatus.SPRequestCreated
-          .SPEdiStatus = enumSPEdiStatus.SPDone
-          .SPEdiMessage = ""
-          .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
-          .SPRequestID = tmp.ReqId
-          .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
-          .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
-        End With
-        Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
+        If SIS.VR.vrVehicleRequest.SPRequestIDExists(tmp.ReqId) Then
+          With Results
+            .SPStatus = enumSPStatus.Free
+            .SPEdiStatus = enumSPEdiStatus.SPError
+            .SPEdiMessage = "SP Request ID already exists. CANNOT Insert Duplicate Key."
+            .SPRequestID = ""
+            .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
+            .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+            .SPLoadData = jsonStr
+          End With
+          Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
+          Throw New Exception(Results.SPEdiMessage)
+        Else
+          With Results
+            .SPStatus = enumSPStatus.SPRequestCreated
+            .SPEdiStatus = enumSPEdiStatus.SPDone
+            .SPEdiMessage = ""
+            .SPRequestID = tmp.ReqId
+            .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
+            .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+          End With
+          Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
+        End If
       End If
       Return jsonStr
     End Function
