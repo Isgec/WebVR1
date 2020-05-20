@@ -74,7 +74,7 @@ Namespace SIS.VR
       Get
         Dim mRet As Boolean = False
         Try
-          If Me.RequestStatus = RequestStates.UnderExecution And SPStatus = enumSPStatus.Free Then
+          If Me.RequestStatus = RequestStates.UnderExecution And (SPStatus = enumSPStatus.Free Or SPStatus = enumSPStatus.SPRequestCreated) Then
             mRet = True
           End If
         Catch ex As Exception

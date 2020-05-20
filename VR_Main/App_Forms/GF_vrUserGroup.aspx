@@ -1,9 +1,12 @@
 <%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="GF_vrUserGroup.aspx.vb" Inherits="GF_vrUserGroup" title="Maintain List: User Group" %>
 <asp:Content ID="CPHvrUserGroup" ContentPlaceHolderID="cph1" Runat="Server">
-<div id="div1" class="page">
+<div class="ui-widget-content page">
+<div class="caption">
+    <asp:Label ID="LabelvrUserGroup" runat="server" Text="&nbsp;List: User Group"></asp:Label>
+</div>
+<div class="pagedata">
 <asp:UpdatePanel ID="UPNLvrUserGroup" runat="server">
   <ContentTemplate>
-    <asp:Label ID="LabelvrUserGroup" runat="server" Text="&nbsp;List: User Group" Width="100%" CssClass="sis_formheading"></asp:Label>
     <table width="100%"><tr><td class="sis_formview"> 
     <LGM:ToolBar0 
       ID = "TBLvrUserGroup"
@@ -18,7 +21,6 @@
         <span style="color: #ff0033">Loading...</span>
       </ProgressTemplate>
     </asp:UpdateProgress>
-    <br />
 		<asp:Panel ID="pnlH" runat="server" CssClass="cph_filter">
 			<div style="padding: 5px; cursor: pointer; vertical-align: middle;">
 				<div style="float: left;">Filter Records </div>
@@ -110,7 +112,6 @@
     </table>
 		</asp:Panel>
 		<AJX:CollapsiblePanelExtender ID="cpe1" runat="Server" TargetControlID="pnlD" ExpandControlID="pnlH" CollapseControlID="pnlH" Collapsed="True" TextLabelID="lblH" ImageControlID="imgH" ExpandedText="(Hide Filters...)" CollapsedText="(Show Filters...)" ExpandedImage="~/images/ua.png" CollapsedImage="~/images/da.png" SuppressPostBack="true" />
-    <br />
     <script type="text/javascript">
       var pcnt = 0;
       function print_report(o) {
@@ -124,46 +125,53 @@
     </script>
     <asp:GridView ID="GVvrUserGroup" SkinID="gv_silver" BorderColor="#A9A9A9" width="100%" runat="server" AllowPaging="True" AllowSorting="True" AutoGenerateColumns="False" DataSourceID="ODSvrUserGroup" DataKeyNames="SerialNo">
       <Columns>
-        <asp:TemplateField>
+        <asp:TemplateField HeaderText="EDIT">
           <ItemTemplate>
-						<Table><tr>
-              <td><asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' /></td>
-              <td><asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" /></td>
-						</tr></Table>
+             <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
           </ItemTemplate>
-          <HeaderStyle Width="30px" />
+          <HeaderStyle CssClass="alignCenter" Width="30px" />
+          <ItemStyle CssClass="alignCenter" />
+        </asp:TemplateField>
+        <asp:TemplateField HeaderText="PRINT">
+          <ItemTemplate>
+            <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
+          </ItemTemplate>
+          <HeaderStyle CssClass="alignCenter" Width="30px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Serial No" SortExpression="SerialNo">
           <ItemTemplate>
-            <asp:Label ID="LabelSerialNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("SerialNo") %>'></asp:Label>
+            <asp:Label ID="LabelSerialNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("SerialNo") %>'></asp:Label>
           </ItemTemplate>
-          <HeaderStyle CssClass="alignright" />
-          <ItemStyle CssClass="alignright" />
-          <HeaderStyle Width="40px" />
+          <HeaderStyle CssClass="alignCenter" Width="40px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="User ID" SortExpression="aspnet_Users1_UserFullName">
           <ItemTemplate>
              <asp:Label ID="L_UserID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("UserID") %>' Text='<%# Eval("aspnet_Users1_UserFullName") %>'></asp:Label>
           </ItemTemplate>
-          <HeaderStyle Width="100px" />
+          <HeaderStyle Width="300px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Group ID" SortExpression="VR_Groups2_GroupName">
           <ItemTemplate>
              <asp:Label ID="L_GroupID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("GroupID") %>' Text='<%# Eval("VR_Groups2_GroupName") %>'></asp:Label>
           </ItemTemplate>
-          <HeaderStyle Width="100px" />
+          <HeaderStyle CssClass="alignCenter" Width="140px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Role ID" SortExpression="RoleID">
           <ItemTemplate>
             <asp:Label ID="LabelRoleID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("RoleID") %>'></asp:Label>
           </ItemTemplate>
-        <HeaderStyle Width="50px" />
+          <HeaderStyle CssClass="alignCenter" Width="60px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Out Of Contract" SortExpression="OutOfContractApprover">
           <ItemTemplate>
             <asp:Label ID="LabelOutOfContractApprover" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("OutOfContractApprover") %>'></asp:Label>
           </ItemTemplate>
-        <HeaderStyle Width="50px" />
+          <HeaderStyle CssClass="alignCenter" Width="50px" />
+          <ItemStyle CssClass="alignCenter" />
         </asp:TemplateField>
       </Columns>
       <EmptyDataTemplate>
@@ -197,5 +205,6 @@
     <asp:AsyncPostBackTrigger ControlID="F_RoleID" />
   </Triggers>
 </asp:UpdatePanel>
+</div>
 </div>
 </asp:Content>

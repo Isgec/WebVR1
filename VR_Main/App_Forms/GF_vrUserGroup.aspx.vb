@@ -55,16 +55,17 @@ Partial Class GF_vrUserGroup
         F_UserID.Text = Session("F_UserID")
       End If
     End If
-		Dim strScriptUserID As String = "<script type=""text/javascript""> " & _
-			"function ACEUserID_Selected(sender, e) {" & _
-			"  var F_UserID = $get('" & F_UserID.ClientID & "');" & _
-			"  var F_UserID_Display = $get('" & F_UserID_Display.ClientID & "');" & _
-			"  var retval = e.get_value();" & _
-			"  var p = retval.split('|');" & _
-			"  F_UserID_Display.innerHTML = e.get_text();" & _
-			"}" & _
-			"</script>"
-			If Not Page.ClientScript.IsClientScriptBlockRegistered("F_UserID") Then
+    Dim strScriptUserID As String = "<script type=""text/javascript""> " &
+      "function ACEUserID_Selected(sender, e) {" &
+      "  var F_UserID = $get('" & F_UserID.ClientID & "');" &
+      "  var F_UserID_Display = $get('" & F_UserID_Display.ClientID & "');" &
+      "  var retval = e.get_value();" &
+      "  var p = retval.split('|');" &
+      "  F_UserID.value = retval;" &
+      "  F_UserID_Display.innerHTML = e.get_text();" &
+      "}" &
+      "</script>"
+    If Not Page.ClientScript.IsClientScriptBlockRegistered("F_UserID") Then
 				Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "F_UserID", strScriptUserID)
 			End If
 		Dim strScriptPopulatingUserID As String = "<script type=""text/javascript""> " & _
