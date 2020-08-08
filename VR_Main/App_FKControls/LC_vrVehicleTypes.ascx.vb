@@ -9,7 +9,7 @@ Imports System.Web.UI.WebControls
 Imports System.Web.UI.WebControls.WebParts
 Imports System.Web.UI.HtmlControls
 
-<ValidationProperty("SelectedValue")> _
+<ValidationProperty("SelectedValue")>
 Partial Class LC_vrVehicleTypes
   Inherits System.Web.UI.UserControl
   Private _OrderBy As String = String.Empty
@@ -27,11 +27,11 @@ Partial Class LC_vrVehicleTypes
       Return DDLvrVehicleTypes.Attributes.ToString
     End Get
     Set(ByVal value As String)
-			Try
-				Dim aVal() As String = value.Split(",".ToCharArray)
-				DDLvrVehicleTypes.Attributes.Add(aVal(0), aVal(1))
-			Catch ex As Exception
-			End Try
+      Try
+        Dim aVal() As String = value.Split(",".ToCharArray)
+        DDLvrVehicleTypes.Attributes.Add(aVal(0), aVal(1))
+      Catch ex As Exception
+      End Try
     End Set
   End Property
   Public Property CssClass() As String
@@ -98,15 +98,16 @@ Partial Class LC_vrVehicleTypes
       DDLvrVehicleTypes.DataValueField = value
     End Set
   End Property
+  Dim x As String = ""
   Public Property SelectedValue() As String
     Get
       Return DDLvrVehicleTypes.SelectedValue
     End Get
     Set(ByVal value As String)
       If Convert.IsDBNull(value) Then
-        DDLvrVehicleTypes.SelectedValue = String.Empty
+        x = String.Empty
       Else
-        DDLvrVehicleTypes.SelectedValue = value
+        x = value
       End If
     End Set
   End Property
@@ -147,10 +148,18 @@ Partial Class LC_vrVehicleTypes
   End Sub
   Protected Sub DDLvrVehicleTypes_DataBinding(ByVal sender As Object, ByVal e As System.EventArgs) Handles DDLvrVehicleTypes.DataBinding
     If _IncludeDefault Then
-      DDLvrVehicleTypes.Items.Add(new ListItem(_DefaultText, _DefaultValue))
+      DDLvrVehicleTypes.Items.Add(New ListItem(_DefaultText, _DefaultValue))
     End If
   End Sub
   Protected Sub DDLvrVehicleTypes_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DDLvrVehicleTypes.SelectedIndexChanged
     RaiseEvent SelectedIndexChanged(sender, e)
+  End Sub
+  Protected Sub DDLvrVehicleTypes_DataBound(sender As Object, e As EventArgs)
+    If DDLvrVehicleTypes.Items.FindByValue(x) IsNot Nothing Then
+      DDLvrVehicleTypes.SelectedValue = x
+    Else
+      DDLvrVehicleTypes.SelectedValue = ""
+    End If
+
   End Sub
 End Class

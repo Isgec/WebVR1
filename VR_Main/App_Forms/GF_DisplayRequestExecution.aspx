@@ -17,37 +17,37 @@
       </ProgressTemplate>
     </asp:UpdateProgress>
     <br />
-		<asp:Panel ID="pnlH" runat="server" CssClass="cph_filter">
-			<div style="padding: 5px; cursor: pointer; vertical-align: middle;">
-				<div style="float: left;">Filter Records </div>
-				<div style="float: left; margin-left: 20px;">
-					<asp:Label ID="lblH" runat="server">(Show Filters...)</asp:Label>
-				</div>
-				<div style="float: right; vertical-align: middle;">
-					<asp:ImageButton ID="imgH" runat="server" ImageUrl="~/images/ua.png" AlternateText="(Show Filters...)" />
-				</div>
-			</div>
-		</asp:Panel>
-		<asp:Panel ID="pnlD" runat="server" CssClass="cp_filter" Height="0">
+    <asp:Panel ID="pnlH" runat="server" CssClass="cph_filter">
+      <div style="padding: 5px; cursor: pointer; vertical-align: middle;">
+        <div style="float: left;">Filter Records </div>
+        <div style="float: left; margin-left: 20px;">
+          <asp:Label ID="lblH" runat="server">(Show Filters...)</asp:Label>
+        </div>
+        <div style="float: right; vertical-align: middle;">
+          <asp:ImageButton ID="imgH" runat="server" ImageUrl="~/images/ua.png" AlternateText="(Show Filters...)" />
+        </div>
+      </div>
+    </asp:Panel>
+    <asp:Panel ID="pnlD" runat="server" CssClass="cp_filter" Height="0">
     <table>
-			<tr>
-				<td class="alignright">
-					<b><asp:Label ID="L_TransporterID" runat="server" Text="Transporter :" /></b>
-				</td>
+      <tr>
+        <td class="alignright">
+          <b><asp:Label ID="L_TransporterID" runat="server" Text="Transporter :" /></b>
+        </td>
         <td>
-					<asp:TextBox
-						ID = "F_TransporterID"
-						CssClass = "myfktxt"
+          <asp:TextBox
+            ID = "F_TransporterID"
+            CssClass = "myfktxt"
             Width="63px"
-						Text=""
-						onfocus = "return this.select();"
-						AutoCompleteType = "None"
+            Text=""
+            onfocus = "return this.select();"
+            AutoCompleteType = "None"
             onblur= "validate_TransporterID(this);"
-						Runat="Server" />
-					<asp:Label
-						ID = "F_TransporterID_Display"
-						Text=""
-						Runat="Server" />
+            Runat="Server" />
+          <asp:Label
+            ID = "F_TransporterID_Display"
+            Text=""
+            Runat="Server" />
           <AJX:AutoCompleteExtender
             ID="ACETransporterID"
             BehaviorID="B_ACETransporterID"
@@ -62,16 +62,16 @@
             OnClientPopulating="ACETransporterID_Populating"
             OnClientPopulated="ACETransporterID_Populated"
             CompletionSetCount="10"
-						CompletionListCssClass = "autocomplete_completionListElement"
-						CompletionListItemCssClass = "autocomplete_listItem"
-						CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
+            CompletionListCssClass = "autocomplete_completionListElement"
+            CompletionListItemCssClass = "autocomplete_listItem"
+            CompletionListHighlightedItemCssClass = "autocomplete_highlightedListItem"
             Runat="Server" />
         </td>
-			</tr>
-			<tr>
-				<td class="alignright">
-					<b><asp:Label ID="L_VehicleTypeID" runat="server" Text="Vehicle Type :" /></b>
-				</td>
+      </tr>
+      <tr>
+        <td class="alignright">
+          <b><asp:Label ID="L_VehicleTypeID" runat="server" Text="Vehicle Type :" /></b>
+        </td>
         <td>
           <LGM:LC_vrVehicleTypes
             ID="F_VehicleTypeID"
@@ -87,10 +87,10 @@
             CssClass="myddl"
             Runat="Server" />
           </td>
-			</tr>
+      </tr>
     </table>
-		</asp:Panel>
-		<AJX:CollapsiblePanelExtender ID="cpe1" runat="Server" TargetControlID="pnlD" ExpandControlID="pnlH" CollapseControlID="pnlH" Collapsed="True" TextLabelID="lblH" ImageControlID="imgH" ExpandedText="(Hide Filters...)" CollapsedText="(Show Filters...)" ExpandedImage="~/images/ua.png" CollapsedImage="~/images/da.png" SuppressPostBack="true" />
+    </asp:Panel>
+    <AJX:CollapsiblePanelExtender ID="cpe1" runat="Server" TargetControlID="pnlD" ExpandControlID="pnlH" CollapseControlID="pnlH" Collapsed="True" TextLabelID="lblH" ImageControlID="imgH" ExpandedText="(Hide Filters...)" CollapsedText="(Show Filters...)" ExpandedImage="~/images/ua.png" CollapsedImage="~/images/da.png" SuppressPostBack="true" />
     <br />
     <script type="text/javascript">
       var pcnt = 0;
@@ -107,10 +107,10 @@
       <Columns>
         <asp:TemplateField>
           <ItemTemplate>
-						<table><tr>
+            <table><tr>
               <td><asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' /></td>
               <td><asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" /></td>
-						</tr></table>
+            </tr></table>
           </ItemTemplate>
           <HeaderStyle Width="30px" />
         </asp:TemplateField>
@@ -127,7 +127,7 @@
             <asp:Label ID="LabelExecutionDescription" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("ExecutionDescription") %>'></asp:Label>
           </ItemTemplate>
           <ItemStyle VerticalAlign="Top" />
-					<HeaderStyle Width="150" />
+          <HeaderStyle Width="150" />
         </asp:TemplateField>
 --%>        
         <asp:TemplateField HeaderText="TRANSPORTER" SortExpression="VR_Transporters10_TransporterName">
@@ -189,8 +189,8 @@
       <SelectParameters >
         <asp:ControlParameter ControlID="F_TransporterID" PropertyName="Text" Name="TransporterID" Type="String" Size="9" />
         <asp:ControlParameter ControlID="F_VehicleTypeID" PropertyName="SelectedValue" Name="VehicleTypeID" Type="Int32" Size="10" />
-				<asp:Parameter Name="SearchState" Type="Boolean" Direction="Input" DefaultValue="false" />
-				<asp:Parameter Name="SearchText" Type="String" Direction="Input" DefaultValue="" />
+        <asp:Parameter Name="SearchState" Type="Boolean" Direction="Input" DefaultValue="false" />
+        <asp:Parameter Name="SearchText" Type="String" Direction="Input" DefaultValue="" />
       </SelectParameters>
     </asp:ObjectDataSource>
     <br />

@@ -25,7 +25,6 @@ Namespace SIS.VR
     Private _OverDimensionConsignment As String = ""
     Private _DetentionAtSite As String = ""
     Private _ReasonForDetention As String = ""
-    Private _OtherRemarks As String = ""
     Private _VehicleTypeID As String = ""
     Private _VehicleType As String = ""
     Private _VehicleLengthInFt As String = ""
@@ -33,6 +32,7 @@ Namespace SIS.VR
     Private _VehicleHeightInFt As String = ""
     Private _MaterialStateID As String = ""
     Private _RemarksForDamageOrShortage As String = ""
+    Private _OtherRemarks As String = ""
     Private _DriverNameAndContactNo As String = ""
     Private _LRStatusID As Int32 = 0
     Private _aspnet_Users1_UserFullName As String = ""

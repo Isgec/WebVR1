@@ -282,42 +282,41 @@ Namespace SIS.VR
       'Checking of Estimated Amount Entered or NOT is Mandatory is pending
       '===========Commented====================
       If Convert.ToBoolean(ConfigurationManager.AppSettings("CheckSanction")) Then
-        If Not Results.SanctionExceededApproved Then
-          If Not Results.SanctionExceeded Then
-            'Check Sanction First
-            Dim SanctionExceeded As Boolean = False
-            Results = SIS.VR.vrRequestExecution.ValidateSanction(SRNNo, "")
-            SIS.VR.vrRequestExecution.UpdateData(Results)
-            If Results.SanctionBalance < 0 Then
-              SanctionExceeded = True
-            Else
-              For Each le As SIS.VR.vrRequestExecution In oLEs
-                le = SIS.VR.vrRequestExecution.ValidateSanction(le.SRNNo, "")
-                SIS.VR.vrRequestExecution.UpdateData(le)
-                If le.SanctionBalance < 0 Then
-                  SanctionExceeded = True
-                End If
-              Next
-            End If
-            'If any exceeded found
-            'Assign in all Linked
-            If SanctionExceeded Then
-              Results.SanctionExceeded = True
-              Results.RequestStatusID = 28
-              SIS.VR.vrRequestExecution.UpdateData(Results)
-              For Each le As SIS.VR.vrRequestExecution In oLEs
-                le.SanctionExceeded = True
-                le.RequestStatusID = 28
-                SIS.VR.vrRequestExecution.UpdateData(le)
-              Next
-            End If
-            If SanctionExceeded Then
-              SendEMailSanctionApproval(Results)
-              Return Results
-            End If
+        'If Not Results.SanctionExceededApproved Then
+        '  If Not Results.SanctionExceeded Then
+        'Check Sanction First
+        Dim SanctionExceeded As Boolean = False
+        Results = SIS.VR.vrRequestExecution.ValidateSanction(SRNNo, "")
+        SIS.VR.vrRequestExecution.UpdateData(Results)
+        If Results.SanctionBalance < 0 Then
+          SanctionExceeded = True
+        End If
+        For Each le As SIS.VR.vrRequestExecution In oLEs
+          le = SIS.VR.vrRequestExecution.ValidateSanction(le.SRNNo, "")
+          SIS.VR.vrRequestExecution.UpdateData(le)
+          If le.SanctionBalance < 0 Then
+            SanctionExceeded = True
+          End If
+        Next
+        'If any exceeded found
+        'Assign in all Linked
+        If SanctionExceeded Then
+          Results.SanctionExceeded = True
+          If Not Results.SanctionExceededApproved Then Results.RequestStatusID = 28
+          SIS.VR.vrRequestExecution.UpdateData(Results)
+          For Each le As SIS.VR.vrRequestExecution In oLEs
+            le.SanctionExceeded = True
+            If Not Results.SanctionExceededApproved Then le.RequestStatusID = 28
+            SIS.VR.vrRequestExecution.UpdateData(le)
+          Next
+          If Not Results.SanctionExceededApproved Then
+            SendEMailSanctionApproval(Results)
+            Return Results
           End If
         End If
       End If
+      '  End If
+      'End If
       'Checking Sanction Consumed Percent And Alert
       Dim ProjectID As String = Results.Project.ProjectID
       Dim tmpCon As Decimal = 0
@@ -394,28 +393,9 @@ Namespace SIS.VR
       '' ''End Consumed Alert
       '=====================
       'Main Execution
-      Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
-      If oVRs.Count > 0 Then
-        Dim ODCFound As Boolean = False
-        For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-          If oVR.OverDimentionConsignement Then
-            ODCFound = True
-          End If
-          oVR.RequestStatus = RequestStates.VehicleArranged
-          SIS.VR.vrVehicleRequest.UpdateData(oVR)
-        Next
-        With Results
-          .RequestStatusID = RequestStates.VehicleArranged
-          .ArrangedBy = HttpContext.Current.Session("LoginID")
-          .ArrangedOn = Now
-          .ODCByRequest = ODCFound
-        End With
-        Results = SIS.VR.vrRequestExecution.UpdateData(Results)
-      End If
-      'Linked Executions
-      For Each le As SIS.VR.vrRequestExecution In oLEs
-        If le.SRNNo.ToString = Results.SRNNo Then Continue For
-        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+      If Not Results.SanctionExceeded OrElse Results.SanctionExceededApproved Then
+
+        Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
         If oVRs.Count > 0 Then
           Dim ODCFound As Boolean = False
           For Each oVR As SIS.VR.vrVehicleRequest In oVRs
@@ -425,20 +405,42 @@ Namespace SIS.VR
             oVR.RequestStatus = RequestStates.VehicleArranged
             SIS.VR.vrVehicleRequest.UpdateData(oVR)
           Next
-          With le
+          With Results
             .RequestStatusID = RequestStates.VehicleArranged
             .ArrangedBy = HttpContext.Current.Session("LoginID")
             .ArrangedOn = Now
             .ODCByRequest = ODCFound
           End With
-          le = SIS.VR.vrRequestExecution.UpdateData(le)
+          Results = SIS.VR.vrRequestExecution.UpdateData(Results)
         End If
-      Next
-      SendEMail(Results)
-      Try
-        CloseSPExecution(Results)
-      Catch ex As Exception
-      End Try
+        'Linked Executions
+        For Each le As SIS.VR.vrRequestExecution In oLEs
+          If le.SRNNo.ToString = Results.SRNNo Then Continue For
+          oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+          If oVRs.Count > 0 Then
+            Dim ODCFound As Boolean = False
+            For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+              If oVR.OverDimentionConsignement Then
+                ODCFound = True
+              End If
+              oVR.RequestStatus = RequestStates.VehicleArranged
+              SIS.VR.vrVehicleRequest.UpdateData(oVR)
+            Next
+            With le
+              .RequestStatusID = RequestStates.VehicleArranged
+              .ArrangedBy = HttpContext.Current.Session("LoginID")
+              .ArrangedOn = Now
+              .ODCByRequest = ODCFound
+            End With
+            le = SIS.VR.vrRequestExecution.UpdateData(le)
+          End If
+        Next
+        SendEMail(Results)
+        Try
+          CloseSPExecution(Results)
+        Catch ex As Exception
+        End Try
+      End If
       Return Results
     End Function
     Public Shared Sub CloseSPExecution(Results As SIS.VR.vrRequestExecution)
@@ -2192,3 +2194,168 @@ Namespace SIS.VR
 
   End Class
 End Namespace
+'Public Shared Function InitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
+'  Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+'  Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Results.SRNNo, "")
+'  'Checking of Estimated Amount Entered or NOT is Mandatory is pending
+'  '===========Commented====================
+'  If Convert.ToBoolean(ConfigurationManager.AppSettings("CheckSanction")) Then
+'    If Not Results.SanctionExceededApproved Then
+'      If Not Results.SanctionExceeded Then
+'        'Check Sanction First
+'        Dim SanctionExceeded As Boolean = False
+'        Results = SIS.VR.vrRequestExecution.ValidateSanction(SRNNo, "")
+'        SIS.VR.vrRequestExecution.UpdateData(Results)
+'        If Results.SanctionBalance < 0 Then
+'          SanctionExceeded = True
+'        Else
+'          For Each le As SIS.VR.vrRequestExecution In oLEs
+'            le = SIS.VR.vrRequestExecution.ValidateSanction(le.SRNNo, "")
+'            SIS.VR.vrRequestExecution.UpdateData(le)
+'            If le.SanctionBalance < 0 Then
+'              SanctionExceeded = True
+'            End If
+'          Next
+'        End If
+'        'If any exceeded found
+'        'Assign in all Linked
+'        If SanctionExceeded Then
+'          Results.SanctionExceeded = True
+'          Results.RequestStatusID = 28
+'          SIS.VR.vrRequestExecution.UpdateData(Results)
+'          For Each le As SIS.VR.vrRequestExecution In oLEs
+'            le.SanctionExceeded = True
+'            le.RequestStatusID = 28
+'            SIS.VR.vrRequestExecution.UpdateData(le)
+'          Next
+'        End If
+'        If SanctionExceeded Then
+'          SendEMailSanctionApproval(Results)
+'          Return Results
+'        End If
+'      End If
+'    End If
+'  End If
+'  'Checking Sanction Consumed Percent And Alert
+'  Dim ProjectID As String = Results.Project.ProjectID
+'  Dim tmpCon As Decimal = 0
+'  Try
+'    tmpCon = (Results.EstimatedPOBalance / Results.POValue) * 100
+'  Catch ex As Exception
+'    tmpCon = 100
+'  End Try
+'  Dim oSPC As SIS.VR.vrSanctionAlert = SIS.VR.vrSanctionAlert.vrSanctionAlertGetByID(ProjectID)
+'  If oSPC Is Nothing Then
+'    oSPC = New SIS.VR.vrSanctionAlert
+'    With oSPC
+'      .ProjectID = ProjectID
+'      .EMailIDs = "shatrughan.sharma@isgec.co.in,randhir@isgec.co.in,girish.belwal@isgec.co.in"
+'      SIS.VR.vrSanctionAlert.InsertData(oSPC)
+'    End With
+'  End If
+'  If tmpCon < 60 Then
+'  ElseIf tmpCon >= 60 And tmpCon < 70 Then
+'    If Not oSPC.At60 Then
+'      oSPC.At60 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 70 And tmpCon < 80 Then
+'    If Not oSPC.At70 Then
+'      oSPC.At70 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 80 And tmpCon < 90 Then
+'    If Not oSPC.At80 Then
+'      oSPC.At80 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 90 And tmpCon < 95 Then
+'    If Not oSPC.At90 Then
+'      oSPC.At90 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 95 And tmpCon < 96 Then
+'    If Not oSPC.At95 Then
+'      oSPC.At95 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 96 And tmpCon < 97 Then
+'    If Not oSPC.At96 Then
+'      oSPC.At96 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 97 And tmpCon < 98 Then
+'    If Not oSPC.At97 Then
+'      oSPC.At97 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 98 And tmpCon < 99 Then
+'    If Not oSPC.At98 Then
+'      oSPC.At98 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  ElseIf tmpCon >= 99 And tmpCon <= 100 Then
+'    If Not oSPC.At99 Then
+'      oSPC.At99 = True
+'      SIS.VR.vrSanctionAlert.UpdateData(oSPC)
+'      SendEMailSanctionConsumption(Results, tmpCon)
+'    End If
+'  End If
+'  '' ''End Consumed Alert
+'  '=====================
+'  'Main Execution
+'  Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
+'  If oVRs.Count > 0 Then
+'    Dim ODCFound As Boolean = False
+'    For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+'      If oVR.OverDimentionConsignement Then
+'        ODCFound = True
+'      End If
+'      oVR.RequestStatus = RequestStates.VehicleArranged
+'      SIS.VR.vrVehicleRequest.UpdateData(oVR)
+'    Next
+'    With Results
+'      .RequestStatusID = RequestStates.VehicleArranged
+'      .ArrangedBy = HttpContext.Current.Session("LoginID")
+'      .ArrangedOn = Now
+'      .ODCByRequest = ODCFound
+'    End With
+'    Results = SIS.VR.vrRequestExecution.UpdateData(Results)
+'  End If
+'  'Linked Executions
+'  For Each le As SIS.VR.vrRequestExecution In oLEs
+'    If le.SRNNo.ToString = Results.SRNNo Then Continue For
+'    oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+'    If oVRs.Count > 0 Then
+'      Dim ODCFound As Boolean = False
+'      For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+'        If oVR.OverDimentionConsignement Then
+'          ODCFound = True
+'        End If
+'        oVR.RequestStatus = RequestStates.VehicleArranged
+'        SIS.VR.vrVehicleRequest.UpdateData(oVR)
+'      Next
+'      With le
+'        .RequestStatusID = RequestStates.VehicleArranged
+'        .ArrangedBy = HttpContext.Current.Session("LoginID")
+'        .ArrangedOn = Now
+'        .ODCByRequest = ODCFound
+'      End With
+'      le = SIS.VR.vrRequestExecution.UpdateData(le)
+'    End If
+'  Next
+'  SendEMail(Results)
+'  Try
+'    CloseSPExecution(Results)
+'  Catch ex As Exception
+'  End Try
+'  Return Results
+'End Function

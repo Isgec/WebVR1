@@ -15,17 +15,28 @@ Partial Class GF_vrVehicleRequest
 			Try
 				Dim RequestNo As Int32 = GVvrVehicleRequest.DataKeys(e.CommandArgument).Values("RequestNo")
 				Dim oVR As SIS.VR.vrVehicleRequest = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(RequestNo)
-				With oVR
-					.RequestNo = 0
-					.RequestedBy = HttpContext.Current.Session("LoginID")
-					.RequestedOn = Now
-					.RequestStatus = RequestStates.Free
-					.ReturnedBy = ""
-					.ReturnedOn = ""
-					.ReturnRemarks = ""
-					.SRNNo = ""
-					.VehicleRequiredOn = ""
-				End With
+        With oVR
+          .RequestNo = 0
+          .RequestedBy = HttpContext.Current.Session("LoginID")
+          .RequestedOn = Now
+          .RequestStatus = RequestStates.Free
+          .ReturnedBy = ""
+          .ReturnedOn = ""
+          .ReturnRemarks = ""
+          .SRNNo = ""
+          .VehicleRequiredOn = ""
+          .SPEdiMessage = ""
+          .SPEdiStatus = 1
+          .SPExecutionCreatedBy = ""
+          .SPExecutionCreatedOn = ""
+          .SPLoadData = ""
+          .SPOrderCreatedBy = ""
+          .SPOrderCreatedOn = ""
+          .SPRequestCreatedBy = ""
+          .SPRequestCreatedOn = ""
+          .SPRequestID = ""
+          .SPStatus = 1
+        End With
         oVR = SIS.VR.vrVehicleRequest.InsertData(oVR)
         Try
           SIS.VR.vrVehicleRequest.CreateItemReference(oVR)

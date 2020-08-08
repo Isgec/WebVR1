@@ -165,14 +165,14 @@ Partial Class EF_vrRequestExecution
 	End Function
 	Protected Sub ODSvrRequestExecution_Selected(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.ObjectDataSourceStatusEventArgs) Handles ODSvrRequestExecution.Selected
 		Dim oVR As SIS.VR.vrRequestExecution = DirectCast(e.ReturnValue, SIS.VR.vrRequestExecution)
-		If oVR.RequestStatusID >= RequestStates.RequestLinked And oVR.RequestStatusID <> 27 Then
-			With TBLvrRequestExecution
-				.EnableSave = False
-				.EnableDelete = False
-			End With
-			Me.RequestStatusID = oVR.RequestStatusID
-		End If
-	End Sub
+    If oVR.RequestStatusID >= RequestStates.RequestLinked And oVR.RequestStatusID <> 27 Then
+      With TBLvrRequestExecution
+        .EnableSave = False
+        .EnableDelete = False
+      End With
+      Me.RequestStatusID = oVR.RequestStatusID
+    End If
+  End Sub
 	Public Property RequestStatusID() As Integer
 		Get
       If ViewState("RequestStatusID") IsNot Nothing Then

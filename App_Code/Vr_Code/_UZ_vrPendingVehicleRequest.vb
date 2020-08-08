@@ -75,7 +75,13 @@ Namespace SIS.VR
         Dim mRet As Boolean = False
         Try
           If Me.RequestStatus = RequestStates.UnderExecution And (SPStatus = enumSPStatus.Free Or SPStatus = enumSPStatus.SPRequestCreated) Then
+            'If Me.RequestStatus = RequestStates.UnderExecution And (SPStatus = enumSPStatus.Free) Then
             mRet = True
+            'Else
+            '  Dim Login As String = HttpContext.Current.Session("LoginID")
+            '  If Login = "0340" Or Login = "9866" Then
+            '    mRet = True
+            '  End If
           End If
         Catch ex As Exception
         End Try
@@ -237,7 +243,6 @@ Namespace SIS.VR
       End If
       Return SPLoadData
     End Function
-
     Public Shared Function CreateSPRequest(RequestNo As Int32) As String
       Dim Results As SIS.VR.vrPendingVehicleRequest = vrPendingVehicleRequestGetByID(RequestNo)
       With Results
@@ -277,15 +282,29 @@ Namespace SIS.VR
           Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
           Throw New Exception(Results.SPEdiMessage)
         Else
-          With Results
-            .SPStatus = enumSPStatus.SPRequestCreated
-            .SPEdiStatus = enumSPEdiStatus.SPDone
-            .SPEdiMessage = ""
-            .SPRequestID = tmp.ReqId
-            .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
-            .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
-          End With
-          Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
+          If Convert.ToInt32(tmp.RFQ) <> Results.RequestNo Then
+            With Results
+              .SPStatus = enumSPStatus.Free
+              .SPEdiStatus = enumSPEdiStatus.SPError
+              .SPEdiMessage = "Wrong RFQ No returned from SP RequestNo:" & Results.RequestNo & ", Returned RFQ:" & tmp.RFQ
+              .SPRequestID = ""
+              .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
+              .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+              .SPLoadData = jsonStr
+            End With
+            Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
+            Throw New Exception(Results.SPEdiMessage)
+          Else
+            With Results
+              .SPStatus = enumSPStatus.SPRequestCreated
+              .SPEdiStatus = enumSPEdiStatus.SPDone
+              .SPEdiMessage = ""
+              .SPRequestID = tmp.ReqId
+              .SPRequestCreatedBy = HttpContext.Current.Session("LoginID")
+              .SPRequestCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+            End With
+            Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
+          End If
         End If
       End If
       Return jsonStr
@@ -374,29 +393,43 @@ Namespace SIS.VR
       End If
       Return mRet
     End Function
-
     Public Shared Function RejectWF(ByVal RequestNo As Int32, ByVal ReturnRemarks As String) As SIS.VR.vrPendingVehicleRequest
       Dim Results As SIS.VR.vrPendingVehicleRequest = vrPendingVehicleRequestGetByID(RequestNo)
-      With Results
-        .RequestStatus = RequestStates.Returned
-        .ReturnRemarks = ReturnRemarks
-        .ReturnedBy = HttpContext.Current.Session("LoginID")
-        .ReturnedOn = Now
-        'To Delete
-        'If .SRNNo <> String.Empty Then
-        '  Dim oRE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.UZ_vrRequestExecutionGetByID(.SRNNo)
-        '  With oRE
-        '    .RequestStatusID = RequestStates.UnderExecution
-        '    .ArrangedBy = HttpContext.Current.Session("LoginID")
-        '    .ArrangedOn = Now
-        '  End With
-        '  SIS.VR.vrRequestExecution.UpdateData(oRE)
-        '  .SRNNo = ""
-        'End If
-        'End to delete
-      End With
+      Dim mayReturn As Boolean = True
+      If Results.SPRequestID <> "" Then
+        mayReturn = False
+        Dim tmp As SPApi.SPResponse = SPApi.CancelSPRequest(Results.SPRequestID, ReturnRemarks)
+        If tmp.IsError Then
+          With Results
+            .SPEdiStatus = enumSPEdiStatus.SPError
+            .SPEdiMessage = tmp.Message
+          End With
+          Throw New Exception(tmp.Message)
+        Else
+          mayReturn = True
+          With Results
+            .SPStatus = enumSPStatus.Free
+            .SPEdiStatus = enumSPEdiStatus.Free
+            .SPEdiMessage = "Cancelled in Superprocure:" & .SPRequestID
+            .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
+            .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+            .SPRequestID = ""
+            .SPLoadData = ""
+          End With
+        End If
+      End If
+      If mayReturn Then
+        With Results
+          .RequestStatus = RequestStates.Returned
+          .ReturnRemarks = ReturnRemarks
+          .ReturnedBy = HttpContext.Current.Session("LoginID")
+          .ReturnedOn = Now
+        End With
+      End If
       Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
-      SendEMail(Results)
+      If mayReturn Then
+        SendEMail(Results)
+      End If
       Return Results
     End Function
     Public Shared Function UZ_vrPendingVehicleRequestSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal SupplierID As String, ByVal ProjectID As String, ByVal RequestedBy As String) As List(Of SIS.VR.vrPendingVehicleRequest)

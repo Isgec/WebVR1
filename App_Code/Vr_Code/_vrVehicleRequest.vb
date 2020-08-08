@@ -1246,11 +1246,14 @@ Namespace SIS.VR
       Return SIS.VR.vrVehicleRequest.UpdateData(_Rec)
     End Function
     Public Shared Function UpdateData(ByVal Record As SIS.VR.vrVehicleRequest) As SIS.VR.vrVehicleRequest
+      '===================================================================================
+      'If new fields are added, Initialize them in Request Creation by Copying old request
+      '===================================================================================
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrVehicleRequestUpdate"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_RequestNo",SqlDbType.Int,11, Record.RequestNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_RequestNo", SqlDbType.Int, 11, Record.RequestNo)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestDescription", SqlDbType.NVarChar, 51, IIf(Record.RequestDescription = "", Convert.DBNull, Record.RequestDescription))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SupplierID", SqlDbType.NVarChar, 9, IIf(Record.SupplierID = "", Convert.DBNull, Record.SupplierID))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SupplierLocation", SqlDbType.NVarChar, 251, IIf(Record.SupplierLocation = "", Convert.DBNull, Record.SupplierLocation))

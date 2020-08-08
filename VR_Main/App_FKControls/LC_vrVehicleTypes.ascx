@@ -1,5 +1,4 @@
 <%@ Control Language="VB" AutoEventWireup="false" CodeFile="LC_vrVehicleTypes.ascx.vb" Inherits="LC_vrVehicleTypes" %>
-<tt>
 <asp:DropDownList 
   ID = "DDLvrVehicleTypes"
   DataSourceID = "OdsDdlvrVehicleTypes"
@@ -8,7 +7,8 @@
   Width="400px"
   CssClass = "myddl"
   Font-Names="Courier"
-  Runat="server" /></tt>
+  OnDataBound="DDLvrVehicleTypes_DataBound"
+  Runat="server" />
 <asp:RequiredFieldValidator 
   ID = "RequiredFieldValidatorvrVehicleTypes"
   Runat = "server" 

@@ -61,6 +61,35 @@ Public Class SPApi
     Return xResponse
   End Function
 
+  Public Shared Function CancelSPRequest(SPRequestID As String, Remarks As String) As SPApi.SPResponse
+    Dim url As String = ""
+    If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
+      url = "https://app.superprocure.com/sp/requisition/cancelRequisition"
+    Else
+      url = "https://demo.superprocure.com/sp/requisition/cancelRequisition"
+    End If
+    Dim xResponse As SPApi.SPResponse = Nothing
+    Dim xWebRequest As HttpWebRequest = GetWebRequest(url, "POST")
+    Dim jsonStr As String = New JavaScriptSerializer().Serialize(New With {
+         .reqId = SPRequestID,
+         .notes = Remarks
+     })
+    Dim jsonByte() As Byte = System.Text.Encoding.ASCII.GetBytes(jsonStr)
+    xWebRequest.ContentLength = jsonByte.Count
+    xWebRequest.GetRequestStream().Write(jsonByte, 0, jsonByte.Count)
+    Try
+      Dim rs As WebResponse = xWebRequest.GetResponse()
+      Dim st As IO.Stream = rs.GetResponseStream
+      Dim sr As IO.StreamReader = New IO.StreamReader(st)
+      Dim strResponse As String = sr.ReadToEnd
+      sr.Close()
+      jsonStr = strResponse
+      xResponse = New JavaScriptSerializer().Deserialize(strResponse, GetType(SPApi.SPResponse))
+    Catch ex As Exception
+      Throw New Exception(ex.Message)
+    End Try
+    Return xResponse
+  End Function
 
   Public Shared Function GetSPExecution(SPRequestID As String, ByRef jsonStr As String) As SPApi.SPExecution
     Dim url As String = ""
@@ -127,18 +156,18 @@ Public Class SPApi
     Dim Uri As Uri = New Uri(url)
     Dim xWebRequest As HttpWebRequest = WebRequest.Create(Uri)
     With xWebRequest
-      .Proxy = New WebProxy("192.9.200.20:3128")
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("UseProxy")) Then
+        .Proxy = New WebProxy(Convert.ToString(ConfigurationManager.AppSettings("Proxy")))
+      End If
       .Method = method
       .ContentType = "application/json"
       .Accept = "*/*"
       .CachePolicy = New Cache.RequestCachePolicy(Net.Cache.RequestCacheLevel.NoCacheNoStore)
-      '.Headers.Add("mode", "no-cors")
       .Headers.Add("ContentType", "application/json")
       If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
         .Headers.Add("Authorization", "Basic ODczNjo4NmUwY2M3NTE2MjhhN2NjMTFmNDNlMDJhNjQ4ODRjZQ==")
-        '.Headers.Add("Authorization", "Basic ODc0Mjo4MzE0NmIzNWNiYzhjZjRiZTRlYmM4NmE2NmZjNDkzMg==")
       Else
-        .Headers.Add("Authorization", "Basic MjIyNTphYTJiNzNhNGEyY2U3YmVmOWIzMjU0OTdmNzQzODExYw==")
+        .Headers.Add("Authorization", "Basic MjIyNTo2MDg3MTI4OTI3NjlhYzEyM2FkYmVjMTY2Mzk5Njc5MA==")
       End If
       .KeepAlive = True
     End With
@@ -225,6 +254,7 @@ Public Class SPApi
     Public Property Code As String = ""
     Public Property Status As String = ""
     Public Property ReqId As String = ""
+    Public Property RFQ As String = ""
     Public ReadOnly Property IsError As Boolean
       Get
         Return (Code <> "201")

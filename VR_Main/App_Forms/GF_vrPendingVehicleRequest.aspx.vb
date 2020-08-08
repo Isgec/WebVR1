@@ -80,6 +80,7 @@ Partial Class GF_vrPendingVehicleRequest
         SIS.VR.vrPendingVehicleRequest.RejectWF(RequestNo, ReturnRemarks)
         GVvrPendingVehicleRequest.DataBind()
       Catch ex As Exception
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", String.Format("alert({0});", New JavaScriptSerializer().Serialize(ex.Message)), True)
       End Try
     End If
   End Sub
