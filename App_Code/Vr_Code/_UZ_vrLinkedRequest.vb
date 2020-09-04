@@ -21,6 +21,10 @@ Namespace SIS.VR
         Try
           If Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.UnderExecution _
           Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.RequestLinked _
+          Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.DetentionRejected _
+          Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.DelayedPlacementRejected _
+          Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.EmptyReturnRejected _
+          Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.SanctionApprovalRejected _
           Or Me.FK_VR_VehicleRequest_SRNNo.RequestStatusID = RequestStates.ODCRejected Then
             mRet = True
           End If

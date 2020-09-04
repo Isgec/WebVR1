@@ -219,7 +219,7 @@ Namespace SIS.VR
             '===============================
             .ArrangedBy = Global.System.Web.HttpContext.Current.Session("LoginID")
             .ArrangedOn = Now.ToString("dd/MM/yyyy HH:mm")
-            .RequestStatusID = 4
+            .RequestStatusID = RequestStates.UnderExecution
             '====================
             .RequestNo = Results.RequestNo
             .SPRequestID = Results.SPRequestID

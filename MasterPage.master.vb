@@ -8,12 +8,9 @@ Partial Class MasterPage
       Response.Redirect("~/Login.aspx")
     End If
     If HttpContext.Current.User.Identity.IsAuthenticated Then
-      'Dim mFile As String = HttpContext.Current.Server.MapPath("~/UserRights/") & HttpContext.Current.Session("ApplicationID") & "/" & HttpContext.Current.User.Identity.Name & "_nMenu.ascx"
-      'If IO.File.Exists(mFile) Then
-      '  Dim ctl As UserControl = Page.LoadControl("~/UserRights/" & HttpContext.Current.Session("ApplicationID") & "/" & HttpContext.Current.User.Identity.Name & "_nMenu.ascx")
-      '  algmnu.Controls.Add(ctl)
-      'End If
-      Dim mFile As String = HttpContext.Current.Server.MapPath("~/../UserRights/") & HttpContext.Current.Session("ApplicationID") & "/" & HttpContext.Current.User.Identity.Name & "_nMenu.xml"
+      Dim Identity As String = HttpContext.Current.User.Identity.Name
+      If HttpContext.Current.Request.Url.Authority.ToLower = "localhost" Then Identity = "0340"
+      Dim mFile As String = HttpContext.Current.Server.MapPath("~/../UserRights/") & HttpContext.Current.Session("ApplicationID") & "/" & Identity & "_nMenu.xml"
       If IO.File.Exists(mFile) Then
         Dim tmp As IO.StreamReader = New IO.StreamReader(mFile)
         algmnu.InnerHtml = tmp.ReadToEnd().Replace("~", HttpContext.Current.Request.Url.Scheme & Uri.SchemeDelimiter & HttpContext.Current.Request.Url.Authority & HttpContext.Current.Request.ApplicationPath)

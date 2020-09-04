@@ -1935,14 +1935,29 @@ Namespace SIS.VR
       End Using
       Return Record
     End Function
-    <DataObjectMethod(DataObjectMethodType.Delete, True)> _
+    <DataObjectMethod(DataObjectMethodType.Delete, True)>
     Public Shared Function vrRequestExecutionDelete(ByVal Record As SIS.VR.vrRequestExecution) As Int32
-      Dim _Result as Integer = 0
+      Try
+        If Record.RequestNo > 0 AndAlso Record.SPLoadID <> "" Then
+          Dim tmpRq As SIS.VR.vrVehicleRequest = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(Record.RequestNo)
+          With tmpRq
+            .SPStatus = enumSPStatus.SPRequestCreated
+            .SPEdiStatus = enumSPEdiStatus.Free
+            .SPEdiMessage = "Execution Deleted"
+            .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
+            .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+            .SPLoadData = ""
+          End With
+          SIS.VR.vrVehicleRequest.UpdateData(tmpRq)
+        End If
+      Catch ex As Exception
+      End Try
+      Dim _Result As Integer = 0
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrRequestExecutionDelete"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_SRNNo",SqlDbType.Int,Record.SRNNo.ToString.Length, Record.SRNNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_SRNNo", SqlDbType.Int, Record.SRNNo.ToString.Length, Record.SRNNo)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -1953,8 +1968,8 @@ Namespace SIS.VR
       End Using
       Return _RecordCount
     End Function
-'		Autocomplete Method
-		Public Shared Function SelectvrRequestExecutionAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
+    '		Autocomplete Method
+    Public Shared Function SelectvrRequestExecutionAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
 			Dim Results As List(Of String) = Nothing
       Dim aVal() As String = contextKey.Split("|".ToCharArray)
 			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())

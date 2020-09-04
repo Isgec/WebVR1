@@ -84,36 +84,30 @@ Namespace SIS.VR
     End Property
     Public ReadOnly Property ForApprovalVisible() As Boolean
       Get
-        Dim mRet As Boolean = False
+        Dim mRet As Boolean = True
         Try
           If _Linked Then
             If _SRNNo.ToString = _LinkID Then
               Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(_SRNNo, "")
-              mRet = True
               For Each le As SIS.VR.vrRequestExecution In oLEs
-                If _RequestStatusID <> RequestStates.GRLinked _
-                And _RequestStatusID <> RequestStates.ODCRejected _
-                And _RequestStatusID <> RequestStates.VehicleNotPlacedRejected _
-                And _RequestStatusID <> RequestStates.DelayedPlacementRejected _
-                And _RequestStatusID <> RequestStates.EmptyReturnRejected _
-                 And _RequestStatusID <> 27 _
-                And _RequestStatusID <> RequestStates.DetentionRejected Then
-                Else
-                  mRet = False
-                  Exit For
-                End If
+                Select Case _RequestStatusID
+                  Case RequestStates.GRLinked, RequestStates.ODCRejected, RequestStates.VehicleNotPlacedRejected
+                  Case RequestStates.DelayedPlacementRejected, RequestStates.EmptyReturnRejected, RequestStates.DetentionRejected
+                  Case RequestStates.SelfRejected
+                  Case Else
+                    mRet = False
+                    Exit For
+                End Select
               Next
             End If
           Else
-            If _RequestStatusID = RequestStates.GRLinked _
-            Or _RequestStatusID = RequestStates.ODCRejected _
-            Or _RequestStatusID = RequestStates.VehicleNotPlacedRejected _
-            Or _RequestStatusID = RequestStates.DelayedPlacementRejected _
-            Or _RequestStatusID = RequestStates.EmptyReturnRejected _
-            Or _RequestStatusID = 27 _
-            Or _RequestStatusID = RequestStates.DetentionRejected Then
-              mRet = True
-            End If
+            Select Case _RequestStatusID
+              Case RequestStates.GRLinked, RequestStates.ODCRejected, RequestStates.VehicleNotPlacedRejected
+              Case RequestStates.DelayedPlacementRejected, RequestStates.EmptyReturnRejected, RequestStates.DetentionRejected
+              Case RequestStates.SelfRejected
+              Case Else
+                mRet = False
+            End Select
           End If
         Catch ex As Exception
         End Try
@@ -142,17 +136,16 @@ Namespace SIS.VR
       Get
         Dim mRet As Boolean = False
         Try
-          If _RequestStatusID = RequestStates.RequestLinked _
-            Or _RequestStatusID = 29 _
-            Or _RequestStatusID = 27 Then
-            If _Linked Then
-              If _SRNNo.ToString = _LinkID Then
+          Select Case _RequestStatusID
+            Case RequestStates.RequestLinked, RequestStates.SanctionApprovalRejected, RequestStates.SanctionApproved
+              If _Linked Then
+                If _SRNNo.ToString = _LinkID Then
+                  mRet = True
+                End If
+              Else
                 mRet = True
               End If
-            Else
-              mRet = True
-            End If
-          End If
+          End Select
         Catch ex As Exception
         End Try
         Return mRet
@@ -282,41 +275,40 @@ Namespace SIS.VR
       'Checking of Estimated Amount Entered or NOT is Mandatory is pending
       '===========Commented====================
       If Convert.ToBoolean(ConfigurationManager.AppSettings("CheckSanction")) Then
-        'If Not Results.SanctionExceededApproved Then
-        '  If Not Results.SanctionExceeded Then
         'Check Sanction First
         Dim SanctionExceeded As Boolean = False
+        Results.SanctionExceeded = False
         Results = SIS.VR.vrRequestExecution.ValidateSanction(SRNNo, "")
-        SIS.VR.vrRequestExecution.UpdateData(Results)
         If Results.SanctionBalance < 0 Then
+          Results.SanctionExceeded = True
           SanctionExceeded = True
         End If
         For Each le As SIS.VR.vrRequestExecution In oLEs
+          le.SanctionExceeded = False
           le = SIS.VR.vrRequestExecution.ValidateSanction(le.SRNNo, "")
-          SIS.VR.vrRequestExecution.UpdateData(le)
           If le.SanctionBalance < 0 Then
+            le.SanctionExceeded = True
             SanctionExceeded = True
           End If
+          SIS.VR.vrRequestExecution.UpdateData(le)
         Next
-        'If any exceeded found
-        'Assign in all Linked
+        Results.SanctionExceeded = SanctionExceeded
+        SIS.VR.vrRequestExecution.UpdateData(Results)
+        'Any exceeded found, Assign in all Linked
         If SanctionExceeded Then
-          Results.SanctionExceeded = True
-          If Not Results.SanctionExceededApproved Then Results.RequestStatusID = 28
-          SIS.VR.vrRequestExecution.UpdateData(Results)
-          For Each le As SIS.VR.vrRequestExecution In oLEs
-            le.SanctionExceeded = True
-            If Not Results.SanctionExceededApproved Then le.RequestStatusID = 28
-            SIS.VR.vrRequestExecution.UpdateData(le)
-          Next
           If Not Results.SanctionExceededApproved Then
+            Results.RequestStatusID = RequestStates.UnderSanctionApproval
+            SIS.VR.vrRequestExecution.UpdateData(Results)
+            For Each le As SIS.VR.vrRequestExecution In oLEs
+              le.SanctionExceeded = True
+              le.RequestStatusID = RequestStates.UnderSanctionApproval
+              SIS.VR.vrRequestExecution.UpdateData(le)
+            Next
             SendEMailSanctionApproval(Results)
             Return Results
           End If
         End If
       End If
-      '  End If
-      'End If
       'Checking Sanction Consumed Percent And Alert
       Dim ProjectID As String = Results.Project.ProjectID
       Dim tmpCon As Decimal = 0
@@ -1087,31 +1079,31 @@ Namespace SIS.VR
                 oMsg.CC.Add(New MailAddress("sarvjeet_chowdhry@isgec.com", "Sarvjeet Chowdhry"))
                 oMsg.CC.Add(New MailAddress("tmdproject@isgec.com", "TMD Projects-YNR"))
                 oMsg.CC.Add(New MailAddress("manoj.raghav@isgec.co.in", "Manoj Raghav"))
+              End If
 
-                'Projects Employees Mapping
-                Dim prUsers As List(Of SIS.TPISG.tpisg046) = SIS.TPISG.tpisg046.GetUsersEMailIDs(vr.ProjectID)
-                Dim IDsFound As Boolean = False
-                For Each pu As SIS.TPISG.tpisg046 In prUsers
-                  If pu.EMailID.Trim <> "" Then
-                    IDsFound = True
-                    ad = New MailAddress(pu.EMailID.Trim, pu.UserName)
-                    If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
-                  End If
-                Next
-                If Not IDsFound Then
-                  Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
-                  Select Case GroupID
-                    Case 1 ' boiler
-                      oMsg.CC.Add("boilerprojects@isgec.co.in")
-                    Case 2 'smd
-                      oMsg.CC.Add("smdprojects@isgec.co.in")
-                    Case 4 'EPC
-                      oMsg.CC.Add("epcprojects@isgec.co.in")
-                    Case 5 'APCE
-                      oMsg.CC.Add("apceprojects@isgec.co.in")
-                  End Select
+              'Projects Employees Mapping
+              Dim prUsers As List(Of SIS.TPISG.tpisg046) = SIS.TPISG.tpisg046.GetUsersEMailIDs(vr.ProjectID)
+              Dim IDsFound As Boolean = False
+
+              For Each pu As SIS.TPISG.tpisg046 In prUsers
+                If pu.EMailID.Trim <> "" Then
+                  IDsFound = True
+                  ad = New MailAddress(pu.EMailID.Trim, pu.UserName)
+                  If Not oMsg.CC.Contains(ad) Then oMsg.CC.Add(ad)
                 End If
-
+              Next
+              If Not IDsFound Then
+                Dim GroupID As Integer = SIS.VR.vrUserGroup.GetUserGroupByUserID(vr.RequestedBy)(0).GroupID
+                Select Case GroupID
+                  Case 1 ' boiler
+                    oMsg.CC.Add("boilerprojects@isgec.co.in")
+                  Case 2 'smd
+                    oMsg.CC.Add("smdprojects@isgec.co.in")
+                  Case 4 'EPC
+                    oMsg.CC.Add("epcprojects@isgec.co.in")
+                  Case 5 'APCE
+                    oMsg.CC.Add("apceprojects@isgec.co.in")
+                End Select
               End If
               ProjectsAdded = True
             Catch ex As Exception
