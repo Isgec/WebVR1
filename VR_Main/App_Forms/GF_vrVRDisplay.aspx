@@ -1,9 +1,12 @@
 <%@ Page Language="VB" MasterPageFile="~/MasterPage.master" AutoEventWireup="false" CodeFile="GF_vrVRDisplay.aspx.vb" Inherits="GF_vrVRDisplay" title="List: Vehicle Request" %>
 <asp:Content ID="CPHvrVehicleRequest" ContentPlaceHolderID="cph1" Runat="Server">
-<div id="div1" class="page">
+<div class="ui-widget-content page">
+<div class="caption">
+    <asp:Label ID="LabeltaApprovalWFTypes" runat="server" Text="&nbsp;List: Vehicle Request"></asp:Label>
+</div>
+<div class="pagedata">
 <asp:UpdatePanel ID="UPNLvrVehicleRequest" runat="server">
   <ContentTemplate>
-    <asp:Label ID="LabelvrVehicleRequest" runat="server" Text="&nbsp;List: Vehicle Request" Width="100%" CssClass="sis_formheading"></asp:Label>
     <table width="100%"><tr><td class="sis_formview"> 
     <LGM:ToolBar0 
       ID = "TBLvrVehicleRequest"
@@ -11,14 +14,12 @@
       EditUrl = "~/VR_Main/App_Edit/EF_vrLinkedRequest.aspx"
       EnableAdd="false"	
       ValidationGroup = "vrVehicleRequest"
-      Skin = "tbl_blue"
       runat = "server" />
     <asp:UpdateProgress ID="UPGSvrVehicleRequest" runat="server" AssociatedUpdatePanelID="UPNLvrVehicleRequest" DisplayAfter="100">
       <ProgressTemplate>
         <span style="color: #ff0033">Loading...</span>
       </ProgressTemplate>
     </asp:UpdateProgress>
-    <br />
 		<asp:Panel ID="pnlH" runat="server" CssClass="cph_filter">
 			<div style="padding: 5px; cursor: pointer; vertical-align: middle;">
 				<div style="float: left;">Filter Records </div>
@@ -131,7 +132,6 @@
     </table>
 		</asp:Panel>
 		<AJX:CollapsiblePanelExtender ID="cpe1" runat="Server" TargetControlID="pnlD" ExpandControlID="pnlH" CollapseControlID="pnlH" Collapsed="True" TextLabelID="lblH" ImageControlID="imgH" ExpandedText="(Hide Filters...)" CollapsedText="(Show Filters...)" ExpandedImage="~/images/ua.png" CollapsedImage="~/images/da.png" SuppressPostBack="true" />
-    <br />
     <script type="text/javascript">
       var pcnt = 0;
       function print_report(o) {
@@ -280,11 +280,10 @@
               <td></td>
               <td></td>
               <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td colspan="3">
+              <td colspan="4">
+                <asp:Label ID="Label1" runat="server" Text='<%# Eval("TransporterName") %>'></asp:Label>
+              </td>
+              <td colspan="4">
                 <asp:Label ID="LabelNotification" runat="server" Text='<%# Eval("Notification") %>'></asp:Label>
               </td>
 						</tr>
@@ -324,4 +323,5 @@
   </Triggers>
 </asp:UpdatePanel>
 </div>
+  </div>
 </asp:Content>

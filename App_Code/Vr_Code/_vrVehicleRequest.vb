@@ -98,6 +98,14 @@ Namespace SIS.VR
     Public Property SPOrderCreatedBy As String = ""
     Public Property SPRequestID As String = ""
     Public Property SPLoadData As String = ""
+    Public ReadOnly Property TransporterName As String
+      Get
+        If FK_VR_VehicleRequest_SRNNo IsNot Nothing Then
+          Return FK_VR_VehicleRequest_SRNNo.VR_Transporters10_TransporterName
+        End If
+        Return ""
+      End Get
+    End Property
     '==============================================
     Public ReadOnly Property SPStatusName As String
       Get
@@ -783,7 +791,11 @@ Namespace SIS.VR
     Public ReadOnly Property FK_VR_VehicleRequest_SRNNo() As SIS.VR.vrRequestExecution
       Get
         If _FK_VR_VehicleRequest_SRNNo Is Nothing Then
-          _FK_VR_VehicleRequest_SRNNo = SIS.VR.vrRequestExecution.UZ_vrRequestExecutionGetByID(_SRNNo)
+          If _SRNNo <> "" Then
+            _FK_VR_VehicleRequest_SRNNo = SIS.VR.vrRequestExecution.UZ_vrRequestExecutionGetByID(_SRNNo)
+          Else
+            Return Nothing
+          End If
         End If
         Return _FK_VR_VehicleRequest_SRNNo
       End Get

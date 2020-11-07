@@ -299,7 +299,10 @@
           <ItemTemplate>
 						</td></tr>
 						<tr style="background-color:AntiqueWhite; color:DeepPink">
-              <td colspan="9"></td>
+              <td colspan="5"></td>
+              <td colspan="4">
+                <asp:Label ID="Label1" runat="server" Text='<%# Eval("TransporterName") %>'></asp:Label>
+              </td>
               <td colspan="5">
                 <asp:Label ID="LabelNotification" runat="server" Text='<%# Eval("Notification") %>'></asp:Label>
               </td>
