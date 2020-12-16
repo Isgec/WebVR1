@@ -247,7 +247,7 @@ Namespace SIS.QCM
         End Using
       End Using
       Try
-        If Results Is Nothing Then Results = SIS.QCM.qcmVendors.GetBPFromERP(VendorID, "200")
+        If Results Is Nothing Then Results = SIS.QCM.qcmVendors.GetBPFromERP(VendorID)
       Catch ex As Exception
       End Try
       Return Results

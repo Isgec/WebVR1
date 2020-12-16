@@ -31,13 +31,9 @@
 	Public Event SaveAddClicked(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs)
 	Public Event UpdateClicked(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs)
 	Public Event ReturnClicked(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs)
-	Public Sub SetUniqueID(ByVal prefix As String)
-		MaskedEditExtenderPageSize.ID = prefix & MaskedEditExtenderPageSize.ID
-		MaskedEditValidatorPageSize.ID = prefix & MaskedEditValidatorPageSize.ID
-		MaskedEditValidatorPageSize.ControlExtender = MaskedEditExtenderPageSize.ID
-		MaskedEditExtenderCurrentPage.ID = prefix & MaskedEditExtenderCurrentPage.ID
-	End Sub
-	Public Property AddPostBack() As Boolean
+  Public Sub SetUniqueID(ByVal prefix As String)
+  End Sub
+  Public Property AddPostBack() As Boolean
 		Get
 			Return _AddPostBack
 		End Get
@@ -478,28 +474,10 @@
 		Get
 			Return _TotalPages.Text
 		End Get
-		Set(ByVal value As Integer)
-			_TotalPages.Text = value
-			'Dim oMEV As New AjaxControlToolkit.MaskedEditValidator
-			'With (oMEV)
-			'	.ID = prefix & "MaskedEditValidatorCurrentPage"
-			'	.ControlToValidate = "_CurrentPage"
-			'	.ControlExtender = MaskedEditExtenderCurrentPage.ID
-			'	' "MaskedEditExtenderCurrentPage"
-			'	.InvalidValueMessage = ""
-			'	.EmptyValueMessage = ""
-			'	.EmptyValueBlurredText = ""
-			'	.Display = ValidatorDisplay.Dynamic
-			'	.EnableClientScript = True
-			'	.ValidationGroup = "currentpage"
-			'	.IsValidEmpty = False
-			'	.MaximumValue = value
-			'	.MinimumValue = 1
-			'	.SetFocusOnError = True
-			'End With
-			'Me.Controls.Add(oMEV)
-		End Set
-	End Property
+    Set(ByVal value As Integer)
+      _TotalPages.Text = value
+    End Set
+  End Property
 	Public Overrides Property CurrentPage() As Integer
 		Get
 			Return _CurrentPage.Text

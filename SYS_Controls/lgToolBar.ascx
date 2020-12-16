@@ -44,8 +44,7 @@
 							<asp:ImageButton ID="navPrev" ToolTip="Previous" AccessKey="P" runat="server" ImageUrl="~/TblImages/prev0.png" onmouseover="this.src='../../tblimages/prev2.png';" onmouseout="this.src='../../tblimages/prev0.png';" />
 						</td>
 						<td>
-							<asp:TextBox ID="_CurrentPage" runat="server" CssClass="mytxt" MaxLength="5" Width="40px" Font-Bold="True" Font-Names="vardana" Font-Size="9px" Text="1" ValidationGroup="currentpage" Style="text-align: right" AutoPostBack="True" />
-							<AJX:MaskedEditExtender ID="MaskedEditExtenderCurrentPage"  runat="server" Mask="99999" AcceptNegative="None" MaskType="Number" MessageValidatorTip="false" InputDirection="RightToLeft" ErrorTooltipEnabled="false" TargetControlID="_CurrentPage" PromptCharacter="" />
+							<asp:TextBox ID="_CurrentPage" runat="server" CssClass="mytxt" MaxLength="5" Width="40px" Font-Bold="True" Font-Names="vardana" Font-Size="9px" Text="1" ValidationGroup="currentpage" Style="text-align: right" AutoPostBack="True" onfocus = "return this.select();" onblur="return dc(this,0);" />
 						</td>
 						<td class="mnu_but">
 							<asp:Label ID="Label1" runat="server" Font-Bold="True"  Font-Size="9px" Text="#of" />
@@ -63,9 +62,7 @@
 							<asp:ImageButton ID="navLast" ToolTip="Last" AccessKey="L" runat="server" ImageUrl="~/TblImages/last0.png" onmouseover="this.src='../../tblimages/last2.png';" onmouseout="this.src='../../tblimages/last0.png';" />
 						</td>
 						<td>
-							<asp:TextBox ID="_PageSize" runat="server" CssClass="mytxt" MaxLength="5" Width="40px" Font-Bold="True" Font-Size="9px" ValidationGroup="currentpage" Style="text-align: right" />
-							<AJX:MaskedEditExtender ID="MaskedEditExtenderPageSize" runat="server" Mask="99999" AcceptNegative="None" MaskType="Number" MessageValidatorTip="false" InputDirection="RightToLeft" ErrorTooltipEnabled="false" TargetControlID="_PageSize" PromptCharacter="" />
-							<AJX:MaskedEditValidator ID="MaskedEditValidatorPageSize" runat="server" ControlToValidate="_PageSize" ControlExtender="MaskedEditExtenderPageSize" InvalidValueMessage="" EmptyValueMessage="" EmptyValueBlurredText="" Display="Dynamic" TooltipMessage="" EnableClientScript="true" ValidationGroup="currentpage" IsValidEmpty="false" MinimumValue="2" MaximumValue="99999" SetFocusOnError="true" />
+							<asp:TextBox ID="_PageSize" runat="server" CssClass="mytxt" MaxLength="5" Width="40px" Font-Bold="True" Font-Size="9px" ValidationGroup="currentpage" Style="text-align: right" onfocus = "return this.select();" onblur="return dc(this,0);" />
 						</td>
 						<td class="mnu_but">
 							<asp:LinkButton ID="_PageSizeButton" runat="server" CausesValidation="False" ForeColor="Wheat" CommandName="PageSize" ValidationGroup="currentpage" Font-Bold="True" Font-Size="9px" Text="/Page"/>

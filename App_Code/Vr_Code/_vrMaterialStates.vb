@@ -91,7 +91,7 @@ Namespace SIS.VR
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrMaterialStatesSelectList"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
@@ -119,14 +119,14 @@ Namespace SIS.VR
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrMaterialStatesSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaterialStateID",SqlDbType.Int,MaterialStateID.ToString.Length, MaterialStateID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaterialStateID", SqlDbType.Int, MaterialStateID.ToString.Length, MaterialStateID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Reader.Read() Then
-						Results = New SIS.VR.vrMaterialStates(Reader)
-					End If
-					Reader.Close()
+          If Reader.Read() Then
+            Results = New SIS.VR.vrMaterialStates(Reader)
+          End If
+          Reader.Close()
         End Using
       End Using
       Return Results
@@ -137,15 +137,15 @@ Namespace SIS.VR
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
-					If SearchState Then
-						Cmd.CommandText = "spvrMaterialStatesSelectListSearch"
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
-					Else
-						Cmd.CommandText = "spvrMaterialStatesSelectListFilteres"
-					End If
+          If SearchState Then
+            Cmd.CommandText = "spvrMaterialStatesSelectListSearch"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
+          Else
+            Cmd.CommandText = "spvrMaterialStatesSelectListFilteres"
+          End If
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, StartRowIndex)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, MaximumRows)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
@@ -179,7 +179,7 @@ Namespace SIS.VR
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrMaterialStatesInsert"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Description",SqlDbType.NVarChar,31, Record.Description)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Description", SqlDbType.NVarChar, 31, Record.Description)
           Cmd.Parameters.Add("@Return_MaterialStateID", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_MaterialStateID").Direction = ParameterDirection.Output
           Con.Open()
@@ -202,8 +202,8 @@ Namespace SIS.VR
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrMaterialStatesUpdate"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_MaterialStateID",SqlDbType.Int,11, Record.MaterialStateID)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Description",SqlDbType.NVarChar,31, Record.Description)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_MaterialStateID", SqlDbType.Int, 11, Record.MaterialStateID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Description", SqlDbType.NVarChar, 31, Record.Description)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -221,7 +221,7 @@ Namespace SIS.VR
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrMaterialStatesDelete"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_MaterialStateID",SqlDbType.Int,Record.MaterialStateID.ToString.Length, Record.MaterialStateID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_MaterialStateID", SqlDbType.Int, Record.MaterialStateID.ToString.Length, Record.MaterialStateID)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -236,28 +236,28 @@ Namespace SIS.VR
 		Public Shared Function SelectvrMaterialStatesAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
 			Dim Results As List(Of String) = Nothing
       Dim aVal() As String = contextKey.Split("|".ToCharArray)
-			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
-				Using Cmd As SqlCommand = Con.CreateCommand()
-					Cmd.CommandType = CommandType.StoredProcedure
-					Cmd.CommandText = "spvrMaterialStatesAutoCompleteList"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@prefix", SqlDbType.NVarChar, 50, Prefix)
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@records", SqlDbType.Int, -1, count)
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@bycode", SqlDbType.Int, 1, IIf(IsNumeric(Prefix), 0, 1))
-					Results = New List(Of String)()
-					Con.Open()
-					Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Not Reader.HasRows Then
-					  Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem("---Select Value---".PadRight(30, " "),""))
-					End If
-					While (Reader.Read())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spvrMaterialStatesAutoCompleteList"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@prefix", SqlDbType.NVarChar, 50, Prefix)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@records", SqlDbType.Int, -1, count)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@bycode", SqlDbType.Int, 1, IIf(IsNumeric(Prefix), 0, 1))
+          Results = New List(Of String)()
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          If Not Reader.HasRows Then
+            Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem("---Select Value---".PadRight(30, " "), ""))
+          End If
+          While (Reader.Read())
             Dim Tmp As SIS.VR.vrMaterialStates = New SIS.VR.vrMaterialStates(Reader)
-					  Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem(Tmp.DisplayField, Tmp.PrimaryKey))
-					End While
-					Reader.Close()
-				End Using
-			End Using
-			Return Results.ToArray
+            Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem(Tmp.DisplayField, Tmp.PrimaryKey))
+          End While
+          Reader.Close()
+        End Using
+      End Using
+      Return Results.ToArray
 		End Function
     Public Sub New(ByVal Reader As SqlDataReader)
       On Error Resume Next

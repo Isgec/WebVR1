@@ -19,6 +19,7 @@ Namespace SIS.QCM
     Private _MobileNo As String = ""
     Private _EMailID As String = ""
     Private _ExtnNo As String = ""
+    Private _PW As String = ""
     Private _HRM_Companies2_Description As String = ""
     Private _HRM_Departments3_Description As String = ""
     Private _HRM_Designations4_Description As String = ""
@@ -29,36 +30,6 @@ Namespace SIS.QCM
     Private _FK_USR_Designation As SIS.QCM.qcmDesignations = Nothing
     Private _FK_USR_Division As SIS.QCM.qcmDivisions = Nothing
     Private _FK_USR_OfficeID As SIS.QCM.qcmOffices = Nothing
-    Public ReadOnly Property ForeColor() As System.Drawing.Color
-      Get
-        Dim mRet As System.Drawing.Color = Drawing.Color.Blue
-        Try
-					mRet = GetColor()
-        Catch ex As Exception
-        End Try
-        Return mRet
-      End Get
-    End Property
-    Public ReadOnly Property Visible() As Boolean
-      Get
-        Dim mRet As Boolean = True
-        Try
-					mRet = GetVisible()
-        Catch ex As Exception
-        End Try
-        Return mRet
-      End Get
-    End Property
-    Public ReadOnly Property Enable() As Boolean
-      Get
-        Dim mRet As Boolean = True
-        Try
-					mRet = GetEnable()
-        Catch ex As Exception
-        End Try
-        Return mRet
-      End Get
-    End Property
     Public Property UserName() As String
       Get
         Return _UserName
@@ -67,7 +38,7 @@ Namespace SIS.QCM
         _UserName = value
       End Set
     End Property
-		Public Property LoginID() As String
+    Public Property LoginID() As String
 			Get
 				Return _UserName
 			End Get
@@ -308,16 +279,28 @@ Namespace SIS.QCM
         Return _FK_USR_OfficeID
       End Get
     End Property
+    Public Property PW As String
+      Get
+        Return _PW
+      End Get
+      Set(value As String)
+        If Not Convert.IsDBNull(value) Then
+          _PW = value
+        Else
+          _PW = ""
+        End If
+      End Set
+    End Property
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmUsersSelectList(ByVal OrderBy As String) As List(Of SIS.QCM.qcmUsers)
       Dim Results As List(Of SIS.QCM.qcmUsers) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmUsersSelectList"
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState",SqlDbType.Bit,2, 1)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState", SqlDbType.Bit, 2, 1)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -340,11 +323,11 @@ Namespace SIS.QCM
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmUsersGetByID(ByVal UserName As String) As SIS.QCM.qcmUsers
       Dim Results As SIS.QCM.qcmUsers = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmUsersSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UserName",SqlDbType.NVarChar,UserName.ToString.Length, UserName)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UserName", SqlDbType.NVarChar, UserName.ToString.Length, UserName)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
@@ -359,7 +342,7 @@ Namespace SIS.QCM
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmUsersSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String) As List(Of SIS.QCM.qcmUsers)
       Dim Results As List(Of SIS.QCM.qcmUsers) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
 					If SearchState Then
@@ -372,7 +355,7 @@ Namespace SIS.QCM
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, MaximumRows)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState",SqlDbType.Bit,2, 1)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState", SqlDbType.Bit, 2, 1)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -396,20 +379,20 @@ Namespace SIS.QCM
 		Public Shared Function SelectqcmUsersAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
 			Dim Results As List(Of String) = Nothing
       Dim aVal() As String = contextKey.Split("|".ToCharArray)
-			Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
 				Using Cmd As SqlCommand = Con.CreateCommand()
 					Cmd.CommandType = CommandType.StoredProcedure
 					Cmd.CommandText = "spqcmUsersAutoCompleteList"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState",SqlDbType.Bit,2, 1)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState", SqlDbType.Bit, 2, 1)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@prefix", SqlDbType.NVarChar, 50, Prefix)
 					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@records", SqlDbType.Int, -1, count)
-					SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@bycode", SqlDbType.Int, 1, IIf(IsNumeric(Prefix),0,IIf(Prefix.ToLower=Prefix, 0, 1)))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@bycode", SqlDbType.Int, 1, IIf(IsNumeric(Prefix), 0, IIf(Prefix.ToLower = Prefix, 0, 1)))
 					Results = New List(Of String)()
 					Con.Open()
 					Dim Reader As SqlDataReader = Cmd.ExecuteReader()
 					If Not Reader.HasRows Then
-					  Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem("---Select Value---".PadRight(50, " "),""))
+            Results.Add(AjaxControlToolkit.AutoCompleteExtender.CreateAutoCompleteItem("---Select Value---".PadRight(50, " "), ""))
 					End If
 					While (Reader.Read())
             Dim Tmp As SIS.QCM.qcmUsers = New SIS.QCM.qcmUsers(Reader)
@@ -421,60 +404,7 @@ Namespace SIS.QCM
 			Return Results.ToArray
 		End Function
     Public Sub New(ByVal Reader As SqlDataReader)
-      On Error Resume Next
-      _UserName = Ctype(Reader("UserName"),String)
-      _UserFullName = Ctype(Reader("UserFullName"),String)
-      If Convert.IsDBNull(Reader("C_CompanyID")) Then
-        _C_CompanyID = String.Empty
-      Else
-        _C_CompanyID = Ctype(Reader("C_CompanyID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_DivisionID")) Then
-        _C_DivisionID = String.Empty
-      Else
-        _C_DivisionID = Ctype(Reader("C_DivisionID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_OfficeID")) Then
-        _C_OfficeID = String.Empty
-      Else
-        _C_OfficeID = Ctype(Reader("C_OfficeID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_DepartmentID")) Then
-        _C_DepartmentID = String.Empty
-      Else
-        _C_DepartmentID = Ctype(Reader("C_DepartmentID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_DesignationID")) Then
-        _C_DesignationID = String.Empty
-      Else
-        _C_DesignationID = Ctype(Reader("C_DesignationID"), String)
-      End If
-      _Contractual = Ctype(Reader("Contractual"),Boolean)
-      If Convert.IsDBNull(Reader("ActiveState")) Then
-        _ActiveState = String.Empty
-      Else
-        _ActiveState = Ctype(Reader("ActiveState"), String)
-      End If
-      If Convert.IsDBNull(Reader("MobileNo")) Then
-        _MobileNo = String.Empty
-      Else
-        _MobileNo = Ctype(Reader("MobileNo"), String)
-      End If
-      If Convert.IsDBNull(Reader("EMailID")) Then
-        _EMailID = String.Empty
-      Else
-        _EMailID = Ctype(Reader("EMailID"), String)
-      End If
-      If Convert.IsDBNull(Reader("ExtnNo")) Then
-        _ExtnNo = String.Empty
-      Else
-        _ExtnNo = Ctype(Reader("ExtnNo"), String)
-      End If
-      _HRM_Companies2_Description = Ctype(Reader("HRM_Companies2_Description"),String)
-      _HRM_Departments3_Description = Ctype(Reader("HRM_Departments3_Description"),String)
-      _HRM_Designations4_Description = Ctype(Reader("HRM_Designations4_Description"),String)
-      _HRM_Divisions5_Description = Ctype(Reader("HRM_Divisions5_Description"),String)
-      _HRM_Offices6_Description = Ctype(Reader("HRM_Offices6_Description"),String)
+      SIS.SYS.SQLDatabase.DBCommon.NewObj(Me, Reader)
     End Sub
     Public Sub New()
     End Sub

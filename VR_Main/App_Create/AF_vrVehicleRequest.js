@@ -147,14 +147,14 @@ var script_vrVehicleRequest = {
 				z.innerHTML=p[3];
 				var oj = eval('(' + p[4] + ')');
 				$get('F_SupplierID').value=oj.SupplierID;
-				$get('F_ProjectID').value=oj.ProjectID;
+				$get('F_ProjectID').value=oj.BudgetProjectID;
 				$get('F_SupplierID_Display').innerText=oj.SupplierName;
-				$get('F_ProjectID_Display').innerText=oj.ProjectName;
+				$get('F_ProjectID_Display').innerText=oj.BudgetProjectName;
 				$get('F_ProjectType').value=oj.ProjectType;
 				$get('F_SupplierLocation').value=oj.SupplierAddress;
 				$get('F_DeliveryLocation').value=oj.ProjectAddress;
 				$get('F_DeliveryTerm').value=oj.DeliveryTerm;
-
+				$get('F_POProject').value=oj.ProjectID;
       }                                                                                                         
 		},        
 		temp: function() {

@@ -209,7 +209,7 @@
           <ItemStyle CssClass="alignCenter" />
           <HeaderStyle CssClass="alignCenter" Width="30px" />
         </asp:TemplateField>
-        <asp:TemplateField  HeaderText="Prnt.">
+        <asp:TemplateField  HeaderText="PRNT">
           <ItemTemplate>
               <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
           </ItemTemplate>
@@ -227,14 +227,14 @@
           <ItemTemplate>
             <asp:Label ID="LabelRequestNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("RequestNo") %>'></asp:Label>
           </ItemTemplate>
-          <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" />
-          <HeaderStyle  HorizontalAlign="Center" Width="40px" />
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="40px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="REQUESTER" SortExpression="aspnet_Users1_UserFullName">
           <ItemTemplate>
              <asp:Label ID="L_RequestedBy" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("RequestedBy") %>' Text='<%# Eval("aspnet_Users1_UserFullName") %>'></asp:Label>
           </ItemTemplate>
-          <ItemStyle VerticalAlign="Top" />
+          <ItemStyle CssClass="alignleft" />
           <HeaderStyle Width="125px"  />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="SUPPLIER" SortExpression="IDM_Vendors5_Description">
@@ -279,15 +279,13 @@
           <ItemStyle VerticalAlign="Top" HorizontalAlign="Right" />
           <HeaderStyle Width="100px"  HorizontalAlign="Center" />
         </asp:TemplateField>
-        <asp:TemplateField HeaderText="FORWARD">
+        <asp:TemplateField HeaderText="FWD">
           <ItemTemplate>
-						<table><tr>
-              <td><asp:ImageButton ID="cmdInitiateWF" Height="16px" Width="16px" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("InitiateWFVisible") %>' Enabled='<%# EVal("InitiateWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Forward" SkinID="forward" OnClientClick='<%# "return Page_ClientValidate(""Initiate" & Container.DataItemIndex & """) && validate_Request(this);" %>' CommandName="InitiateWF" CommandArgument='<%# Container.DataItemIndex %>' /></td>
-<%--              <td><asp:ImageButton ID="ImageButton1" Height="16px" Width="16px" runat="server" AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Update CT" SkinID="complete" CommandName="UpdateCT" CommandArgument='<%# Container.DataItemIndex %>' /></td>
---%>						</tr></table>
+            <asp:ImageButton ID="cmdInitiateWF" Height="16px" Width="16px" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("InitiateWFVisible") %>' Enabled='<%# EVal("InitiateWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Forward" SkinID="forward" OnClientClick='<%# "return Page_ClientValidate(""Initiate" & Container.DataItemIndex & """) && validate_Request(this);" %>' CommandName="InitiateWF" CommandArgument='<%# Container.DataItemIndex %>' />
+<%--        <asp:ImageButton ID="ImageButton1" Height="16px" Width="16px" runat="server" AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Update CT" SkinID="complete" CommandName="UpdateCT" CommandArgument='<%# Container.DataItemIndex %>' />--%>
           </ItemTemplate>
-          <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" />
-          <HeaderStyle Width="60px"  />
+          <ItemStyle CssClass="alignCenter" />
+          <HeaderStyle CssClass="alignCenter" Width="30px"  />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="EXE.NO" SortExpression="SRNNo">
           <ItemTemplate>
@@ -308,7 +306,7 @@
               </td>
 						</tr>
           </ItemTemplate>
-          <HeaderStyle Width="10px" />
+          <HeaderStyle Width="5px" />
         </asp:TemplateField>
       </Columns>
       <EmptyDataTemplate>

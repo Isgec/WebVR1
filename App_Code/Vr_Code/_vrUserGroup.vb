@@ -166,18 +166,18 @@ Namespace SIS.VR
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function vrUserGroupGetByID(ByVal SerialNo As Int32) As SIS.VR.vrUserGroup
       Dim Results As SIS.VR.vrUserGroup = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrUserGroupSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SerialNo",SqlDbType.Int,SerialNo.ToString.Length, SerialNo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SerialNo", SqlDbType.Int, SerialNo.ToString.Length, SerialNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-					If Reader.Read() Then
-						Results = New SIS.VR.vrUserGroup(Reader)
-					End If
-					Reader.Close()
+          If Reader.Read() Then
+            Results = New SIS.VR.vrUserGroup(Reader)
+          End If
+          Reader.Close()
         End Using
       End Using
       Return Results
@@ -185,21 +185,21 @@ Namespace SIS.VR
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function vrUserGroupSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal UserID As String, ByVal GroupID As Int32, ByVal RoleID As String) As List(Of SIS.VR.vrUserGroup)
       Dim Results As List(Of SIS.VR.vrUserGroup) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
-					If SearchState Then
-						Cmd.CommandText = "spvrUserGroupSelectListSearch"
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
-					Else
-						Cmd.CommandText = "spvrUserGroupSelectListFilteres"
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_UserID",SqlDbType.NVarChar,8, IIf(UserID Is Nothing, String.Empty,UserID))
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_GroupID",SqlDbType.Int,10, IIf(GroupID = Nothing, 0,GroupID))
-						SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_RoleID",SqlDbType.NVarChar,20, IIf(RoleID Is Nothing, String.Empty,RoleID))
-					End If
+          If SearchState Then
+            Cmd.CommandText = "spvrUserGroupSelectListSearch"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
+          Else
+            Cmd.CommandText = "spvrUserGroupSelectListFilteres"
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_UserID", SqlDbType.NVarChar, 8, IIf(UserID Is Nothing, String.Empty, UserID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_GroupID", SqlDbType.Int, 10, IIf(GroupID = Nothing, 0, GroupID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_RoleID", SqlDbType.NVarChar, 20, IIf(RoleID Is Nothing, String.Empty, RoleID))
+          End If
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, StartRowIndex)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, MaximumRows)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
@@ -236,14 +236,14 @@ Namespace SIS.VR
       Return SIS.VR.vrUserGroup.InsertData(_Rec)
     End Function
     Public Shared Function InsertData(ByVal Record As SIS.VR.vrUserGroup) As SIS.VR.vrUserGroup
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrUserGroupInsert"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UserID",SqlDbType.NVarChar,9, Iif(Record.UserID= "" ,Convert.DBNull, Record.UserID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupID",SqlDbType.Int,11, Iif(Record.GroupID= "" ,Convert.DBNull, Record.GroupID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RoleID",SqlDbType.NVarChar,21, Iif(Record.RoleID= "" ,Convert.DBNull, Record.RoleID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OutOfContractApprover",SqlDbType.Bit,3, Record.OutOfContractApprover)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UserID", SqlDbType.NVarChar, 9, IIf(Record.UserID = "", Convert.DBNull, Record.UserID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupID", SqlDbType.Int, 11, IIf(Record.GroupID = "", Convert.DBNull, Record.GroupID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RoleID", SqlDbType.NVarChar, 21, IIf(Record.RoleID = "", Convert.DBNull, Record.RoleID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OutOfContractApprover", SqlDbType.Bit, 3, Record.OutOfContractApprover)
           Cmd.Parameters.Add("@Return_SerialNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_SerialNo").Direction = ParameterDirection.Output
           Con.Open()
@@ -265,15 +265,15 @@ Namespace SIS.VR
       Return SIS.VR.vrUserGroup.UpdateData(_Rec)
     End Function
     Public Shared Function UpdateData(ByVal Record As SIS.VR.vrUserGroup) As SIS.VR.vrUserGroup
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrUserGroupUpdate"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_SerialNo",SqlDbType.Int,11, Record.SerialNo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UserID",SqlDbType.NVarChar,9, Iif(Record.UserID= "" ,Convert.DBNull, Record.UserID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupID",SqlDbType.Int,11, Iif(Record.GroupID= "" ,Convert.DBNull, Record.GroupID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RoleID",SqlDbType.NVarChar,21, Iif(Record.RoleID= "" ,Convert.DBNull, Record.RoleID))
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OutOfContractApprover",SqlDbType.Bit,3, Record.OutOfContractApprover)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_SerialNo", SqlDbType.Int, 11, Record.SerialNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@UserID", SqlDbType.NVarChar, 9, IIf(Record.UserID = "", Convert.DBNull, Record.UserID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@GroupID", SqlDbType.Int, 11, IIf(Record.GroupID = "", Convert.DBNull, Record.GroupID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RoleID", SqlDbType.NVarChar, 21, IIf(Record.RoleID = "", Convert.DBNull, Record.RoleID))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OutOfContractApprover", SqlDbType.Bit, 3, Record.OutOfContractApprover)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -287,11 +287,11 @@ Namespace SIS.VR
     <DataObjectMethod(DataObjectMethodType.Delete, True)> _
     Public Shared Function vrUserGroupDelete(ByVal Record As SIS.VR.vrUserGroup) As Int32
       Dim _Result as Integer = 0
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvrUserGroupDelete"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_SerialNo",SqlDbType.Int,Record.SerialNo.ToString.Length, Record.SerialNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Original_SerialNo", SqlDbType.Int, Record.SerialNo.ToString.Length, Record.SerialNo)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

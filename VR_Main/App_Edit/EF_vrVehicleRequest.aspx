@@ -138,7 +138,7 @@
                     </td>
                     <td class="alignright">
                       <b>
-                        <asp:Label ID="L_ProjectID" runat="server" Text="Project ID :" />
+                        <asp:Label ID="L_ProjectID" runat="server" Text="Budget From Project :" />
                       </b>
                     </td>
                     <td>
@@ -163,6 +163,15 @@
                         <asp:ListItem Value="Domestic">Domestic</asp:ListItem>
                         <asp:ListItem Value="Export">Export</asp:ListItem>
                       </asp:DropDownList>
+                      <asp:Label ID="Label6" runat="server" Text="PO Project :" />
+                      <asp:TextBox 
+                        ID="F_POProject" 
+                        runat="Server" 
+                        Text='<%# Bind("POProject") %>'
+                        Enabled="false"
+                        CssClass="dmytxt" 
+                        ClientIDMode="Static"
+                        Width="62px" />
                     </td>
                   </tr>
                   <tr><td colspan="4" style="border-top: solid 1pt LightGrey" ></td></tr>

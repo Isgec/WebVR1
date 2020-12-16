@@ -18,6 +18,7 @@ Namespace SIS.QCM
 			Return mRet
 		End Function
     Public Shared Function GetProjectFromERP(ByVal ProjectID As String, Optional ByVal mComp As String = "200") As SIS.QCM.qcmProjects
+      mComp = HttpContext.Current.Session("FinanceCompany")
       Dim Ret As SIS.QCM.qcmProjects = Nothing
       Dim Sql As String = ""
       Sql &= "select top 1  "

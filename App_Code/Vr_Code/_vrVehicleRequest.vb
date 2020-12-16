@@ -98,6 +98,7 @@ Namespace SIS.VR
     Public Property SPOrderCreatedBy As String = ""
     Public Property SPRequestID As String = ""
     Public Property SPLoadData As String = ""
+    Public Property POProject As String = ""
     Public ReadOnly Property TransporterName As String
       Get
         If FK_VR_VehicleRequest_SRNNo IsNot Nothing Then
@@ -1119,6 +1120,7 @@ Namespace SIS.VR
         .SitePersonName = Record.SitePersonName
         .SPStatus = enumSPStatus.Free
         .SPEdiStatus = enumSPEdiStatus.Free
+        .POProject = Record.POProject
       End With
       Return SIS.VR.vrVehicleRequest.InsertData(_Rec)
     End Function
@@ -1192,6 +1194,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPOrderCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPOrderCreatedBy = "", Convert.DBNull, Record.SPOrderCreatedBy))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestID", SqlDbType.NVarChar, 51, IIf(Record.SPRequestID = "", Convert.DBNull, Record.SPRequestID))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadData", SqlDbType.NVarChar, Integer.MaxValue, IIf(Record.SPLoadData = "", Convert.DBNull, Record.SPLoadData))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POProject", SqlDbType.NVarChar, 7, IIf(Record.POProject = "", Convert.DBNull, Record.POProject))
           Cmd.Parameters.Add("@Return_RequestNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_RequestNo").Direction = ParameterDirection.Output
           Con.Open()
@@ -1331,6 +1334,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPOrderCreatedBy", SqlDbType.NVarChar, 9, IIf(Record.SPOrderCreatedBy = "", Convert.DBNull, Record.SPOrderCreatedBy))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPRequestID", SqlDbType.NVarChar, 51, IIf(Record.SPRequestID = "", Convert.DBNull, Record.SPRequestID))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadData", SqlDbType.NVarChar, Integer.MaxValue, IIf(Record.SPLoadData = "", Convert.DBNull, Record.SPLoadData))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@POProject", SqlDbType.NVarChar, 7, IIf(Record.POProject = "", Convert.DBNull, Record.POProject))
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

@@ -25,7 +25,7 @@ Partial Class AF_vrVehicleRequest
       End If
     End If
     Dim oF_SupplierID As TextBox = FVvrVehicleRequest.FindControl("F_SupplierID")
-    oF_SupplierID.Enabled = True
+    'oF_SupplierID.Enabled = True
     oF_SupplierID.Text = String.Empty
     If Not Session("F_SupplierID") Is Nothing Then
       If Session("F_SupplierID") <> String.Empty Then
@@ -40,7 +40,7 @@ Partial Class AF_vrVehicleRequest
       End If
     End If
     Dim oF_ProjectID As TextBox = FVvrVehicleRequest.FindControl("F_ProjectID")
-    oF_ProjectID.Enabled = True
+    'oF_ProjectID.Enabled = True
     oF_ProjectID.Text = String.Empty
     If Not Session("F_ProjectID") Is Nothing Then
       If Session("F_ProjectID") <> String.Empty Then
@@ -50,7 +50,7 @@ Partial Class AF_vrVehicleRequest
     CType(FVvrVehicleRequest.FindControl("F_Height"), TextBox).Text = "0.00"
     CType(FVvrVehicleRequest.FindControl("F_Width"), TextBox).Text = "0.00"
     CType(FVvrVehicleRequest.FindControl("F_Length"), TextBox).Text = "0.00"
-    CType(FVvrVehicleRequest.FindControl("F_NoOfPackages"), TextBox).Text = "0.00"
+    CType(FVvrVehicleRequest.FindControl("F_NoOfPackages"), TextBox).Text = "0"
     CType(FVvrVehicleRequest.FindControl("F_MaterialWeight"), TextBox).Text = "0.00"
     CType(FVvrVehicleRequest.FindControl("F_InvoiceValue"), TextBox).Text = "0.00"
     Dim mStr As String = ""

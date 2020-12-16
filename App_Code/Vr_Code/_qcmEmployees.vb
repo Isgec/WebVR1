@@ -25,36 +25,6 @@ Namespace SIS.QCM
     Private _EMP_DepartmentID As SIS.QCM.qcmDepartments = Nothing
     Private _EMP_DesignationID As SIS.QCM.qcmDesignations = Nothing
     Private _EMP_OfficeID As SIS.QCM.qcmOffices = Nothing
-    Public ReadOnly Property ForeColor() As System.Drawing.Color
-      Get
-        Dim mRet As System.Drawing.Color = Drawing.Color.Blue
-        Try
-          mRet = GetColor()
-        Catch ex As Exception
-        End Try
-        Return mRet
-      End Get
-    End Property
-    Public ReadOnly Property Visible() As Boolean
-      Get
-        Dim mRet As Boolean = True
-        Try
-          mRet = GetVisible()
-        Catch ex As Exception
-        End Try
-        Return mRet
-      End Get
-    End Property
-    Public ReadOnly Property Enable() As Boolean
-      Get
-        Dim mRet As Boolean = True
-        Try
-          mRet = GetEnable()
-        Catch ex As Exception
-        End Try
-        Return mRet
-      End Get
-    End Property
     Public Property CardNo() As String
       Get
         Return _CardNo
@@ -266,7 +236,7 @@ Namespace SIS.QCM
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmEmployeesSelectList(ByVal OrderBy As String) As List(Of SIS.QCM.qcmEmployees)
       Dim Results As List(Of SIS.QCM.qcmEmployees) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmEmployeesSelectList"
@@ -295,7 +265,7 @@ Namespace SIS.QCM
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmEmployeesGetByID(ByVal CardNo As String) As SIS.QCM.qcmEmployees
       Dim Results As SIS.QCM.qcmEmployees = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmEmployeesSelectByID"
@@ -314,7 +284,7 @@ Namespace SIS.QCM
     <DataObjectMethod(DataObjectMethodType.Select)> _
     Public Shared Function qcmEmployeesSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String) As List(Of SIS.QCM.qcmEmployees)
       Dim Results As List(Of SIS.QCM.qcmEmployees) = Nothing
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           If SearchState Then
@@ -347,11 +317,11 @@ Namespace SIS.QCM
       Return _RecordCount
     End Function
     'Select By ID One Record Filtered Overloaded GetByID
-    '		Autocomplete Method
+'		Autocomplete Method
     Public Shared Function SelectqcmEmployeesAutoCompleteList(ByVal Prefix As String, ByVal count As Integer, ByVal contextKey As String) As String()
       Dim Results As List(Of String) = Nothing
       Dim aVal() As String = contextKey.Split("|".ToCharArray)
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spqcmEmployeesAutoCompleteList"
@@ -376,54 +346,7 @@ Namespace SIS.QCM
       Return Results.ToArray
     End Function
     Public Sub New(ByVal Reader As SqlDataReader)
-      On Error Resume Next
-      _CardNo = CType(Reader("CardNo"), String)
-      _EmployeeName = CType(Reader("EmployeeName"), String)
-      If Convert.IsDBNull(Reader("C_DateOfJoining")) Then
-        _C_DateOfJoining = String.Empty
-      Else
-        _C_DateOfJoining = CType(Reader("C_DateOfJoining"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_OfficeID")) Then
-        _C_OfficeID = String.Empty
-      Else
-        _C_OfficeID = CType(Reader("C_OfficeID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_DepartmentID")) Then
-        _C_DepartmentID = String.Empty
-      Else
-        _C_DepartmentID = CType(Reader("C_DepartmentID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_DesignationID")) Then
-        _C_DesignationID = String.Empty
-      Else
-        _C_DesignationID = CType(Reader("C_DesignationID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_CompanyID")) Then
-        _C_CompanyID = String.Empty
-      Else
-        _C_CompanyID = CType(Reader("C_CompanyID"), String)
-      End If
-      If Convert.IsDBNull(Reader("C_DivisionID")) Then
-        _C_DivisionID = String.Empty
-      Else
-        _C_DivisionID = CType(Reader("C_DivisionID"), String)
-      End If
-      _ActiveState = CType(Reader("ActiveState"), Boolean)
-      _Contractual = CType(Reader("Contractual"), Boolean)
-      If Convert.IsDBNull(Reader("ContactNumbers")) Then
-        _ContactNumbers = String.Empty
-      Else
-        _ContactNumbers = CType(Reader("ContactNumbers"), String)
-      End If
-      If Convert.IsDBNull(Reader("EMailID")) Then
-        _EMailID = String.Empty
-      Else
-        _EMailID = CType(Reader("EMailID"), String)
-      End If
-      _HRM_Departments2_Description = CType(Reader("HRM_Departments2_Description"), String)
-      _HRM_Designations3_Description = CType(Reader("HRM_Designations3_Description"), String)
-      _HRM_Offices1_Description = CType(Reader("HRM_Offices1_Description"), String)
+      SIS.SYS.SQLDatabase.DBCommon.NewObj(Me, Reader)
     End Sub
     Public Sub New()
     End Sub

@@ -267,26 +267,26 @@
                 </style>
                 <asp:GridView ID="GVvrPendingVehicleRequest" SkinID="gv_silver" BorderColor="#A9A9A9" Width="100%" runat="server" AllowPaging="True" AllowSorting="True" AutoGenerateColumns="False" DataSourceID="ODSvrPendingVehicleRequest" DataKeyNames="RequestNo">
                   <Columns>
-                    <asp:TemplateField>
+                    <asp:TemplateField HeaderText="EDIT">
                       <ItemTemplate>
-                        <table>
-                          <tr>
-                            <td style="vertical-align: top">
-                              <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' /></td>
-                            <td style="vertical-align: top">
-                              <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" /></td>
-                          </tr>
-                        </table>
+                        <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
-                      <ItemStyle VerticalAlign="Top" />
-                      <HeaderStyle Width="40px" />
+                      <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle CssClass="alignCenter" Width="30px" />
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="PRNT">
+                      <ItemTemplate>
+                        <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
+                      </ItemTemplate>
+                      <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle CssClass="alignCenter" Width="30px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="REQ.No" SortExpression="RequestNo">
                       <ItemTemplate>
-                        <asp:Label ID="LabelRequestNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("RequestNo") %>'></asp:Label>
+                        <asp:Label ID="LabelRequestNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("RequestNo") %>'></asp:Label>
                       </ItemTemplate>
-                      <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" />
-                      <HeaderStyle HorizontalAlign="Center" Width="60px" />
+                      <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle CssClass="alignCenter" Width="50px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="SUPPLIER" SortExpression="IDM_Vendors5_Description">
                       <ItemTemplate>

@@ -18,7 +18,7 @@ Namespace SIS.SYS.Utilities
       End With
     End Sub
     Public Shared Sub UpdateMD5Password(ByVal Uid As String, ByVal Upw As String)
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString)
         Using Cmd As SqlCommand = Con.CreateCommand()
           Dim mSql As String = "UPDATE aspnet_users SET md5Password = '" & getMD5(Upw) & "', pw = '" & Upw & "' WHERE UserName = '" & Uid & "'"
           Cmd.CommandType = System.Data.CommandType.Text
@@ -30,7 +30,7 @@ Namespace SIS.SYS.Utilities
     End Sub
     Public Shared Function GetPassword(ByVal Uid As String) As String
       Dim mRet As String = ""
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString)
         Using Cmd As SqlCommand = Con.CreateCommand()
           Dim mSql As String = "Select ISNULL(pw,'') from aspnet_users WHERE UserName = '" & Uid & "'"
           Cmd.CommandType = System.Data.CommandType.Text
@@ -190,144 +190,6 @@ Namespace SIS.SYS.Utilities
       Return mRet
     End Function
   End Class
-  'Public Class clsBaan
-  '	Const PARSEDLL As String = "otppdmdlldcm"
-  '	Private oBaaN As Baan4.Baan4
-  '	Public Function Execute(ByVal FunctionName As String, ByVal Arguments As String) As ReturnedValues
-  '		SyncLock Me
-  '			Dim oRet As New ReturnedValues
-  '			Dim mSource As String = GetSource(FunctionName, Arguments)
-  '			Dim mRet As Integer
-  '			oRet.FunctionName = FunctionName
-  '			oRet.Arguments = Arguments
-  '			Try
-  '				mRet = oBaaN.ParseExecFunction(PARSEDLL, mSource)
-  '				If oBaaN.Error <> 0 Then
-  '					Disconnect()
-  '					oRet.RetVal = 1
-  '					Select Case oBaaN.Error
-  '						Case Is = -1
-  '							oRet.RetStr = "DLL Unknown"
-  '						Case Is = -2
-  '							oRet.RetStr = "Function Unknown"
-  '						Case Is = -3
-  '							oRet.RetStr = "Syntax Error in Function Call"
-  '					End Select
-  '					oRet.RetStr = "BaaN Disconnected. Error : " & oRet.RetStr
-  '				End If
-  '			Catch ex As Exception
-  '				Disconnect()
-  '				oRet.RetVal = 2
-  '				oRet.RetStr = "Fatal error. : BaaN Disconnected."
-  '			End Try
-  '			If Not oBaaN Is Nothing Then
-  '				Dim aStr() As String = oBaaN.ReturnValue.Split("||".ToCharArray, 2)
-  '				If aStr(0) > "0" Then
-  '					oRet.RetVal = 1
-  '					If aStr.Length > 1 Then
-  '						oRet.RetStr = aStr(1)
-  '					End If
-  '				Else
-  '					oRet.RetVal = 0
-  '					oRet.DllRetStr = aStr(1)
-  '				End If
-  '			End If
-  '			Return oRet
-  '		End SyncLock
-  '	End Function
-  '	Public Function Connect() As ReturnedValues
-  '		Dim oBW() As Process
-  '		Dim t As Process
-  '		Dim oRet As New ReturnedValues
-  '		Dim _may As Boolean
-  '		oBW = Process.GetProcessesByName("bw")
-  '		For Each t In oBW
-  '			If t.ProcessName = "bw" Then
-  '				oRet.RetVal = 1
-  '				oRet.RetStr = "BaaN is allready running !!! [Please Close BaaN]"
-  '				_may = True
-  '			End If
-  '		Next
-  '		If Not _may Then
-  '			Try
-  '				oBaaN = HttpContext.Current.Server.CreateObject("BaaN4.Application.lalit200")
-  '				oRet.RetVal = 0
-  '				oRet.RetStr = "Connected"
-  '			Catch ex As Exception
-  '				oRet.RetVal = 2
-  '				oRet.RetStr = "Can Not Connect to BaaN." & " : " & ex.Message
-  '				oBW = Process.GetProcessesByName("bw")
-  '				For Each t In oBW
-  '					If t.ProcessName = "bw" Then
-  '						t.Kill()
-  '					End If
-  '				Next
-  '			End Try
-  '		End If
-  '		oBW = Nothing
-  '		Return oRet
-  '	End Function
-  '	Private Function GetSource(ByVal FunctionName As String, ByVal Arguments As String) As String
-  '		Dim aArgs() As String
-  '		Dim mSource As String
-  '		Dim I As Integer
-  '		mSource = ""
-  '		If Arguments = "" Then
-  '			mSource = FunctionName & "()"
-  '		Else
-  '			aArgs = Arguments.Split(",".ToCharArray)
-  '			For I = 0 To aArgs.Length - 1
-  '				If mSource = "" Then
-  '					mSource = Chr(34) & aArgs(I) & Chr(34)
-  '				Else
-  '					mSource = mSource & "," & Chr(34) & aArgs(I) & Chr(34)
-  '				End If
-  '			Next
-  '			mSource = FunctionName & "(" & mSource & ")"
-  '		End If
-  '		Return mSource
-  '	End Function
-  '	Public Sub Disconnect()
-  '		Try
-  '			oBaaN.Quit()
-  '			oBaaN = Nothing
-  '		Catch ex As Exception
-  '			Try
-  '				Dim oBW() As Process
-  '				Dim t As Process
-  '				oBW = Process.GetProcessesByName("bw")
-  '				For Each t In oBW
-  '					If t.ProcessName = "bw" Then
-  '						t.Kill()
-  '						Exit For
-  '					End If
-  '				Next
-  '				oBaaN = Nothing
-  '			Catch ex1 As Exception
-  '			End Try
-  '		End Try
-  '	End Sub
-  '	Public Sub Dispose()
-  '		Try
-  '			oBaaN.Quit()
-  '			oBaaN = Nothing
-  '		Catch ex As Exception
-  '			Try
-  '				Dim oBW() As Process
-  '				Dim t As Process
-  '				oBW = Process.GetProcessesByName("bw")
-  '				For Each t In oBW
-  '					If t.ProcessName = "bw" Then
-  '						t.Kill()
-  '						Exit For
-  '					End If
-  '				Next
-  '				oBaaN = Nothing
-  '			Catch ex1 As Exception
-  '			End Try
-  '		End Try
-  '	End Sub
-  'End Class
   Public Class ReturnedValues
     Private _RetVal As Integer
     Private _DllRetVal As Integer
@@ -387,7 +249,7 @@ Namespace SIS.SYS.Utilities
   Public Class GlobalVariables
     Public Shared Function PageNo(ByVal PageName As String, ByVal LoginID As String) As Integer
       Dim _Result As Integer = 0
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString)
         Using Cmd As SqlCommand = Con.CreateCommand()
           Dim mSql As String = "SELECT TOP 1 [SYS_LGPageSize].[PageNo] FROM [SYS_LGPageSize] WHERE [SYS_LGPageSize].[PageName] = '" & PageName & "' AND [SYS_LGPageSize].[LoginID] = '" & LoginID & "' AND [SYS_LGPageSize].[ApplicationID] = '" & HttpContext.Current.Session("ApplicationID") & "'"
           Cmd.CommandType = System.Data.CommandType.Text
@@ -403,7 +265,7 @@ Namespace SIS.SYS.Utilities
     End Function
     Public Shared Function PageNo(ByVal PageName As String, ByVal LoginID As String, ByVal Position As Integer) As Integer
       Dim _Result As Integer = 0
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spSYS_LG_SetPageNumber"
@@ -419,7 +281,7 @@ Namespace SIS.SYS.Utilities
     End Function
     Public Shared Function PageSize(ByVal PageName As String, ByVal LoginID As String) As Integer
       Dim _Result As Integer = 0
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString)
         Using Cmd As SqlCommand = Con.CreateCommand()
           Dim mSql As String = "SELECT TOP 1 [SYS_LGPageSize].[PageSize] FROM [SYS_LGPageSize] WHERE [SYS_LGPageSize].[PageName] = '" & PageName & "' AND [SYS_LGPageSize].[LoginID] = '" & LoginID & "' AND [SYS_LGPageSize].[ApplicationID] = " & HttpContext.Current.Session("ApplicationID")
           Cmd.CommandType = System.Data.CommandType.Text
@@ -435,7 +297,7 @@ Namespace SIS.SYS.Utilities
     End Function
     Public Shared Function PageSize(ByVal PageName As String, ByVal LoginID As String, ByVal Size As Integer) As Integer
       Dim _Result As Integer = 0
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spSYS_LG_SetPageSize"
@@ -451,7 +313,7 @@ Namespace SIS.SYS.Utilities
     End Function
     Public Shared Function GetEMailID(ByVal LoginID As String) As String
       Dim _Result As String = ""
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString)
         Using Cmd As SqlCommand = Con.CreateCommand()
           Dim mSql As String = "SELECT ISNULL(EMailID,'') FROM [aspnet_Users] WHERE UserName = '" & LoginID & "'"
           Cmd.CommandType = System.Data.CommandType.Text
@@ -547,7 +409,7 @@ Namespace SIS.SYS.Utilities
         Case "DF_"
           FileName = FileName.Replace("DF_", "GD_")
       End Select
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetToolsConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spSYS_LG_VRSessionByUserFile"

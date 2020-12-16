@@ -38,60 +38,9 @@ Namespace SIS.SYS.Utilities
         .Session("ApplicationID") = 20
         .Session("Redirected") = False
         .Session("ApplicationDefaultPage") = "~/Default.aspx"
-        .Session("FinYear") = ReadActiveFinYear
-
+        .Session("FinanceCompany") = "200"
       End With
     End Sub
-    Public Shared ReadOnly Property FinYearStartDate() As String
-      Get
-        Dim _Result As DateTime
-        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
-          Using Cmd As SqlCommand = Con.CreateCommand()
-            Dim mSql As String = "SELECT TOP 1 [ATN_FinYear].[StartDate] FROM [ATN_FinYear] WHERE [ATN_FinYear].[Active] = 1"
-            Cmd.CommandType = System.Data.CommandType.Text
-            Cmd.CommandText = mSql
-            Con.Open()
-            _Result = Cmd.ExecuteScalar()
-          End Using
-        End Using
-        Return _Result.ToString("dd/MM/yyyy")
-      End Get
-    End Property
-    Public Shared ReadOnly Property FinYearEndDate() As String
-      Get
-        Dim _Result As DateTime
-        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
-          Using Cmd As SqlCommand = Con.CreateCommand()
-            Dim mSql As String = "SELECT TOP 1 [ATN_FinYear].[EndDate] FROM [ATN_FinYear] WHERE [ATN_FinYear].[Active] = 1"
-            Cmd.CommandType = System.Data.CommandType.Text
-            Cmd.CommandText = mSql
-            Con.Open()
-            _Result = Cmd.ExecuteScalar()
-          End Using
-        End Using
-        Return _Result.ToString("dd/MM/yyyy")
-      End Get
-    End Property
-    Public Shared ReadOnly Property ReadActiveFinYear() As Integer
-      Get
-        Dim _Result As Integer = 0
-        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString)
-          Using Cmd As SqlCommand = Con.CreateCommand()
-            Dim mSql As String = "SELECT TOP 1 [ATN_FinYear].[FinYear] FROM [ATN_FinYear] WHERE [ATN_FinYear].[Active] = 1"
-            Cmd.CommandType = System.Data.CommandType.Text
-            Cmd.CommandText = mSql
-            Con.Open()
-            _Result = Cmd.ExecuteScalar()
-          End Using
-        End Using
-        Return _Result
-      End Get
-    End Property
-    Public Shared ReadOnly Property ActiveFinYear() As Integer
-      Get
-        Return Convert.ToInt32(HttpContext.Current.Session("FinYear"))
-      End Get
-    End Property
     Public Shared Sub ApplicationReports(ByVal Context As HttpContext)
       If Not Context.Request.QueryString("ReportName") Is Nothing Then
         Select Case (Context.Request.QueryString("ReportName").ToLower)

@@ -1562,9 +1562,8 @@ Namespace SIS.VR
     Public Shared Function GetPTRFromERPLN(ByVal IRNo As Integer, ByVal BillAmount As Decimal, ByVal Company As String) As Decimal
       Dim mRet As Decimal = BillAmount
       Dim MainCompany As String = "200"
-      If Company = "700" Then
-        MainCompany = "700"
-      End If
+      If Company = "700" Then MainCompany = "700"
+      If Company = "651" Then MainCompany = "651"
 
       Dim Sql As String = ""
       Sql = Sql & "select "
@@ -1613,11 +1612,11 @@ Namespace SIS.VR
       Return Results
     End Function
     Public Shared Function GetProjectFinanceCompany(ByVal ProjectID As String) As String
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
       Dim mRet As Decimal = 0
       Dim Sql As String = "select t_ncmp "
-      Sql &= "from ttppdm600200 "
-      Sql &= "where t_cprj='" & ProjectID.ToUpper & "'"
-      'Sql = "select isnull(erpcompany,'200') from idm_projects where projectid='" & ProjectID & "'"
+      Sql &= " from ttppdm600" & Comp
+      Sql &= " where t_cprj='" & ProjectID.ToUpper & "'"
       Dim Results As String = ""
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
@@ -1795,7 +1794,11 @@ Namespace SIS.VR
       'Sql = Sql & "     inner join ttfcmg100200 as cq on pb.t_btno = cq.t_pbtn "
       'Sql = Sql & "     inner join ttfcmg109200 as bt on pb.t_btno = bt.t_btno "
       'Sql = Sql & "where ir.t_ctyp = 'PTR' and ir.t_ninv = " & IRNo
-      If Company <> "700" Then Company = "200"
+      If Company = "700" Then
+      ElseIf Company = "651" Then
+      Else
+        Company = "200"
+      End If
 
       Sql &= "select t_totl from ttpisg012" & Company.Trim & " where t_elem='99050500' and t_cprj='" & ProjectID.ToUpper & "'"
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())

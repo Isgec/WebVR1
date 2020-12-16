@@ -394,12 +394,14 @@ Namespace SIS.VR
     Public Property ProjectType As String = ""
     Public Property ProjectID As String = ""
     Public Property ProjectName As String = ""
+    Public Property BudgetProjectID As String = ""
+    Public Property BudgetProjectName As String = ""
     Public Shared Function vrERPPoGetByID(ByVal PONumber As String) As SIS.VR.vrERPPo
       Dim mSql As String = ""
-      Dim mComp As String = "200"
-      If PONumber.StartsWith("P701") Then
-        mComp = "700"
-      End If
+      Dim mComp As String = HttpContext.Current.Session("FinanceCompany")
+      'If PONumber.StartsWith("P701") Or PONumber.StartsWith("P77") Then
+      '  mComp = "700"
+      'End If
       mSql = mSql & "select distinct "
       mSql = mSql & "ordh.t_orno as ERPPoNumber,"
       mSql = mSql & "ordh.t_otbp as SupplierID,"
@@ -433,15 +435,17 @@ Namespace SIS.VR
       If Results IsNot Nothing Then
         If Results.BuyerID.Length < 4 Then Results.BuyerID = Results.BuyerID.PadLeft(4, "0")
         Dim tmpSupplierID As String = Results.SupplierID
-        'If mComp <> "200" Then Results.SupplierID = "S" & mComp & Right(Results.SupplierID, 5)
-        If mComp <> "200" Then Results.SupplierID = "" & mComp & Right(Results.SupplierID, 6)
+        'If mComp <> "200" Then Results.SupplierID = "" & mComp & Right(Results.SupplierID, 6)
         Dim oVar As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(Results.SupplierID)
-        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(tmpSupplierID, mComp)
+        If oVar Is Nothing Then oVar = SIS.QCM.qcmVendors.GetBPFromERP(tmpSupplierID)
         Results.SupplierAddress = oVar.Address1.Trim & " " & oVar.Address2 & " " & oVar.Address3 & " " & oVar.Address4
         Dim oPVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(Results.ProjectID)
         If oPVar Is Nothing Then oPVar = SIS.QCM.qcmProjects.GetProjectFromERP(Results.ProjectID, mComp)
         Results.ProjectName = oPVar.Description
         Results.ProjectAddress = oPVar.Address1.Trim & " " & oPVar.Address2 & " " & oPVar.Address3 & " " & oPVar.Address4
+        Dim frbdPrj As SIS.VR.vrFreightBudgetProject = SIS.VR.vrFreightBudgetProject.GetBudgetProject(Results.ProjectID)
+        Results.BudgetProjectID = frbdPrj.ProjectID
+        Results.BudgetProjectName = frbdPrj.IDM_Projects3_Description
       End If
       Return Results
     End Function

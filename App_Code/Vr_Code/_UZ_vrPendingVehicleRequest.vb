@@ -235,7 +235,7 @@ Namespace SIS.VR
           SIS.VR.vrUnLinkedRequest.CompleteWF(Results.RequestNo, re.SRNNo)
           'Push in ERP for PO
           Try
-            SIS.VR.vrPendingVehicleRequest.PushPOData(x, "200")
+            SIS.VR.vrPendingVehicleRequest.PushPOData(x)
           Catch ex As Exception
             Dim xx As String = ""
           End Try
@@ -311,9 +311,14 @@ Namespace SIS.VR
     End Function
     Private Shared Function GetSPR(r As SIS.VR.vrVehicleRequest, Optional Test As Boolean = False) As SPApi.SPRequest
       Dim t As New SPApi.SPRequest
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
       If Not Test Then
         With t
-          .RFQ = r.RequestNo
+          If Comp <> "200" Then
+            .RFQ = Comp & "_" & r.RequestNo
+          Else
+            .RFQ = r.RequestNo
+          End If
           .loadingDate = Convert.ToDateTime(r.VehicleRequiredOn).ToString("dd-MM-yyyy")
           .projectCode = r.ProjectID
           .projectName = r.IDM_Projects4_Description
@@ -381,9 +386,10 @@ Namespace SIS.VR
       End Using
       Return mRet.Trim
     End Function
-    Public Shared Function PushPOData(ed As SPApi.ExecutionData, Optional Comp As String = "200") As Boolean
+    Public Shared Function PushPOData(ed As SPApi.ExecutionData) As Boolean
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
       Dim mRet As Boolean = False
-      Dim tmpPO As SPApi.POData = SPApi.POData.GetByID(ed.loadId)
+      Dim tmpPO As SPApi.POData = SPApi.POData.GetByID(ed.loadId, Comp)
       Dim Found As Boolean = False
       If tmpPO IsNot Nothing Then Found = True
       If Found Then

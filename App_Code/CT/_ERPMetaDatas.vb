@@ -37,9 +37,7 @@ Namespace SIS.IREF
 
     Public Shared Function ItemReferenceSelectList(ByVal t_orno As String, ByVal t_pono As Integer) As List(Of SIS.IREF.ItemReference)
       Dim Results As New List(Of SIS.IREF.ItemReference)
-      Dim Comp As String = "200" ' It should be byval parameter latter
-      If Comp Is Nothing Then Comp = "200"
-      If Comp = "" Then Comp = "200"
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
 
       Dim Sql As String = ""
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
@@ -148,9 +146,7 @@ Namespace SIS.SUBI
 
     Public Shared Function SubItemSelectList(ByVal iref As SIS.IREF.ItemReference) As List(Of SIS.SUBI.SubItem)
       Dim Results As New List(Of SIS.SUBI.SubItem)
-      Dim Comp As String = "200" ' It should be byval parameter latter
-      If Comp Is Nothing Then Comp = "200"
-      If Comp = "" Then Comp = "200"
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
 
       Dim Sql As String = ""
       Dim t_cprj As String = ""
