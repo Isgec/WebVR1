@@ -119,5 +119,27 @@ Partial Class AF_vrLorryReceiptDetails
     End If
     Return mRet
   End Function
+  Protected Sub cmdShowIRN_Click(sender As Object, e As EventArgs)
+    Dim ProjectID As String = CType(FVvrLorryReceiptDetails.FindControl("F_ProjectID"), TextBox).Text
+    Dim SupplierID As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierID"), TextBox).Text
+    Dim BillNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox).Text
+    Dim BillDate As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox).Text
+    test.Show(ProjectID, SupplierID, "", "")
+  End Sub
+  Private Sub test_Execute(IRNo As String) Handles test.Execute
+    If IRNo = "" Then Exit Sub
+    CType(FVvrLorryReceiptDetails.FindControl("F_IRNO"), TextBox).Text = IRNo
+    Dim oIR As SIS.VR.irnList = SIS.VR.irnList.GetByID(IRNo)
+    If oIR IsNot Nothing Then
+      Dim BillNo As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox)
+      Dim BillDate As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox)
+      Dim GrNo As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_GRorLRNo"), TextBox)
+      Dim GrDate As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_GRorLRDate"), TextBox)
+      If BillNo.Text = "" Then BillNo.Text = oIR.BillNo
+      If BillDate.Text = "" Then BillDate.Text = oIR.BillDate
+      If GrNo.Text = "" Then GrNo.Text = oIR.GRNo
+      If GrDate.Text = "" Then GrDate.Text = oIR.GRDate
+    End If
+  End Sub
 
 End Class

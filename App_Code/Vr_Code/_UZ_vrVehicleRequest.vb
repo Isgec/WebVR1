@@ -444,7 +444,7 @@ Namespace SIS.VR
         Results.ProjectName = oPVar.Description
         Results.ProjectAddress = oPVar.Address1.Trim & " " & oPVar.Address2 & " " & oPVar.Address3 & " " & oPVar.Address4
         Dim frbdPrj As SIS.VR.vrFreightBudgetProject = SIS.VR.vrFreightBudgetProject.GetBudgetProject(Results.ProjectID)
-        Results.BudgetProjectID = frbdPrj.ProjectID
+        Results.BudgetProjectID = frbdPrj.FreightBudgetProjectID
         Results.BudgetProjectName = frbdPrj.IDM_Projects3_Description
       End If
       Return Results

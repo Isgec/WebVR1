@@ -33,11 +33,24 @@ Partial Class EF_vrLorryReceiptDetails
       ViewState.Add("PrimaryKey", value)
     End Set
   End Property
+  Public Property ProjectID() As String
+    Get
+      If ViewState("ProjectID") IsNot Nothing Then
+        Return CType(ViewState("ProjectID"), String)
+      End If
+      Return True
+    End Get
+    Set(ByVal value As String)
+      ViewState.Add("ProjectID", value)
+    End Set
+  End Property
+
   Protected Sub ODSvrLorryReceiptDetails_Selected(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.ObjectDataSourceStatusEventArgs) Handles ODSvrLorryReceiptDetails.Selected
     Dim tmp As SIS.VR.vrLorryReceiptDetails = CType(e.ReturnValue, SIS.VR.vrLorryReceiptDetails)
     Editable = tmp.Editable
     Deleteable = tmp.Deleteable
     PrimaryKey = tmp.PrimaryKey
+    ProjectID = tmp.ProjectID
   End Sub
   Protected Sub FVvrLorryReceiptDetails_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles FVvrLorryReceiptDetails.Init
     DataClassName = "EvrLorryReceiptDetails"
@@ -77,4 +90,25 @@ Partial Class EF_vrLorryReceiptDetails
     Return mRet
   End Function
 
+  Protected Sub cmdShowIRN_Click(sender As Object, e As EventArgs)
+    Dim SupplierID As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierID"), TextBox).Text
+    Dim BillNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox).Text
+    Dim BillDate As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox).Text
+    test.Show(ProjectID, SupplierID, "", "")
+  End Sub
+  Private Sub test_Execute(IRNo As String) Handles test.Execute
+    If IRNo = "" Then Exit Sub
+    CType(FVvrLorryReceiptDetails.FindControl("F_IRNO"), TextBox).Text = IRNo
+    Dim oIR As SIS.VR.irnList = SIS.VR.irnList.GetByID(IRNo)
+    If oIR IsNot Nothing Then
+      Dim BillNo As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox)
+      Dim BillDate As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox)
+      Dim GrNo As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_GRorLRNo"), TextBox)
+      Dim GrDate As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_GRorLRDate"), TextBox)
+      If BillNo.Text = "" Then BillNo.Text = oIR.BillNo
+      If BillDate.Text = "" Then BillDate.Text = oIR.BillDate
+      If GrNo.Text = "" Then GrNo.Text = oIR.GRNo
+      If GrDate.Text = "" Then GrDate.Text = oIR.GRDate
+    End If
+  End Sub
 End Class

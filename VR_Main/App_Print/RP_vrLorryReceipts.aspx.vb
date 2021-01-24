@@ -1,17 +1,10 @@
 Partial Class RP_vrLorryReceipts
   Inherits System.Web.UI.Page
-  Private _InfoUrl As String = "~/VR_Main/App_Display/DF_vrLorryReceipts.aspx"
-  Protected Sub Info_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs)
-    Dim oBut As ImageButton = CType(sender, ImageButton)
-    Dim aVal() As String = oBut.CommandArgument.ToString.Split(",".ToCharArray)
-    Dim RedirectUrl As String = _InfoUrl  & "?ProjectID=" & aVal(0) & "&MRNNo=" & aVal(1)
-    Response.Redirect(RedirectUrl)
-  End Sub
   Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
     Dim aVal() As String = Request.QueryString("pk").Split("|".ToCharArray)
-    Dim ProjectID As String = CType(aVal(0),String)
-    Dim MRNNo As Int32 = CType(aVal(1),Int32)
-    Dim oVar As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID,MRNNo)
+    Dim ProjectID As String = CType(aVal(0), String)
+    Dim MRNNo As Int32 = CType(aVal(1), Int32)
+    Dim oVar As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID, MRNNo)
     Dim oTbl As New Table
     oTbl.Width = 1000
     oTbl.GridLines = GridLines.Both
@@ -26,11 +19,13 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.ProjectID
-      oCol.Style.Add("text-align","left")
+    oCol.Font.Size = "14"
+    oCol.Font.Bold = True
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.IDM_Projects2_Description
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = "MRN No"
@@ -38,7 +33,9 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.MRNNo
-      oCol.Style.Add("text-align","right")
+    oCol.Font.Size = "14"
+    oCol.Font.Bold = True
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -49,11 +46,11 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.TransporterID
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VR_Transporters7_TransporterName
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = "MRN Date"
@@ -61,7 +58,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.MRNDate
-      oCol.Style.Add("text-align","center")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -70,13 +67,14 @@ Partial Class RP_vrLorryReceipts
     oCol.Text = "Vehicle Type ID"
     oCol.Font.Bold = True
     oRow.Cells.Add(oCol)
+    'oCol = New TableCell
+    'oCol.Text = oVar.VehicleTypeID
+    'oCol.Style.Add("text-align", "right")
+    'oRow.Cells.Add(oCol)
     oCol = New TableCell
-    oCol.Text = oVar.VehicleTypeID
-      oCol.Style.Add("text-align","right")
-    oRow.Cells.Add(oCol)
-    oCol = New TableCell
+    oCol.ColumnSpan = "2"
     oCol.Text = oVar.VR_VehicleTypes8_cmba
-      oCol.Style.Add("text-align","right")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = "Vehicle Registration No"
@@ -84,7 +82,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VehicleRegistrationNo
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -95,7 +93,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VehicleInDate
-      oCol.Style.Add("text-align","center")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oCol = New TableCell
@@ -104,7 +102,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VehicleOutDate
-      oCol.Style.Add("text-align","center")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -115,11 +113,11 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.CustomerID
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VR_BusinessPartner3_BPName
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = "Way Bill Form No [Enter NA if NOT Applicable]"
@@ -127,7 +125,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.WayBillFormNo
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -138,7 +136,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = IIf(oVar.PaymentMadeAtSite, "YES", "NO")
-      oCol.Style.Add("text-align","center")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oCol = New TableCell
@@ -147,7 +145,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.AmountPaid
-      oCol.Style.Add("text-align","right")
+    oCol.Style.Add("text-align", "right")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -158,7 +156,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VehicleType
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oCol = New TableCell
@@ -167,7 +165,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VehicleLengthInFt
-      oCol.Style.Add("text-align","right")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -178,7 +176,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VechicleWidthInFt
-      oCol.Style.Add("text-align","right")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oCol = New TableCell
@@ -187,22 +185,23 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.VehicleHeightInFt
-      oCol.Style.Add("text-align","right")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
     oRow = New TableRow
     oCol = New TableCell
-    oCol.Text = "Material State ID"
+    oCol.Text = "Material State"
     oCol.Font.Bold = True
     oRow.Cells.Add(oCol)
+    'oCol = New TableCell
+    'oCol.Text = oVar.MaterialStateID
+    'oCol.Style.Add("text-align", "right")
+    'oRow.Cells.Add(oCol)
     oCol = New TableCell
-    oCol.Text = oVar.MaterialStateID
-      oCol.Style.Add("text-align","right")
-    oRow.Cells.Add(oCol)
-    oCol = New TableCell
+    oCol.ColumnSpan = "2"
     oCol.Text = oVar.VR_MaterialStates5_Description
-      oCol.Style.Add("text-align","right")
+    oCol.Style.Add("text-align", "left")
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = "Remarks For Damage Or Shortage"
@@ -210,7 +209,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.RemarksForDamageOrShortage
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -221,7 +220,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.OverDimensionConsignment
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oCol = New TableCell
@@ -230,7 +229,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.DetentionAtSite
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
@@ -241,7 +240,7 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.ReasonForDetention
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oCol = New TableCell
@@ -250,14 +249,36 @@ Partial Class RP_vrLorryReceipts
     oRow.Cells.Add(oCol)
     oCol = New TableCell
     oCol.Text = oVar.OtherRemarks
-      oCol.Style.Add("text-align","left")
+    oCol.Style.Add("text-align", "left")
     oCol.ColumnSpan = "2"
     oRow.Cells.Add(oCol)
     oTbl.Rows.Add(oRow)
+
+    oRow = New TableRow
+    oCol = New TableCell
+    oCol.Text = "Created/Uploaded By"
+    oCol.Font.Bold = True
+    oRow.Cells.Add(oCol)
+    oCol = New TableCell
+    oCol.Text = oVar.FK_VR_LorryReceipts_CreatedBy.UserFullName
+    oCol.Style.Add("text-align", "left")
+    oCol.ColumnSpan = "2"
+    oRow.Cells.Add(oCol)
+    oCol = New TableCell
+    oCol.Text = "Created/Uploaded On"
+    oCol.Font.Bold = True
+    oRow.Cells.Add(oCol)
+    oCol = New TableCell
+    oCol.Text = oVar.CreatedOn
+    oCol.Style.Add("text-align", "left")
+    oCol.ColumnSpan = "2"
+    oRow.Cells.Add(oCol)
+    oTbl.Rows.Add(oRow)
+
     form1.Controls.Add(oTbl)
-      Dim oTblvrLorryReceiptDetails As Table = Nothing
-      Dim oRowvrLorryReceiptDetails As TableRow = Nothing
-      Dim oColvrLorryReceiptDetails As TableCell = Nothing
+    Dim oTblvrLorryReceiptDetails As Table = Nothing
+    Dim oRowvrLorryReceiptDetails As TableRow = Nothing
+    Dim oColvrLorryReceiptDetails As TableCell = Nothing
     Dim ovrLorryReceiptDetailss As List(Of SIS.VR.vrLorryReceiptDetails) = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", oVar.ProjectID, oVar.MRNNo)
     If ovrLorryReceiptDetailss.Count > 0 Then
       oTblvrLorryReceiptDetails = New Table
@@ -268,7 +289,7 @@ Partial Class RP_vrLorryReceipts
       oRowvrLorryReceiptDetails = New TableRow
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Font.Bold = True
-      oColvrLorryReceiptDetails.Font.UnderLine = True
+      oColvrLorryReceiptDetails.Font.Underline = True
       oColvrLorryReceiptDetails.Font.Size = 10
       oColvrLorryReceiptDetails.CssClass = "grpHD"
       oColvrLorryReceiptDetails.Text = "Lorry Receipt Details"
@@ -285,79 +306,79 @@ Partial Class RP_vrLorryReceipts
       oColvrLorryReceiptDetails.Text = "Serial No"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "right")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "GR / LR No"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "left")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "GR / LR Date"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","center")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "center")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Supplier ID"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "left")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Supplier Invoice No"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "left")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Supplier Invoice Date"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","center")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "center")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Weight as per Invoice [KG]"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "right")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Weight Received [KG]"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "right")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "MaterialForm"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "left")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "No. of Packages as per Invoice"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "right")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "No. of Packages Received"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "right")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Cenvat Invoice Received"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "left")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oColvrLorryReceiptDetails = New TableCell
       oColvrLorryReceiptDetails.Text = "Remarks"
       oColvrLorryReceiptDetails.Font.Bold = True
       oColvrLorryReceiptDetails.CssClass = "colHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+      oColvrLorryReceiptDetails.Style.Add("text-align", "left")
       oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
       oTblvrLorryReceiptDetails.Rows.Add(oRowvrLorryReceiptDetails)
       For Each ovrLorryReceiptDetails As SIS.VR.vrLorryReceiptDetails In ovrLorryReceiptDetailss
@@ -365,67 +386,67 @@ Partial Class RP_vrLorryReceipts
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.SerialNo
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "right")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.GRorLRNo
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "left")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.GRorLRDate
-      oColvrLorryReceiptDetails.Style.Add("text-align","center")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "center")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.VR_BusinessPartner2_BPName
         oColvrLorryReceiptDetails.CssClass = "rowHD"
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "left")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.SupplierInvoiceNo
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "left")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.SupplierInvoiceDate
-      oColvrLorryReceiptDetails.Style.Add("text-align","center")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "center")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.WeightAsPerInvoiceInKG
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "right")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.WeightReceived
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "right")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.MaterialForm
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "left")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.NoOfPackagesAsPerInvoice
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "right")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.NoOfPackagesReceived
-      oColvrLorryReceiptDetails.Style.Add("text-align","right")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "right")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.CenvatInvoiceReceived
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "left")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oColvrLorryReceiptDetails = New TableCell
         oColvrLorryReceiptDetails.CssClass = "rowHD"
         oColvrLorryReceiptDetails.Text = ovrLorryReceiptDetails.Remarks
-      oColvrLorryReceiptDetails.Style.Add("text-align","left")
+        oColvrLorryReceiptDetails.Style.Add("text-align", "left")
         oRowvrLorryReceiptDetails.Cells.Add(oColvrLorryReceiptDetails)
         oTblvrLorryReceiptDetails.Rows.Add(oRowvrLorryReceiptDetails)
       Next

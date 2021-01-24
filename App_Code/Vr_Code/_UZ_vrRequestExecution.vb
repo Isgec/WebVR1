@@ -1749,12 +1749,17 @@ Namespace SIS.VR
       Return mRet
     End Function
     Public Shared Function GetConsumedInMaterial(ByVal ProjectID As String, ByVal Company As String) As Decimal
+      If Company = "700" Then 
+      ElseIf Company = "651" Then
+      Else
+        Company = "200"
+      End If
       Dim mRet As Decimal = 0
       Dim Sql As String = ""
       Sql &= "select ISNULL(sum(aa.t_oamt),0) as Amount from ttdpur401" & Company.Trim & " as aa  "
       Sql &= "inner join ttdpur400" & Company.Trim & " as bb on aa.t_orno=bb.t_orno "
       Sql &= "where aa.t_cspa='99050500' "
-      Sql &= "and   bb.t_cotp='P01' "
+      Sql &= "and   bb.t_cotp IN ('P01','C01','RC0','RC1') "
       Sql &= "and   aa.t_oltp in (2,4) "
       Sql &= "and   aa.t_cprj = '" & ProjectID.ToUpper & "'"
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())

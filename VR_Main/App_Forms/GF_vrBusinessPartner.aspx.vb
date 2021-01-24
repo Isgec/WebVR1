@@ -34,31 +34,65 @@ Partial Class GF_vrBusinessPartner
     HttpContext.Current.Server.ScriptTimeout = Integer.MaxValue
     Dim oBPs As List(Of lgBP) = lgBP.GetDataFromBaaN("SUP")
     For Each bp As lgBP In oBPs
+      Dim Found As Boolean = True
       Try
-        Dim tmp As New SIS.VR.vrTransporters
+        Dim tmp As SIS.VR.vrTransporters = SIS.VR.vrTransporters.vrTransportersGetByID(bp.t_bpid)
+        If tmp Is Nothing Then
+          Found = False
+          tmp = New SIS.VR.vrTransporters
+        End If
         tmp.TransporterID = bp.t_bpid
         tmp.TransporterName = bp.t_nama
-        SIS.VR.vrTransporters.InsertData(tmp)
+        If Not Found Then
+          SIS.VR.vrTransporters.InsertData(tmp)
+        Else
+          SIS.VR.vrTransporters.UpdateData(tmp)
+        End If
       Catch ex As Exception
       End Try
+      Found = True
       Try
-        Dim tmp As New SIS.VR.vrBusinessPartner
+        Dim tmp As SIS.VR.vrBusinessPartner = SIS.VR.vrBusinessPartner.vrBusinessPartnerGetByID(bp.t_bpid)
+        If tmp Is Nothing Then
+          Found = False
+          tmp = New SIS.VR.vrBusinessPartner
+        End If
         tmp.BPID = bp.t_bpid
         tmp.BPName = bp.t_nama
-        SIS.VR.vrBusinessPartner.InsertData(tmp)
+        If Not Found Then
+          SIS.VR.vrBusinessPartner.InsertData(tmp)
+        Else
+          SIS.VR.vrBusinessPartner.UpdateData(tmp)
+        End If
+      Catch ex As Exception
+      End Try
+      Found = True
+      Try
+        Dim tmp As SIS.QCM.qcmVendors = SIS.QCM.qcmVendors.qcmVendorsGetByID(bp.t_bpid)
+        If tmp Is Nothing Then
+          Found = False
+          tmp = New SIS.QCM.qcmVendors
+        End If
+        tmp.VendorID = bp.t_bpid
+        tmp.Description = bp.t_nama
+        If Not Found Then
+          SIS.QCM.qcmVendors.InsertData(tmp)
+        Else
+          SIS.QCM.qcmVendors.UpdateData(tmp)
+        End If
       Catch ex As Exception
       End Try
     Next
-    oBPs = lgBP.GetDataFromBaaN("CUS")
-    For Each bp As lgBP In oBPs
-      Try
-        Dim tmp As New SIS.VR.vrBusinessPartner
-        tmp.BPID = bp.t_bpid
-        tmp.BPName = bp.t_nama
-        SIS.VR.vrBusinessPartner.InsertData(tmp)
-      Catch ex As Exception
-      End Try
-    Next
+    'oBPs = lgBP.GetDataFromBaaN("CUS")
+    'For Each bp As lgBP In oBPs
+    '  Try
+    '    Dim tmp As New SIS.VR.vrBusinessPartner
+    '    tmp.BPID = bp.t_bpid
+    '    tmp.BPName = bp.t_nama
+    '    SIS.VR.vrBusinessPartner.InsertData(tmp)
+    '  Catch ex As Exception
+    '  End Try
+    'Next
     HttpContext.Current.Server.ScriptTimeout = st
   End Sub
 End Class

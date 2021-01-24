@@ -113,6 +113,14 @@ Namespace SIS.VR
       If Convert.ToDateTime(Results.VehicleOutDate) < Convert.ToDateTime(Results.VehicleInDate) Then
         Throw New Exception("Vehicle Out Date can not be less than vehicle in Date.")
       End If
+      If Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
+        Dim GRs As List(Of SIS.VR.vrLorryReceiptDetails) = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", Results.ProjectID, Results.MRNNo)
+        For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
+          If gr.IRNO = "" Then
+            Throw New Exception("IR is not linked, CAN NOT forward MRN to HO. Please Link IR in GR Details.")
+          End If
+        Next
+      End If
       With Results
         .LRStatusID = 2
         .CreatedBy = HttpContext.Current.Session("LoginID")
@@ -121,7 +129,7 @@ Namespace SIS.VR
       Results = SIS.VR.vrLorryReceipts.UpdateData(Results)
       Return Results
     End Function
-    Public Shared Function UZ_vrLorryReceiptsSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal ProjectID As String, ByVal TransporterID As String, ByVal CustomerID As String, ByVal VehicleTypeID As Int32, ByVal LRStatusID As Int32) As List(Of SIS.VR.vrLorryReceipts)
+    Public Shared Function UZ_vrLorryReceiptsSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal ProjectID As String, ByVal TransporterID As String, ByVal CustomerID As String, ByVal VehicleTypeID As Int32, ByVal LRStatusID As Int32, Pending As Boolean) As List(Of SIS.VR.vrLorryReceipts)
       Dim Results As List(Of SIS.VR.vrLorryReceipts) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
@@ -139,6 +147,7 @@ Namespace SIS.VR
             SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_VehicleTypeID", SqlDbType.Int, 10, IIf(VehicleTypeID = Nothing, 0, VehicleTypeID))
             SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_LRStatusID", SqlDbType.Int, 10, IIf(LRStatusID = Nothing, 0, LRStatusID))
           End If
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Pending", SqlDbType.Bit, 3, Pending)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, StartRowIndex)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, MaximumRows)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
@@ -158,6 +167,10 @@ Namespace SIS.VR
       End Using
       Return Results
     End Function
+    Public Shared Function vrLorryReceiptsSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal ProjectID As String, ByVal TransporterID As String, ByVal CustomerID As String, ByVal VehicleTypeID As Int32, ByVal LRStatusID As Int32, Pending As Boolean) As Integer
+      Return _RecordCount
+    End Function
+
     Public Shared Function UZ_vrLorryReceiptsInsert(ByVal Record As SIS.VR.vrLorryReceipts) As SIS.VR.vrLorryReceipts
       Dim MRNNo As Integer = 1
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())

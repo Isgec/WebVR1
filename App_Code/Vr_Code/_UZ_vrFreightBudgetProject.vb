@@ -6,7 +6,11 @@ Imports System.ComponentModel
 Namespace SIS.VR
   Partial Public Class vrFreightBudgetProject
     Public Property AthHandle As String = "J_FREIGHTBUDGET_" & HttpContext.Current.Session("FinanceCompany")
-    Public Property AthIndex As String = HttpContext.Current.Session("FinanceCompany") & "_" & ProjectID
+    Public ReadOnly Property AthIndex As String
+      Get
+        Return HttpContext.Current.Session("FinanceCompany") & "_" & ProjectID
+      End Get
+    End Property
     Public ReadOnly Property IsAttached() As Boolean
       Get
         Dim mRet As Boolean = False

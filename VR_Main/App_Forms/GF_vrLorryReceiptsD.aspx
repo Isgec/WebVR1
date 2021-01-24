@@ -210,7 +210,7 @@
         var nam = 'wTask' + pcnt;
         var url = self.location.href.replace('App_Forms/GF_','App_Print/RP_');
         url = url + '?pk=' + o.alt;
-        window.open(url, nam, 'left=20,top=20,width=1000,height=600,toolbar=1,resizable=1,scrollbars=1');
+        window.open(url, nam, 'left=20,top=20,width=1050,height=600,toolbar=1,resizable=1,scrollbars=1');
         return false;
       }
     </script>

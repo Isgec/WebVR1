@@ -207,7 +207,7 @@
           <asp:TextBox
             ID = "F_ProjectID"
             CssClass = "mypktxt"
-            Width="42px"
+            Width="70px"
             Text=""
             onfocus = "return this.select();"
             AutoCompleteType = "None"
@@ -245,7 +245,7 @@
           <asp:TextBox
             ID = "F_TransporterID"
             CssClass = "myfktxt"
-            Width="63px"
+            Width="80px"
             Text=""
             onfocus = "return this.select();"
             AutoCompleteType = "None"
@@ -354,8 +354,12 @@
         </td>
       </tr>
       <tr>
-        <td>&nbsp;</td>
-        <td></td>
+        <td class="alignright">
+          <b><asp:Label ID="Label1" runat="server" Text="Pending to Submit:" /></b>
+        </td>
+        <td>
+          <asp:CheckBox ID="F_Pending" runat="server" CssClass="mychk" AutoPostBack="true" />
+        </td>
       </tr>
       <tr>
         <td></td>
@@ -372,7 +376,7 @@
         var nam = 'wTask' + pcnt;
         var url = self.location.href.replace('App_Forms/GF_','App_Print/RP_');
         url = url + '?pk=' + o.alt;
-        window.open(url, nam, 'left=20,top=20,width=1000,height=600,toolbar=1,resizable=1,scrollbars=1');
+        window.open(url, nam, 'left=20,top=20,width=1050,height=600,toolbar=1,resizable=1,scrollbars=1');
         return false;
       }
     </script>
@@ -380,66 +384,66 @@
       <Columns>
         <asp:TemplateField HeaderText="EDIT">
           <ItemTemplate>
-            <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
+            <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
           </ItemTemplate>
           <ItemStyle CssClass="alignCenter" />
           <HeaderStyle HorizontalAlign="Center" Width="30px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="PRINT">
           <ItemTemplate>
-            <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
+            <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
           </ItemTemplate>
           <ItemStyle CssClass="alignCenter" />
           <HeaderStyle HorizontalAlign="Center" Width="30px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Project" SortExpression="IDM_Projects2_Description">
           <ItemTemplate>
-             <asp:Label ID="L_ProjectID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("ProjectID") %>' Text='<%# Eval("IDM_Projects2_Description") %>'></asp:Label>
+             <asp:Label ID="L_ProjectID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("ProjectID") %>' Text='<%# Eval("IDM_Projects2_Description") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="MRN No" SortExpression="MRNNo">
           <ItemTemplate>
-            <asp:Label ID="LabelMRNNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("MRNNo") %>'></asp:Label>
+            <asp:Label ID="LabelMRNNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("MRNNo") %>'></asp:Label>
           </ItemTemplate>
           <ItemStyle CssClass="alignCenter" />
           <HeaderStyle CssClass="alignright" Width="80px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="MRN Date" SortExpression="MRNDate">
           <ItemTemplate>
-            <asp:Label ID="LabelMRNDate" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("MRNDate") %>'></asp:Label>
+            <asp:Label ID="LabelMRNDate" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("MRNDate") %>'></asp:Label>
           </ItemTemplate>
           <ItemStyle CssClass="alignCenter" />
         <HeaderStyle CssClass="" Width="90px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Transporter" SortExpression="VR_Transporters7_TransporterName">
           <ItemTemplate>
-             <asp:Label ID="L_TransporterID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("TransporterID") %>' Text='<%# Eval("VR_Transporters7_TransporterName") %>'></asp:Label>
+             <asp:Label ID="L_TransporterID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("TransporterID") %>' Text='<%# Eval("VR_Transporters7_TransporterName") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Vehicle No" SortExpression="VehicleRegistrationNo">
           <ItemTemplate>
-            <asp:Label ID="LabelVehicleRegistrationNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("VehicleRegistrationNo") %>'></asp:Label>
+            <asp:Label ID="LabelVehicleRegistrationNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("VehicleRegistrationNo") %>'></asp:Label>
           </ItemTemplate>
           <ItemStyle CssClass="" />
         <HeaderStyle CssClass="" Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Vehicle Type ID" SortExpression="VR_VehicleTypes8_cmba">
           <ItemTemplate>
-             <asp:Label ID="L_VehicleTypeID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("VehicleTypeID") %>' Text='<%# Eval("VR_VehicleTypes8_cmba") %>'></asp:Label>
+             <asp:Label ID="L_VehicleTypeID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("VehicleTypeID") %>' Text='<%# Eval("VR_VehicleTypes8_cmba") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="LR Status" SortExpression="VR_LorryReceiptStatus4_Description">
           <ItemTemplate>
-             <asp:Label ID="L_LRStatusID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("LRStatusID") %>' Text='<%# Eval("VR_LorryReceiptStatus4_Description") %>'></asp:Label>
+             <asp:Label ID="L_LRStatusID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("LRStatusID") %>' Text='<%# Eval("VR_LorryReceiptStatus4_Description") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Forward">
           <ItemTemplate>
-            <asp:ImageButton ID="cmdInitiateWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("InitiateWFVisible") %>' Enabled='<%# EVal("InitiateWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Forward" SkinID="forward" OnClientClick='<%# "return Page_ClientValidate(""Initiate" & Container.DataItemIndex & """) && confirm(""Forward record ?"");" %>' CommandName="InitiateWF" CommandArgument='<%# Container.DataItemIndex %>' />
+            <asp:ImageButton ID="cmdInitiateWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("InitiateWFVisible") %>' Enabled='<%# EVal("InitiateWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Forward" SkinID="forward" OnClientClick='<%# "return Page_ClientValidate(""Initiate" & Container.DataItemIndex & """) && confirm(""Please link IRN (if NOT linked), then submit MRN to HO ?"");" %>' CommandName="InitiateWF" CommandArgument='<%# Container.DataItemIndex %>' />
           </ItemTemplate>
           <ItemStyle CssClass="alignCenter" />
           <HeaderStyle HorizontalAlign="Center" Width="30px" />
@@ -464,6 +468,7 @@
         <asp:ControlParameter ControlID="F_VehicleTypeID" PropertyName="SelectedValue" Name="VehicleTypeID" Type="Int32" Size="10" />
         <asp:ControlParameter ControlID="F_LRStatusID" PropertyName="SelectedValue" Name="LRStatusID" Type="Int32" Size="10" />
         <asp:ControlParameter ControlID="F_CustomerID" PropertyName="Text" Name="CustomerID" Type="String" Size="9" />
+        <asp:ControlParameter ControlID="F_Pending" PropertyName="Checked" Name="Pending" Type="Boolean" Size="3" />
         <asp:Parameter Name="SearchState" Type="Boolean" Direction="Input" DefaultValue="false" />
         <asp:Parameter Name="SearchText" Type="String" Direction="Input" DefaultValue="" />
       </SelectParameters>
@@ -478,6 +483,7 @@
     <asp:AsyncPostBackTrigger ControlID="F_VehicleTypeID" />
     <asp:AsyncPostBackTrigger ControlID="F_LRStatusID" />
     <asp:AsyncPostBackTrigger ControlID="F_CustomerID" />
+    <asp:AsyncPostBackTrigger ControlID="F_Pending" />
     <asp:PostBackTrigger ControlID="cmdFileUpload" />
     <asp:PostBackTrigger ControlID="cmdDownload" />
 

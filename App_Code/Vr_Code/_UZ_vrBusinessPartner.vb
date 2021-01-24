@@ -70,49 +70,36 @@ Namespace SIS.VR
   End Class
 End Namespace
 Public Class lgBP
-	Public t_bpid As String = ""
-	Public t_nama As String = ""
-	Public CustomerID As String = ""
-	Public CustomerName As String = ""
-	Public Shared Function GetDataFromBaaN(ByVal Typ As String, Optional ByVal ProjectID As String = "") As List(Of lgBP)
-		Dim Results As List(Of lgBP) = Nothing
-		Dim Sql As String = ""
-		If Typ <> "PRJ" Then
-      Sql = Sql & "select t_bpid,t_nama from ttccom100200 where ltrim(t_nama)<>'' and t_prst=2 and substring(t_bpid,1,3) = '" & Typ & "' and t_crdt > dateadd(day,-35, getdate()) order by t_nama"
+  Public Property t_bpid As String = ""
+  Public Property t_nama As String = ""
+  Public Property CustomerID As String = ""
+  Public Property CustomerName As String = ""
+  Public Shared Function GetDataFromBaaN(ByVal Typ As String, Optional ByVal ProjectID As String = "") As List(Of lgBP)
+    Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+    Dim Results As List(Of lgBP) = Nothing
+    Dim Sql As String = ""
+    If Typ <> "PRJ" Then
+      Sql = Sql & "select t_bpid,t_nama from ttccom100" & Comp & " where ltrim(t_nama)<>'' and t_prst=2 and substring(t_bpid,1,3) = '" & Typ & "' " 'and t_crdt > dateadd(day,-35, getdate()) order by t_nama"
     Else
-			Sql = Sql & "select aa.t_cprj as t_bpid, aa.t_dsca as t_nama, bb.t_ofbp as CustomerID, cc.t_nama as CustomerName from ttcmcs052200 aa inner join ttppdm740200 bb on aa.t_cprj = bb.t_cprj inner join ttccom100200 as cc on bb.t_ofbp = cc.t_bpid where aa.t_cprj='" & ProjectID & "'"
-		End If
-		Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
-			Using Cmd As SqlCommand = Con.CreateCommand()
-				Cmd.CommandType = CommandType.Text
-				Cmd.CommandText = Sql
-				Results = New List(Of lgBP)()
-				Con.Open()
-				Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-				While (Reader.Read())
-					Results.Add(New lgBP(Reader))
-				End While
-				Reader.Close()
-			End Using
-		End Using
-		Return Results
-	End Function
+      Sql = Sql & "select aa.t_cprj as t_bpid, aa.t_dsca as t_nama, bb.t_ofbp as CustomerID, cc.t_nama as CustomerName from ttcmcs052" & Comp & " aa inner join ttppdm740" & Comp & " bb on aa.t_cprj = bb.t_cprj inner join ttccom100" & Comp & " as cc on bb.t_ofbp = cc.t_bpid where aa.t_cprj='" & ProjectID & "'"
+    End If
+    Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+      Using Cmd As SqlCommand = Con.CreateCommand()
+        Cmd.CommandType = CommandType.Text
+        Cmd.CommandText = Sql
+        Results = New List(Of lgBP)()
+        Con.Open()
+        Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+        While (Reader.Read())
+          Results.Add(New lgBP(Reader))
+        End While
+        Reader.Close()
+      End Using
+    End Using
+    Return Results
+  End Function
   Public Sub New(ByVal Reader As SqlDataReader)
-    Try
-      For Each pi As System.Reflection.PropertyInfo In Me.GetType.GetProperties
-        If pi.MemberType = Reflection.MemberTypes.Property Then
-          Try
-            If Convert.IsDBNull(Reader(pi.Name)) Then
-              CallByName(Me, pi.Name, CallType.Let, String.Empty)
-            Else
-              CallByName(Me, pi.Name, CallType.Let, Reader(pi.Name))
-            End If
-          Catch ex As Exception
-          End Try
-        End If
-      Next
-    Catch ex As Exception
-    End Try
+    SIS.SYS.SQLDatabase.DBCommon.NewObj(Me, Reader)
   End Sub
   Public Sub New()
   End Sub
