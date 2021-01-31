@@ -94,12 +94,14 @@ Partial Class EF_vrLorryReceiptDetails
     Dim SupplierID As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierID"), TextBox).Text
     Dim BillNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox).Text
     Dim BillDate As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox).Text
-    test.Show(ProjectID, SupplierID, "", "")
+    Dim MrnNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_MRNNo"), TextBox).Text
+    Dim oMrn As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID, MrnNo)
+    test.Show(ProjectID, SupplierID, oMrn.TransporterID, "", "")
   End Sub
-  Private Sub test_Execute(IRNo As String) Handles test.Execute
+  Private Sub test_Execute(IRNo As String, ProjectID As String) Handles test.Execute
     If IRNo = "" Then Exit Sub
     CType(FVvrLorryReceiptDetails.FindControl("F_IRNO"), TextBox).Text = IRNo
-    Dim oIR As SIS.VR.irnList = SIS.VR.irnList.GetByID(IRNo)
+    Dim oIR As SIS.VR.irnList = SIS.VR.irnList.GetByID(IRNo, ProjectID)
     If oIR IsNot Nothing Then
       Dim BillNo As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox)
       Dim BillDate As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox)

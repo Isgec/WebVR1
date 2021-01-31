@@ -347,6 +347,10 @@ Partial Class GF_vrLorryReceipts
     If Not Page.ClientScript.IsClientScriptBlockRegistered("validateFK_VR_LorryReceipts_TransporterID") Then
       Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "validateFK_VR_LorryReceipts_TransporterID", validateScriptFK_VR_LorryReceipts_TransporterID)
     End If
+    F_Pending.Checked = False
+    If Not Session("F_Pending") Is Nothing Then
+      F_Pending.Checked = Convert.ToBoolean(Session("F_Pending"))
+    End If
   End Sub
   <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_VR_LorryReceipts_ProjectID(ByVal value As String) As String
@@ -425,6 +429,7 @@ Partial Class GF_vrLorryReceipts
     Dim st As Long = HttpContext.Current.Server.ScriptTimeout
     HttpContext.Current.Server.ScriptTimeout = Integer.MaxValue
     Dim PrjID As String = ""
+    Dim Project As String = ""
     Dim CardNo As String = ""
     Try
       With F_FileUpload
@@ -453,9 +458,36 @@ Partial Class GF_vrLorryReceipts
             End If
             Dim MrnNo As String = ""
             Dim tMrnNo As String = ""
+            Dim CompanyChecked As Boolean = False
             For I As Integer = 3 To 9000
               PrjID = wsD.Cells(I, 1).Text
               If PrjID = String.Empty Then Exit For
+              Project = PrjID
+              If Not CompanyChecked Then
+                CompanyChecked = True
+                Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+                Dim cmp As String = SIS.VR.irnList.GetProjectCompany(PrjID)
+                If cmp <> Comp Then
+                  If Not SIS.VR.vrLorryReceipts.IsProjectMRNExists(PrjID) Then
+                    Dim cmpName As String = cmp
+                    Select Case cmp
+                      Case "200"
+                        cmpName = "ISGEC"
+                      Case "700"
+                        cmpName = "REDECAM"
+                      Case "651"
+                        cmpName = "ISGEC COVEMA LTD."
+                    End Select
+                    Dim message As String = New JavaScriptSerializer().Serialize("Please Change company to " & cmpName & " to upload MRN for " & PrjID)
+                    Dim script As String = String.Format("alert({0});", message)
+                    ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+                    wsD.Dispose()
+                    wsG.Dispose()
+                    xlP.Dispose()
+                    Exit Sub
+                  End If
+                End If
+              End If
               MrnNo = wsD.Cells(I, 3).Text
               If MrnNo <> String.Empty Then Continue For
               tMrnNo = wsD.Cells(I, 2).Text
@@ -783,64 +815,80 @@ Partial Class GF_vrLorryReceipts
             wsG.Dispose()
             xlP.Dispose()
           End Using
-          Dim FileNameForUser As String = F_FileUpload.FileName
-          If IO.File.Exists(tmpFile) Then
-            '===============
-            'Reverse Update
-            Dim FileInfo As IO.FileInfo = New IO.FileInfo(tmpFile)
-            Dim xlPk As ExcelPackage = New ExcelPackage(FileInfo)
-
-            '1.
-            Dim xlWS As ExcelWorksheet = xlPk.Workbook.Worksheets("SUP")
-            Dim oBPs As List(Of lgBP) = lgBP.GetDataFromBaaN("SUP")
-            Dim r As Integer = 1
-            Dim c As Integer = 1
-            Dim cnt As Integer = 1
-            With xlWS
-              .Cells.Clear()
-              .Cells(r, 2).Value = ""
-              .Cells(r, 1).Value = "---NOT IN LIST---"
-              r += 1
-              For Each bp As lgBP In oBPs
-                .Cells(r, 2).Value = bp.t_bpid
-                .Cells(r, 1).Value = bp.t_nama
-                r += 1
-              Next
-            End With
-            xlWS = xlPk.Workbook.Worksheets("VType")
-            Dim oVTyps As List(Of SIS.VR.vrVehicleTypes) = SIS.VR.vrVehicleTypes.vrVehicleTypesSelectList("")
-            r = 1
-            c = 1
-            With xlWS
-              .Cells.Clear()
-              .Cells(r, 2).Value = ""
-              .Cells(r, 1).Value = "---NOT IN LIST---"
-              .Cells(r, 3).Value = 0
-              .Cells(r, 4).Value = 0
-              .Cells(r, 5).Value = 0
-              r += 1
-              For Each vt As SIS.VR.vrVehicleTypes In oVTyps
-                .Cells(r, 1).Value = vt.cmba
-                .Cells(r, 2).Value = vt.VehicleTypeID
-                .Cells(r, 3).Value = vt.LengthInFt
-                .Cells(r, 4).Value = vt.WidthInFt
-                .Cells(r, 5).Value = vt.HeightInFt
-                r += 1
-              Next
-            End With
-            xlPk.Save()
-            xlWS.Dispose()
-            xlPk.Dispose()
-            'end of reverse update
-            '======================
-            Response.Clear()
-            Response.AppendHeader("content-disposition", "attachment; filename=" & FileNameForUser)
-            Response.ContentType = SIS.SYS.Utilities.ApplicationSpacific.ContentType(FileNameForUser)
-            Response.WriteFile(tmpFile)
-            HttpContext.Current.Server.ScriptTimeout = st
-            Response.End()
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
+            Session("F_ProjectID") = Project
+            Session("F_Pending") = True
+            F_ProjectID.Text = Project
+            F_Pending.Checked = True
+            ODSvrLorryReceipts.SelectParameters("ProjectID").DefaultValue = PrjID
+            ODSvrLorryReceipts.SelectParameters("Pending").DefaultValue = True
+            GVvrLorryReceipts.DataBind()
+            'Dim message As String = New JavaScriptSerializer().Serialize("MRN Uploaded and Listed below, Pl. Link IRN and Submit to HO.")
+            'Dim script As String = String.Format("alert({0});", message)
+            'ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+            cpe1.Collapsed = True
+            cpe1.ClientState = "true"
+            ready.InnerHtml = "<script>alert('MRN Uploaded and Listed, Pl. Link IRN and Submit to HO. After submitting MRN to HO, DOWNLOAD updated Excel.');</script>"
+            Exit Sub
           End If
-        End If
+          Dim FileNameForUser As String = F_FileUpload.FileName
+            If IO.File.Exists(tmpFile) Then
+              '===============
+              'Reverse Update
+              Dim FileInfo As IO.FileInfo = New IO.FileInfo(tmpFile)
+              Dim xlPk As ExcelPackage = New ExcelPackage(FileInfo)
+
+              '1.
+              Dim xlWS As ExcelWorksheet = xlPk.Workbook.Worksheets("SUP")
+              Dim oBPs As List(Of lgBP) = lgBP.GetDataFromBaaN("SUP")
+              Dim r As Integer = 1
+              Dim c As Integer = 1
+              Dim cnt As Integer = 1
+              With xlWS
+                .Cells.Clear()
+                .Cells(r, 2).Value = ""
+                .Cells(r, 1).Value = "---NOT IN LIST---"
+                r += 1
+                For Each bp As lgBP In oBPs
+                  .Cells(r, 2).Value = bp.t_bpid
+                  .Cells(r, 1).Value = bp.t_nama
+                  r += 1
+                Next
+              End With
+              xlWS = xlPk.Workbook.Worksheets("VType")
+              Dim oVTyps As List(Of SIS.VR.vrVehicleTypes) = SIS.VR.vrVehicleTypes.vrVehicleTypesSelectList("")
+              r = 1
+              c = 1
+              With xlWS
+                .Cells.Clear()
+                .Cells(r, 2).Value = ""
+                .Cells(r, 1).Value = "---NOT IN LIST---"
+                .Cells(r, 3).Value = 0
+                .Cells(r, 4).Value = 0
+                .Cells(r, 5).Value = 0
+                r += 1
+                For Each vt As SIS.VR.vrVehicleTypes In oVTyps
+                  .Cells(r, 1).Value = vt.cmba
+                  .Cells(r, 2).Value = vt.VehicleTypeID
+                  .Cells(r, 3).Value = vt.LengthInFt
+                  .Cells(r, 4).Value = vt.WidthInFt
+                  .Cells(r, 5).Value = vt.HeightInFt
+                  r += 1
+                Next
+              End With
+              xlPk.Save()
+              xlWS.Dispose()
+              xlPk.Dispose()
+              'end of reverse update
+              '======================
+              Response.Clear()
+              Response.AppendHeader("content-disposition", "attachment; filename=" & FileNameForUser)
+              Response.ContentType = SIS.SYS.Utilities.ApplicationSpacific.ContentType(FileNameForUser)
+              Response.WriteFile(tmpFile)
+              HttpContext.Current.Server.ScriptTimeout = st
+              Response.End()
+            End If
+          End If
       End With
     Catch ex As Exception
       Dim message As String = New JavaScriptSerializer().Serialize(ex.Message.ToString() & " : " & CardNo)
@@ -861,6 +909,25 @@ over:
       Dim script As String = String.Format("alert({0});", message)
       ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
       Exit Sub
+    End If
+    Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+    Dim cmp As String = SIS.VR.irnList.GetProjectCompany(ProjectID)
+    If cmp <> Comp Then
+      If Not SIS.VR.vrLorryReceipts.IsProjectMRNExists(ProjectID) Then
+        Dim cmpName As String = cmp
+        Select Case cmp
+          Case "200"
+            cmpName = "ISGEC"
+          Case "700"
+            cmpName = "REDECAM"
+          Case "651"
+            cmpName = "ISGEC COVEMA LTD."
+        End Select
+        Dim message As String = New JavaScriptSerializer().Serialize("Please Change company to " & cmpName & " to download MRN Template for " & ProjectID)
+        Dim script As String = String.Format("alert({0});", message)
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+        Exit Sub
+      End If
     End If
     Dim TemplateName As String = "MRN_Template.xlsm"
     Dim tmpFile As String = Server.MapPath("~/App_Templates/" & TemplateName)
@@ -1011,6 +1078,10 @@ over:
 
   End Sub
 
+  Private Sub F_Pending_CheckedChanged(sender As Object, e As EventArgs) Handles F_Pending.CheckedChanged
+    Session("F_Pending") = F_Pending.Checked
+    InitGridPage()
+  End Sub
 End Class
 Public Class lgBP
   Public Property t_bpid As String = ""
@@ -1018,12 +1089,13 @@ Public Class lgBP
   Public Property CustomerID As String = ""
   Public Property CustomerName As String = ""
   Public Shared Function GetDataFromBaaN(ByVal Typ As String, Optional ByVal ProjectID As String = "") As List(Of lgBP)
+    Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
     Dim Results As List(Of lgBP) = Nothing
     Dim Sql As String = ""
     If Typ <> "PRJ" Then
-      Sql = Sql & "select t_bpid,t_nama from ttccom100200 where ltrim(t_nama)<>'' and t_prst=2 and substring(t_bpid,1,3) = '" & Typ & "' order by t_nama"
+      Sql = Sql & "select t_bpid,t_nama from ttccom100" & Comp & " where ltrim(t_nama)<>'' and t_prst=2 and substring(t_bpid,1,3) = '" & Typ & "' order by t_nama"
     Else
-      Sql = Sql & "select aa.t_cprj as t_bpid, aa.t_dsca as t_nama, bb.t_ofbp as CustomerID, cc.t_nama as CustomerName from ttcmcs052200 aa inner join ttppdm740200 bb on aa.t_cprj = bb.t_cprj inner join ttccom100200 as cc on bb.t_ofbp = cc.t_bpid where aa.t_cprj='" & ProjectID & "'"
+      Sql = Sql & "select aa.t_cprj as t_bpid, aa.t_dsca as t_nama, bb.t_ofbp as CustomerID, cc.t_nama as CustomerName from ttcmcs052" & Comp & " aa inner join ttppdm740" & Comp & " bb on aa.t_cprj = bb.t_cprj inner join ttccom100" & Comp & " as cc on bb.t_ofbp = cc.t_bpid where aa.t_cprj='" & ProjectID & "'"
     End If
     Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
       Using Cmd As SqlCommand = Con.CreateCommand()

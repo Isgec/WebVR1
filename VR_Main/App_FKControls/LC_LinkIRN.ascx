@@ -25,12 +25,14 @@
   </style>
 <asp:UpdatePanel runat="server">
   <ContentTemplate>
-    <asp:Panel ID="pnl1" runat="server" Style="background-color: white; display: none; height: 350px; border-radius: 6px;" Width='800px'>
-      <asp:Panel ID="pnlHeader" runat="server" Style="width: 100%; height: 33px; padding-top: 8px; text-align: center; border-bottom: 1pt solid lightgray;">
+    <asp:Panel ID="pnl1" runat="server" Style="background-color: white; display: none; height: 450px; border-radius: 6px;" Width='800px'>
+      <asp:Panel ID="pnlHeader" runat="server" Style="width: 100%; padding-top: 8px; text-align: center; border-bottom: 1pt solid lightgray;">
         <asp:Label ID="HeaderText" runat="server" Font-Size="16px" Font-Bold="true" Text='My Modal Text'></asp:Label>
-      </asp:Panel>
-      <asp:Panel ID="modalContent" runat="server" Style="width: 98%; height: 250px; padding: 4px; overflow-y: scroll;">
+        <div id="divGRInfo" runat="server">
+        </div>
         <asp:CheckBox ID="F_ShowAll" runat="server" Font-Bold="true" AutoPostBack="true" Text="Show All [Including Already Linked]: " OnCheckedChanged="F_ShowAll_CheckedChanged" TextAlign="Left" />
+      </asp:Panel>
+      <asp:Panel ID="modalContent" runat="server" Style="width: 98%; height: 300px; padding: 4px; overflow-y: scroll;">
         <asp:GridView ID="GVirnList" SkinID="gv_silver" Width="100%" runat="server" AllowPaging="False" AutoGenerateColumns="False" DataSourceID="ODSirnList" DataKeyNames="IRNO">
           <Columns>
             <asp:TemplateField>
@@ -50,15 +52,22 @@
               <ItemTemplate>
                 <asp:Label ID="LabelSupplierName" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# EVal("SupplierName") %>'></asp:Label>
               </ItemTemplate>
-              <ItemStyle CssClass="alignCenter" />
-              <HeaderStyle CssClass="alignCenter" Width="150px" />
+              <ItemStyle CssClass="alignleft" />
+              <HeaderStyle CssClass="alignleft" Width="150px" />
+            </asp:TemplateField>
+            <asp:TemplateField HeaderText="Transporter">
+              <ItemTemplate>
+                <asp:Label ID="LabelTransporterName" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# EVal("TransporterName") %>'></asp:Label>
+              </ItemTemplate>
+              <ItemStyle CssClass="alignleft" />
+              <HeaderStyle CssClass="alignleft" Width="150px" />
             </asp:TemplateField>
             <asp:TemplateField HeaderText="Bill No">
               <ItemTemplate>
                 <asp:Label ID="LabelBillNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# EVal("BillNo") %>'></asp:Label>
               </ItemTemplate>
               <ItemStyle CssClass="alignCenter" />
-              <HeaderStyle CssClass="alignCenter" Width="60px" />
+              <HeaderStyle CssClass="alignCenter" Width="80px" />
             </asp:TemplateField>
             <asp:TemplateField HeaderText="Bill Date">
               <ItemTemplate>
@@ -98,6 +107,7 @@
             <asp:ControlParameter ControlID="F_ShowAll" PropertyName="Checked" Name="ShowAll" Type="Boolean" DefaultValue="False" />
             <asp:Parameter Name="ProjectID" Type="String" Direction="Input" DefaultValue="" />
             <asp:Parameter Name="SupplierID" Type="String" Direction="Input" DefaultValue="" />
+            <asp:Parameter Name="TransporterID" Type="String" Direction="Input" DefaultValue="" />
             <asp:Parameter Name="BillNo" Type="String" Direction="Input" DefaultValue="" />
             <asp:Parameter Name="BillDate" Type="String" Direction="Input" DefaultValue="" />
           </SelectParameters>

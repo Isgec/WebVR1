@@ -58,4 +58,7 @@ Public Enum BillStatus
 	AcceptedByCentralAccount = 5
 	PaidByCentralAccount = 6
 End Enum
-
+Public Enum enumMRNStatus
+  Free = 1
+  SubmittedToHO = 2
+End Enum

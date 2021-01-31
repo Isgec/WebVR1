@@ -43,7 +43,7 @@
                     <td>
                       <asp:TextBox
                         ID="F_ProjectID"
-                        Width="42px"
+                        Width="70px"
                         Text='<%# Bind("ProjectID") %>'
                         CssClass="mypktxt"
                         Enabled="False"
@@ -126,7 +126,7 @@
                         CssClass="myfktxt"
                         Text='<%# Bind("TransporterID") %>'
                         AutoCompleteType="None"
-                        Width="63px"
+                        Width="72px"
                         onfocus="return this.select();"
                         ToolTip="Enter value for Transporter."
                         ValidationGroup="vrLorryReceipts"
@@ -221,7 +221,7 @@
                         CssClass="myfktxt"
                         Text='<%# Bind("CustomerID") %>'
                         AutoCompleteType="None"
-                        Width="63px"
+                        Width="72px"
                         onfocus="return this.select();"
                         ToolTip="Enter value for Customer."
                         onblur="script_vrLorryReceipts.validate_CustomerID(this);"
@@ -713,7 +713,7 @@
                 <div class="pagedata">
                   <asp:UpdatePanel ID="UPNLvrLorryReceiptDetails" runat="server">
                     <ContentTemplate>
-                      <table width="100%">
+                      <table style="width:100%;">
                         <tr>
                           <td class="sis_formview">
                             <LGM:ToolBar0
@@ -743,49 +743,57 @@
                                   <ItemTemplate>
                                     <asp:Label ID="LabelSerialNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("SerialNo") %>'></asp:Label>
                                   </ItemTemplate>
-                                  <ItemStyle CssClass="alignright" />
-                                  <HeaderStyle CssClass="alignright" Width="40px" />
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="30px" />
                                 </asp:TemplateField>
-                                <asp:TemplateField HeaderText="GR / LR No" SortExpression="GRorLRNo">
+                                <asp:TemplateField HeaderText="Supplier" SortExpression="VR_BusinessPartner2_BPName">
                                   <ItemTemplate>
-                                    <asp:Label ID="LabelGRorLRNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("GRorLRNo") %>'></asp:Label>
-                                  </ItemTemplate>
-                                  <ItemStyle CssClass="" />
-                                  <HeaderStyle CssClass="" Width="100px" />
-                                </asp:TemplateField>
-                                <asp:TemplateField HeaderText="Supplier ID" SortExpression="VR_BusinessPartner2_BPName">
-                                  <ItemTemplate>
-                                    <asp:Label ID="L_SupplierID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("SupplierID") %>' Text='<%# Eval("VR_BusinessPartner2_BPName") %>'></asp:Label>
+                                    <asp:Label ID="L_SupplierID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("SupplierID") %>' Text='<%# Eval("VR_BusinessPartner2_BPName") %>'></asp:Label>
                                   </ItemTemplate>
                                   <HeaderStyle Width="100px" />
                                 </asp:TemplateField>
-                                <asp:TemplateField HeaderText="Supplier Invoice No" SortExpression="SupplierInvoiceNo">
+                                <asp:TemplateField HeaderText="Bill No" SortExpression="SupplierInvoiceNo">
                                   <ItemTemplate>
-                                    <asp:Label ID="LabelSupplierInvoiceNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("SupplierInvoiceNo") %>'></asp:Label>
+                                    <asp:Label ID="LabelSupplierInvoiceNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("SupplierInvoiceNo") %>'></asp:Label>
                                   </ItemTemplate>
-                                  <ItemStyle CssClass="" />
-                                  <HeaderStyle CssClass="" Width="100px" />
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="60px" />
                                 </asp:TemplateField>
-                                <asp:TemplateField HeaderText="Weight Received [KG]" SortExpression="WeightReceived">
+                                <asp:TemplateField HeaderText="Bill Date" SortExpression="SupplierInvoiceDate">
                                   <ItemTemplate>
-                                    <asp:Label ID="LabelWeightReceived" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("WeightReceived") %>'></asp:Label>
+                                    <asp:Label ID="LabelSupplierInvoiceDate" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("SupplierInvoiceDate") %>'></asp:Label>
                                   </ItemTemplate>
-                                  <ItemStyle CssClass="alignright" />
-                                  <HeaderStyle CssClass="alignright" Width="80px" />
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="80px" />
                                 </asp:TemplateField>
-                                <asp:TemplateField HeaderText="No. of Packages Received" SortExpression="NoOfPackagesReceived">
+                                <asp:TemplateField HeaderText="GR No" SortExpression="GRorLRNo">
                                   <ItemTemplate>
-                                    <asp:Label ID="LabelNoOfPackagesReceived" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("NoOfPackagesReceived") %>'></asp:Label>
+                                    <asp:Label ID="LabelGRorLRNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("GRorLRNo") %>'></asp:Label>
                                   </ItemTemplate>
-                                  <ItemStyle CssClass="alignright" />
-                                  <HeaderStyle CssClass="alignright" Width="80px" />
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="60px" />
                                 </asp:TemplateField>
-                                <asp:TemplateField HeaderText="Cenvat Invoice Received" SortExpression="CenvatInvoiceReceived">
+                                <asp:TemplateField HeaderText="GR Date" SortExpression="GRorLRDate">
                                   <ItemTemplate>
-                                    <asp:Label ID="LabelCenvatInvoiceReceived" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("CenvatInvoiceReceived") %>'></asp:Label>
+                                    <asp:Label ID="LabelGRorLRDate" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("GRorLRDate") %>'></asp:Label>
                                   </ItemTemplate>
-                                  <ItemStyle CssClass="" />
-                                  <HeaderStyle CssClass="" Width="50px" />
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="80px" />
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="IR No" SortExpression="IRNO">
+                                  <ItemTemplate>
+                                    <asp:Label ID="LabelIRNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("IRNO") %>'></asp:Label>
+                                  </ItemTemplate>
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="60px" />
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="LINK">
+                                  <ItemTemplate>
+                                    <asp:Button ID="cmdShowIRN" runat="server" CssClass="nt-but-danger" Visible='<%# Eval("ShowIRNVisible") %>' Text="Show IRN" CommandName="lgLinkIR" CommandArgument='<%# Container.DataItemIndex %>' />
+                                    <asp:Button ID="cmdDelink" runat="server" CssClass="nt-but-primary" Visible='<%# Eval("DelinkIRNVisible") %>' Text="Delink IRN" CommandName="lgDeLinkIR" CommandArgument='<%# Container.DataItemIndex %>' />
+                                  </ItemTemplate>
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="60px" />
                                 </asp:TemplateField>
                               </Columns>
                               <EmptyDataTemplate>
@@ -839,4 +847,5 @@
       </asp:ObjectDataSource>
     </div>
   </div>
+  <LGM:LC_LinkIRN ID="test" runat="server" />
 </asp:Content>

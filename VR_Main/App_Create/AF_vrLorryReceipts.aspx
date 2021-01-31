@@ -32,7 +32,7 @@
                       <asp:TextBox
                         ID="F_ProjectID"
                         CssClass="mypktxt"
-                        Width="42px"
+                        Width="72px"
                         Text='<%# Bind("ProjectID") %>'
                         AutoCompleteType="None"
                         onfocus="return this.select();"
@@ -81,7 +81,7 @@
                       <asp:TextBox
                         ID="F_RequestExecutionNo"
                         CssClass="myfktxt"
-                        Width="70px"
+                        Width="72px"
                         Text='<%# Bind("RequestExecutionNo") %>'
                         AutoCompleteType="None"
                         onfocus="return this.select();"
@@ -124,7 +124,7 @@
                         Text='<%# Bind("MRNNo") %>'
                         Enabled="False"
                         ToolTip="Value of MRN No."
-                        Width="70px"
+                        Width="72px"
                         CssClass="dmypktxt"
                         Style="text-align: right"
                         runat="server" />
@@ -177,7 +177,7 @@
                       <asp:TextBox
                         ID="F_TransporterID"
                         CssClass="myfktxt"
-                        Width="63px"
+                        Width="72px"
                         Text='<%# Bind("TransporterID") %>'
                         AutoCompleteType="None"
                         onfocus="return this.select();"
@@ -233,7 +233,7 @@
                       <asp:TextBox
                         ID="F_CustomerID"
                         CssClass="myfktxt"
-                        Width="63px"
+                        Width="72px"
                         Text='<%# Bind("CustomerID") %>'
                         AutoCompleteType="None"
                         onfocus="return this.select();"

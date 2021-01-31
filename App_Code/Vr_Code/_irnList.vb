@@ -9,6 +9,8 @@ Namespace SIS.VR
     Public Property IRNO As String = ""
     Public Property SupplierID As String = ""
     Public Property SupplierName As String = ""
+    Public Property TransporterID As String = ""
+    Public Property TransporterName As String = ""
     Public Property BillNo As String = ""
     Public Property BillDate As String = ""
     Public Property GRNo As String = ""
@@ -23,9 +25,15 @@ Namespace SIS.VR
       End Get
     End Property
     <DataObjectMethod(DataObjectMethodType.Select)>
-    Public Shared Function GetByID(IRNo As String) As SIS.VR.irnList
+    Public Shared Function GetByID(IRNo As String, Optional ProjectID As String = "") As SIS.VR.irnList
       Dim Results As SIS.VR.irnList = Nothing
       Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+      If ProjectID <> "" Then
+        Dim cmp = GetProjectCompany(ProjectID)
+        If cmp <> "" Then
+          Comp = cmp
+        End If
+      End If
       Dim Sql As String = ""
       Sql &= " select  "
       Sql &= "  ir.t_ninv as IRNo, "
@@ -34,9 +42,12 @@ Namespace SIS.VR
       Sql &= "  ir.t_isup as BillNo, "
       Sql &= "  ir.t_invd as BillDate, "
       Sql &= "  lgr.t_grno as GRNo, "
-      Sql &= "  lgr.t_grdt as GRDate "
+      Sql &= "  lgr.t_grdt as GRDate, "
+      Sql &= "  lgr.t_grbp as TransporterID, "
+      Sql &= "  gbp.t_nama as TransporterName "
       Sql &= " from ttfacp100" & Comp & " as ir "
       Sql &= " inner join ttfisg002" & Comp & " as lgr on ir.t_ninv = lgr.t_irno "
+      Sql &= " left outer join ttccom100" & Comp & " as gbp on gbp.t_bpid = lgr.t_grbp "
       Sql &= " where ir.t_ninv = " & IRNo
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
@@ -52,10 +63,39 @@ Namespace SIS.VR
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)>
-    Public Shared Function SelectList(ProjectID As String, SupplierID As String, BillNo As String, BillDate As String, ShowAll As Boolean) As List(Of SIS.VR.irnList)
+    Public Shared Function GetProjectCompany(ByVal ProjectID As String) As String
       Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+      Dim aComp() As String = ConfigurationManager.AppSettings("ERPComps").Split(",".ToCharArray)
+      Dim mRet As String = ""
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+        Con.Open()
+        For Each cmp As String In aComp
+          Dim Sql As String = "select top 1 isnull(t_cprj,'') from ttppdm600" & cmp & " where t_cprj='" & ProjectID.ToUpper & "'"
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = Sql
+            Dim Results As String = Cmd.ExecuteScalar
+            If Results <> "" Then
+              mRet = cmp
+              Exit For
+            End If
+          End Using
+        Next
+      End Using
+      Return mRet
+    End Function
+
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function SelectList(ProjectID As String, SupplierID As String, TransporterID As String, BillNo As String, BillDate As String, ShowAll As Boolean) As List(Of SIS.VR.irnList)
       Dim Results As New List(Of SIS.VR.irnList)
+      If ProjectID Is Nothing Then
+        Return Results
+      End If
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+      Dim cmp As String = GetProjectCompany(ProjectID)
+      If cmp <> "" Then
+        Comp = cmp
+      End If
       Dim Sql As String = ""
       Sql &= " select  "
       Sql &= "  ir.t_ninv as IRNo, "
@@ -64,12 +104,22 @@ Namespace SIS.VR
       Sql &= "  ir.t_isup as BillNo, "
       Sql &= "  ir.t_invd as BillDate, "
       Sql &= "  lgr.t_grno as GRNo, "
-      Sql &= "  lgr.t_grdt as GRDate "
+      Sql &= "  lgr.t_grdt as GRDate, "
+      Sql &= "  lgr.t_grbp as TransporterID, "
+      Sql &= "  gbp.t_nama as TransporterName "
       Sql &= " from ttfacp100" & Comp & " as ir "
       Sql &= " inner join ttfisg002" & Comp & " as lgr on ir.t_ninv = lgr.t_irno "
+      Sql &= " left outer join ttccom100" & Comp & " as gbp on gbp.t_bpid = lgr.t_grbp "
       Sql &= " where ir.t_cdf_irdt >= dateadd(d,-365,getdate()) "
       Sql &= " 	and ir.t_cdf_cprj='" & ProjectID & "' "
-      Sql &= "  and ir.t_ifbp='" & SupplierID & "' "
+      If cmp = HttpContext.Current.Session("FinanceCompany") Then
+        If SupplierID <> "" AndAlso SupplierID.Substring(0, 3) <> "CUS" Then
+          Sql &= "  and ir.t_ifbp='" & SupplierID & "' "
+        End If
+        If TransporterID <> "" Then
+          'Sql &= " 	and lgr.t_grbp = '" & TransporterID & "' "
+        End If
+      End If
       If BillNo <> "" Then
         Sql &= " 	and ir.t_isup = '" & BillNo & "' "
       End If

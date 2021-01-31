@@ -5,6 +5,48 @@ Imports System.Data.SqlClient
 Imports System.ComponentModel
 Namespace SIS.VR
   Partial Public Class vrLorryReceipts
+    Public ReadOnly Property IRLinkStatus As String
+      Get
+        Dim mRet As String = ""
+        Try
+          If LRStatusID = enumMRNStatus.SubmittedToHO Then
+            Return "N/A"
+          End If
+          Dim Linked As Integer = 0
+          Dim GRs As List(Of SIS.VR.vrLorryReceiptDetails) = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", ProjectID, MRNNo)
+          If GRs.Count <= 0 Then
+            Return "GR NOT FOUND"
+          End If
+          For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
+            If gr.IRNO <> "" Then
+              Linked += 1
+            End If
+          Next
+          If Linked < GRs.Count Then
+            mRet = GRs.Count - Linked & " of " & GRs.Count & " GR NOT Linked."
+          Else
+            mRet = "IRN Linked"
+          End If
+        Catch ex As Exception
+        End Try
+        Return mRet
+      End Get
+    End Property
+    Public Shared Function IsProjectMRNExists(ProjectID As String) As Boolean
+      Dim mRet As Boolean = False
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "Select isnull(count(*),0) from VR_LorryReceipts where projectid='" & ProjectID & "'"
+          Con.Open()
+          Dim cnt As Integer = Cmd.ExecuteScalar
+          If cnt > 0 Then
+            mRet = True
+          End If
+        End Using
+      End Using
+      Return mRet
+    End Function
     Public ReadOnly Property xl_MrnDate As String
       Get
         Dim mRet As String = ""
@@ -113,11 +155,14 @@ Namespace SIS.VR
       If Convert.ToDateTime(Results.VehicleOutDate) < Convert.ToDateTime(Results.VehicleInDate) Then
         Throw New Exception("Vehicle Out Date can not be less than vehicle in Date.")
       End If
+      Dim GRs As List(Of SIS.VR.vrLorryReceiptDetails) = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", Results.ProjectID, Results.MRNNo)
+      If GRs.Count <= 0 Then
+        Throw New Exception("NO GR entry found, can NOT forward to HO.")
+      End If
       If Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
-        Dim GRs As List(Of SIS.VR.vrLorryReceiptDetails) = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", Results.ProjectID, Results.MRNNo)
         For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
           If gr.IRNO = "" Then
-            Throw New Exception("IR is not linked, CAN NOT forward MRN to HO. Please Link IR in GR Details.")
+            Throw New Exception("IR is not linked, CAN NOT forward MRN to HO." & vbCrLf & "CLICK ON EDIT BUTTON TO LINK IR.")
           End If
         Next
       End If

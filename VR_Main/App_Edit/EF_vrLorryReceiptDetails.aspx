@@ -29,7 +29,7 @@
                     <td>
                       <asp:TextBox
                         ID="F_ProjectID"
-                        Width="42px"
+                        Width="70px"
                         Text='<%# Bind("ProjectID") %>'
                         CssClass="mypktxt"
                         Enabled="False"
@@ -155,9 +155,11 @@
                         Enabled="False"
                         CssClass="dmytxt"
                         Width="78px"
+                        ClientIDMode="Static"
                         Style="text-align: right"
                         runat="server" />
                       <asp:Button ID="cmdShowIRN" runat="server" CssClass="nt-but-danger" Text="Show IRN List" OnClick="cmdShowIRN_Click" />
+                      <asp:Button ID="cmdDelink" runat="server" CssClass="nt-but-primary" Text="Delink IRN" OnClientClick="$get('F_IRNO').value='';false;" />
                     </td>
                   </tr>
                   <tr>
