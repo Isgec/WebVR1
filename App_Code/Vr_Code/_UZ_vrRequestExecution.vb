@@ -1192,14 +1192,49 @@ Namespace SIS.VR
       With sb
         oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(oRE.SRNNo, "")
         .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
+        .AppendLine("<tr><td colspan='2' style='font-style:italic;text-align:right;font;font-size:10px;'>Format:Rev-1,Date:15-01-2021</td></tr>")
         If CancellationEMail Then
           .AppendLine("<tr><td colspan=""2"" style=""color:red"" align=""center""><h3><b>MEMO FOR LIFTING THE MATERIAL-CANCELLED</b></h2></td></tr>")
         Else
           .AppendLine("<tr><td colspan=""2"" align=""center""><h3><b>MEMO FOR LIFTING THE MATERIAL</b></h2></td></tr>")
         End If
+        Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+        Dim CompName As String = ""
+        Dim CompAdd1 As String = ""
+        Dim CompAdd2 As String = ""
+        Dim CompGSTIN As String = ""
+        CompName = "ISGEC HEAVY ENGINEERING LIMITED"
+        CompAdd1 = "Saraswati Corporate Center, A-4, Sector-24"
+        CompAdd2 = "Noida, Gautam Buddha Nagar, UP-201301"
+        CompGSTIN = "09AAACT5540K2Z4"
+        Select Case Comp
+          Case "200"
+            CompName = "ISGEC HEAVY ENGINEERING LIMITED"
+            CompAdd1 = "Saraswati Corporate Center, A-4, Sector-24"
+            CompAdd2 = "Noida, Gautam Buddha Nagar, UP-201301"
+            CompGSTIN = "09AAACT5540K2Z4"
+          Case "700"
+            CompName = "Isgec Redecam Enviro Solutions Private Limited"
+            CompAdd1 = "A-5, Sector-63"
+            CompAdd2 = "Noida, Gautam Buddha Nagar, UP-201301"
+            CompGSTIN = "09AAECI3897A2ZG"
+          Case "651"
+            CompName = "ISGEC COVEMA LTD."
+            CompAdd1 = "Saraswati Corporate Center, A-4, Sector-24"
+            CompAdd2 = "Noida, Gautam Buddha Nagar, UP-201301"
+            CompGSTIN = "09AAACI1229C2Z2"
+        End Select
+        .AppendLine("<tr><td style='background-color:lightgray'><b>Company Name</b></td>")
+        .AppendLine("<td style='font-size:14px;font-weight:bold;'>" & CompName & "</td></tr>")
+        .AppendLine("<tr><td style='background-color:lightgray'><b>Address</b></td>")
+        .AppendLine("<td style='font-size:12px;font-weight:bold;'>" & CompAdd1 & "<br/>" & CompAdd2 & "</td></tr>")
+        .AppendLine("<tr><td style='background-color:lightgray'><b>ERP Code</b></td>")
+        .AppendLine("<td style='font-size:12px;font-weight:bold;'>" & Comp & "</td></tr>")
+        .AppendLine("<tr><td style='background-color:lightgray'><b>GSTIN</b></td>")
+        .AppendLine("<td style='font-size:12px;font-weight:bold;'>" & CompGSTIN & "</td></tr>")
         'Main Execution
-        .AppendLine("<tr><td bgcolor=""lightgray""><b>Execution No.</b></td>")
-        .AppendLine("<td>" & oRE.SRNNo & "</td></tr>")
+        .AppendLine("<tr><td style='background-color:lightgray'><b>Execution No.</b></td>")
+        .AppendLine("<td style='font-size:14px;font-weight:bold;'>" & oRE.SRNNo & "</td></tr>")
         .AppendLine("<tr><td><b>Project Name &  Code</b></td>")
         .AppendLine("<td>" & oVRs(0).FK_VR_VehicleRequest_ProjectID.Description & " [" & oVRs(0).ProjectID & "]" & "</td></tr>")
         .AppendLine("<tr><td><b>Name of Shipper / Supplier with Address and PIN CODE <br/>Name of the Contact person & Contact Number</b></td>")
@@ -1760,6 +1795,7 @@ Namespace SIS.VR
       Sql &= "inner join ttdpur400" & Company.Trim & " as bb on aa.t_orno=bb.t_orno "
       Sql &= "where aa.t_cspa='99050500' "
       Sql &= "and   bb.t_cotp IN ('P01','C01','RC0','RC1') "
+      Sql &= "and   Left(bb.t_orno,4) <> 'P601' "
       Sql &= "and   aa.t_oltp in (2,4) "
       Sql &= "and   aa.t_cprj = '" & ProjectID.ToUpper & "'"
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
