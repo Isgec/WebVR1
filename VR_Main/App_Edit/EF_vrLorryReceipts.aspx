@@ -331,6 +331,19 @@
                     </td>
                   </tr>
                   <tr>
+                    <td class="alignright">
+                      <asp:Label ID="Label5" runat="server" Text="Site Purchase :" />&nbsp;
+                    </td>
+                    <td>
+                      <asp:CheckBox ID="F_SitePurchase"
+                        Checked='<%# Bind("SitePurchase") %>'
+                        CssClass="mychk"
+                        runat="server" />
+                    </td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td colspan="4" style="border-top: solid 1pt LightGrey"></td>
                   </tr>
                   <tr>
@@ -742,6 +755,13 @@
                                 <asp:TemplateField HeaderText="Serial No" SortExpression="SerialNo">
                                   <ItemTemplate>
                                     <asp:Label ID="LabelSerialNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("SerialNo") %>'></asp:Label>
+                                  </ItemTemplate>
+                                  <ItemStyle CssClass="alignCenter" />
+                                  <HeaderStyle HorizontalAlign="Center" Width="30px" />
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="PO Number" SortExpression="PONumber">
+                                  <ItemTemplate>
+                                    <asp:Label ID="LabelPONumber" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("PONumber") %>'></asp:Label>
                                   </ItemTemplate>
                                   <ItemStyle CssClass="alignCenter" />
                                   <HeaderStyle HorizontalAlign="Center" Width="30px" />

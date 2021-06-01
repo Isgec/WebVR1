@@ -5,6 +5,29 @@ Imports OfficeOpenXml
 Imports System.Web.Script.Serialization
 Partial Class GF_vrLorryReceipts
   Inherits SIS.SYS.GridBase
+  Public Property ProjectID As String
+    Get
+      If ViewState("ProjectID") IsNot Nothing Then
+        Return Convert.ToString(ViewState("ProjectID"))
+      End If
+      Return False
+    End Get
+    Set(value As String)
+      ViewState.Add("ProjectID", value)
+    End Set
+  End Property
+  Public Property MRNNo As Int32
+    Get
+      If ViewState("MRNNo") IsNot Nothing Then
+        Return Convert.ToInt32(ViewState("MRNNo"))
+      End If
+      Return False
+    End Get
+    Set(value As Int32)
+      ViewState.Add("MRNNo", value)
+    End Set
+  End Property
+  Private ShowPopup As Boolean = False
   Protected Sub GVvrLorryReceipts_RowCommand(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCommandEventArgs) Handles GVvrLorryReceipts.RowCommand
     If e.CommandName.ToLower = "lgedit".ToLower Then
       Try
@@ -25,6 +48,15 @@ Partial Class GF_vrLorryReceipts
         Dim message As String = New JavaScriptSerializer().Serialize(ex.Message.ToString())
         Dim script As String = String.Format("alert({0});", message)
         ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+      End Try
+    End If
+    If e.CommandName.ToLower = "MoveMRN".ToLower Then
+      Try
+        ProjectID = GVvrLorryReceipts.DataKeys(e.CommandArgument).Values("ProjectID")
+        MRNNo = GVvrLorryReceipts.DataKeys(e.CommandArgument).Values("MRNNo")
+        ShowPopup = True
+      Catch ex As Exception
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", "alert('" & New JavaScriptSerializer().Serialize(ex.Message) & "');", True)
       End Try
     End If
   End Sub
@@ -590,32 +622,39 @@ Partial Class GF_vrLorryReceipts
                   .OtherRemarks = wsD.Cells(I, 24).Text
                 Catch ex As Exception
                 End Try
+                Try
+                  .SitePurchase = IIf(wsD.Cells(I, 25).Text.ToLower = "yes", True, False)
+                Catch ex As Exception
+                End Try
                 .CreatedBy = HttpContext.Current.Session("LoginID")
                 .CreatedOn = Now
                 If Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
-                  .LRStatusID = 1
+                  If .SitePurchase Then
+                    .LRStatusID = 2
+                  Else
+                    .LRStatusID = 1
+                  End If
                 Else
                   .LRStatusID = 2
                 End If
-
                 .RequestExecutionNo = ""
               End With
               '====================================
               If Convert.ToDateTime(Mrn.MRNDate).Date > Now.Date Then
-                wsD.Cells(I, 25).Value = "Future Date MRN can NOT be uploaded."
+                wsD.Cells(I, 26).Value = "Future Date MRN can NOT be uploaded."
                 Continue For
               End If
               If Convert.ToDateTime(Mrn.MRNDate).Date < Convert.ToDateTime(Mrn.VehicleInDate).Date Then
-                wsD.Cells(I, 25).Value = "MRN Date can NOT be less than Vehicle In date."
+                wsD.Cells(I, 26).Value = "MRN Date can NOT be less than Vehicle In date."
                 Continue For
               End If
               If Convert.ToDateTime(Mrn.VehicleOutDate) < Convert.ToDateTime(Mrn.VehicleInDate) Then
-                wsD.Cells(I, 25).Value = "Vehicle Out Date can NOT be less than Vehicle In date."
+                wsD.Cells(I, 26).Value = "Vehicle Out Date can NOT be less than Vehicle In date."
                 Continue For
               End If
               'Check Mrn Header for Duplicate Entry
               If DuplicateMRN(Mrn) Then
-                wsD.Cells(I, 25).Value = "Already Exists.[Pl. download latest template for Project.]"
+                wsD.Cells(I, 26).Value = "Already Exists.[Pl. download latest template for Project.]"
                 Continue For
               Else
                 Try
@@ -631,10 +670,10 @@ Partial Class GF_vrLorryReceipts
                   Mrn.MRNNo = MrnNo
                   Mrn = SIS.VR.vrLorryReceipts.InsertData(Mrn)
                   wsD.Cells(I, 3).Value = Mrn.MRNNo
-                  wsD.Cells(I, 25).Value = "Inserted"
+                  wsD.Cells(I, 26).Value = "Inserted"
                   MrnNo = Mrn.MRNNo
                 Catch ex As Exception
-                  wsD.Cells(I, 25).Value = ex.Message.ToString
+                  wsD.Cells(I, 26).Value = ex.Message.ToString
                   MrnNo = ""
                 End Try
 
@@ -709,12 +748,16 @@ Partial Class GF_vrLorryReceipts
                   Catch ex As Exception
                   End Try
                   Try
+                    oGR.PONumber = wsG.Cells(J, 18).Text
+                  Catch ex As Exception
+                  End Try
+                  Try
                     oGR = SIS.VR.vrLorryReceiptDetails.InsertData(oGR)
                     wsG.Cells(J, 3).Value = MrnNo
                     wsG.Cells(J, 4).Value = oGR.SerialNo
-                    wsG.Cells(J, 18).Value = "Inserted"
+                    wsG.Cells(J, 19).Value = "Inserted"
                   Catch ex As Exception
-                    wsG.Cells(J, 18).Value = ex.Message.ToString
+                    wsG.Cells(J, 19).Value = ex.Message.ToString
                   End Try
                 Else
                   If mrnFound Then
@@ -1082,6 +1125,47 @@ over:
     Session("F_Pending") = F_Pending.Checked
     InitGridPage()
   End Sub
+
+  Private Sub GF_vrLorryReceipts_PreRender(sender As Object, e As EventArgs) Handles Me.PreRender
+    If ShowPopup Then
+      L_PrimaryKey.Text = ProjectID & "|" & MRNNo
+      HeaderText.Text = "PROJECT: " & ProjectID & " MRN: " & MRNNo
+      M_ProjectID.Text = ""
+      mPopup.Show()
+    End If
+
+  End Sub
+  Private Sub cmdOK_Click(sender As Object, e As EventArgs) Handles cmdOK.Click
+    Dim MRN As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID, MRNNo)
+    Dim GRs As List(Of SIS.VR.vrLorryReceiptDetails) = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", ProjectID, MRNNo)
+    Dim tProject As String = M_ProjectID.Text.ToUpper
+    If tProject = "" Then Exit Sub
+    Dim tmp As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(tProject)
+    If tmp Is Nothing Then Exit Sub
+    Dim OK As Boolean = True
+    '1. First Create New MRN
+    Try
+      MRN.ProjectID = tProject
+      MRN = SIS.VR.vrLorryReceipts.UZ_vrLorryReceiptsInsert(MRN)
+      For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
+        gr.ProjectID = tProject
+        gr.MRNNo = MRN.MRNNo
+        SIS.VR.vrLorryReceiptDetails.InsertData(gr)
+      Next
+    Catch ex As Exception
+      OK = False
+    End Try
+    '2. Then Delete MRN
+    If OK Then
+      GRs = SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsSelectList(0, 999, "", False, "", ProjectID, MRNNo)
+      For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
+        SIS.VR.vrLorryReceiptDetails.vrLorryReceiptDetailsDelete(gr)
+      Next
+      MRN = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID, MRNNo)
+      SIS.VR.vrLorryReceipts.vrLorryReceiptsDelete(MRN)
+    End If
+  End Sub
+
 End Class
 Public Class lgBP
   Public Property t_bpid As String = ""

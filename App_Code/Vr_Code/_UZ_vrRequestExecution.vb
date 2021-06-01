@@ -6,6 +6,39 @@ Imports System.ComponentModel
 Imports System.Web.Mail
 Imports System.Net.Mail
 Namespace SIS.VR
+  Public Class ErpPOResult
+    Public Property SPLoadID As String = ""
+    Public Property ErpOrderNo As String = ""
+    Public Property ErpOrderVN As String = ""
+    Public Property SentForApproval As Boolean = False
+    Public Property POApproved As Boolean = False
+    Public ReadOnly Property VehicleCanBePlaced As Boolean
+      Get
+        If SentForApproval Or POApproved Then Return True Else Return False
+      End Get
+    End Property
+    Public Shared Function GetPOStatus(epr As SIS.VR.ErpPOResult) As SIS.VR.ErpPOResult
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+      Dim ePO As SPApi.POData = SPApi.POData.GetByID(epr.SPLoadID, Comp)
+      epr.ErpOrderNo = ePO.t_orno
+      If ePO.t_orno <> "" Then
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+          Con.Open()
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = "select * from ttdmsl400" & Comp & " where t_orno='" & epr.ErpOrderNo & "' and t_vrsn = (select max(t_vrsn) from ttdmsl400" & Comp & " where t_orno='" & epr.ErpOrderNo & "') "
+            Dim Rd As SqlDataReader = Cmd.ExecuteReader
+            If Rd.Read() Then
+              epr.POApproved = IIf(Rd("t_stat") = 1, True, False)
+              epr.SentForApproval = IIf(Rd("t_work") = 1, True, False)
+              epr.ErpOrderVN = Rd("t_vrsn")
+            End If
+          End Using
+        End Using
+      End If
+      Return epr
+    End Function
+  End Class
   Partial Public Class vrRequestExecution
     Public Function GetColor() As System.Drawing.Color
       Dim mRet As System.Drawing.Color = Drawing.Color.Black
@@ -268,11 +301,123 @@ Namespace SIS.VR
         Return mRet
       End Get
     End Property
+    Public ReadOnly Property PushPODataVisible As Boolean
+      Get
+        If HttpContext.Current.Session("LoginID") = "0340" Then
+          Return True
+        End If
+        Return False
+      End Get
+    End Property
+    Public Shared Function PushPODataByExecution(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+      Dim Re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+      Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, Comp)
+      If ePO Is Nothing Then
+        SPApi.POData.InsertData(Re, Comp)
+      Else
+        SPApi.POData.UpdateData(Re, Comp)
+      End If
+      Return Re
+    End Function
     'Confirm Vehicle
+    Public Shared Function NewLogicInitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
+      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+      Dim Re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+      If Re.FK_VR_RequestExecution_TransporterID.EMailID = "" Then
+        Throw New Exception("Transporter E-Mail ID is blank. Can Not Issue Memo.")
+      End If
+      Dim epr As New SIS.VR.ErpPOResult
+      If Re.SPLoadID = "" Then
+        Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, Comp)
+        If ePO Is Nothing Then
+          SPApi.POData.InsertData(Re, Comp)
+        Else
+          SPApi.POData.UpdateData(Re, Comp)
+        End If
+        epr.SPLoadID = Re.ISGECLoadID
+      Else
+        epr.SPLoadID = Re.SPLoadID
+      End If
+      epr = SIS.VR.ErpPOResult.GetPOStatus(epr)
+      If Not epr.VehicleCanBePlaced Then
+        Throw New Exception("ERP PO: " & epr.ErpOrderNo & " is NOT sent for approval or approved.")
+      End If
+      Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Re.SRNNo, "")
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = Re.SRNNo Then Continue For
+        Dim lpr As New SIS.VR.ErpPOResult
+        lpr.SPLoadID = le.SPLoadID
+        lpr = SIS.VR.ErpPOResult.GetPOStatus(lpr)
+        If Not lpr.VehicleCanBePlaced Then
+          Throw New Exception("Linked VE ERP PO: " & lpr.ErpOrderNo & " is NOT sent for approval or approved.")
+        End If
+      Next
+      'Main Execution
+      Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
+      If oVRs.Count > 0 Then
+        Dim ODCFound As Boolean = False
+        For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+          If oVR.OverDimentionConsignement Then
+            ODCFound = True
+          End If
+          oVR.RequestStatus = RequestStates.VehicleArranged
+          SIS.VR.vrVehicleRequest.UpdateData(oVR)
+        Next
+        With Re
+          .RequestStatusID = RequestStates.VehicleArranged
+          .ArrangedBy = HttpContext.Current.Session("LoginID")
+          .ArrangedOn = Now
+          .ODCByRequest = ODCFound
+        End With
+        Re = SIS.VR.vrRequestExecution.UpdateData(Re)
+      End If
+      'Linked Executions
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = Re.SRNNo Then Continue For
+        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+        If oVRs.Count > 0 Then
+          Dim ODCFound As Boolean = False
+          For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+            If oVR.OverDimentionConsignement Then
+              ODCFound = True
+            End If
+            oVR.RequestStatus = RequestStates.VehicleArranged
+            SIS.VR.vrVehicleRequest.UpdateData(oVR)
+          Next
+          With le
+            .RequestStatusID = RequestStates.VehicleArranged
+            .ArrangedBy = HttpContext.Current.Session("LoginID")
+            .ArrangedOn = Now
+            .ODCByRequest = ODCFound
+          End With
+          le = SIS.VR.vrRequestExecution.UpdateData(le)
+        End If
+      Next
+      SendEMail(Re)
+      Try
+        CloseSPExecution(Re)
+      Catch ex As Exception
+      End Try
+      For Each le As SIS.VR.vrRequestExecution In oLEs
+        If le.SRNNo.ToString = Re.SRNNo Then Continue For
+        SendEMail(le)
+        Try
+          CloseSPExecution(le)
+        Catch ex As Exception
+        End Try
+      Next
+
+      Return Re
+    End Function
+
     Public Shared Function InitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
       Dim Results As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+      If Results.FK_VR_RequestExecution_TransporterID.EMailID = "" Then
+        Throw New Exception("Transporter E-Mail ID is blank.")
+      End If
       Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Results.SRNNo, "")
-      'Checking of Estimated Amount Entered or NOT is Mandatory is pending
+      'Checking of Estimated Amount Entered or NOT is Mandatory
       '===========Commented====================
       If Convert.ToBoolean(ConfigurationManager.AppSettings("CheckSanction")) Then
         'Check Sanction First
@@ -322,7 +467,7 @@ Namespace SIS.VR
         oSPC = New SIS.VR.vrSanctionAlert
         With oSPC
           .ProjectID = ProjectID
-          .EMailIDs = "shatrughan.sharma@isgec.co.in,randhir@isgec.co.in,girish.belwal@isgec.co.in"
+          .EMailIDs = "shatrughan.sharma@isgec.co.in,girish.belwal@isgec.co.in"
           SIS.VR.vrSanctionAlert.InsertData(oSPC)
         End With
       End If
@@ -446,7 +591,6 @@ Namespace SIS.VR
         .placementDate = Results.VehiclePlacedOn
         .vehicleCode = Results.VehicleTypeID
         .materialWeight = Results.MaterialWeight
-        '.uom = Results.FK_VR_RequestExecution_WeightUnit.Description
       End With
       SPApi.PushISGECExecution(isgE, "")
       'Update ERP-PO
@@ -768,242 +912,6 @@ Namespace SIS.VR
     Public Shared Function UZ_vrRequestExecutionGetByID(ByVal SRNNo As Int32, ByVal Filter_TransporterID As String, ByVal Filter_VehicleTypeID As Int32) As SIS.VR.vrRequestExecution
       Return UZ_vrRequestExecutionGetByID(SRNNo)
     End Function
-    'Public Shared Shadows Function SendEMail(ByVal oRq As SIS.VR.vrRequestExecution, Optional ByVal CancellationEMail As Boolean = False) As String
-    '  Dim mRet As String = ""
-    '  Dim First As Boolean = True
-    '  Dim Cnt As Integer = 0
-    '  Dim mRecipients As New StringBuilder
-    '  Dim maySend As Boolean = False
-    '  Dim oEmp As SIS.QCM.qcmEmployees = SIS.QCM.qcmEmployees.qcmEmployeesGetByID(oRq.ArrangedBy)
-    '  Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(oRq.SRNNo, "")
-    '  For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-    '    If oVR.FK_VR_VehicleRequest_RequestedBy.EMailID <> String.Empty Then
-    '      maySend = True
-    '      mRecipients.AppendLine(oVR.FK_VR_VehicleRequest_RequestedBy.EMailID & " [" & oVR.FK_VR_VehicleRequest_RequestedBy.UserFullName & "]")
-    '    End If
-    '  Next
-    '  If oEmp.EMailID <> String.Empty And maySend Then
-    '    Try
-    '      Dim oClient As SmtpClient = New SmtpClient()
-
-    '      Dim oMsg As System.Net.Mail.MailMessage = New System.Net.Mail.MailMessage()
-    '      With oMsg
-    '        .From = New MailAddress(oEmp.EMailID, oEmp.EmployeeName)
-    '        For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-    '          Dim oAD As MailAddress = Nothing
-    '          Try
-    '            If oVR.FK_VR_VehicleRequest_BuyerInERP.EMailID <> String.Empty Then
-    '              oAD = New MailAddress(oVR.FK_VR_VehicleRequest_BuyerInERP.EMailID, oVR.FK_VR_VehicleRequest_BuyerInERP.UserFullName)
-    '              If Not .CC.Contains(oAD) Then
-    '                .CC.Add(oAD)
-    '              End If
-    '            End If
-
-    '          Catch ex As Exception
-
-    '          End Try
-    '          If oVR.FK_VR_VehicleRequest_RequestedBy.EMailID <> String.Empty Then
-    '            oAD = New MailAddress(oVR.FK_VR_VehicleRequest_RequestedBy.EMailID, oVR.FK_VR_VehicleRequest_RequestedBy.UserFullName)
-    '            Try
-    '              If Not .To.Contains(oAD) Then
-    '                .To.Add(oAD)
-    '              End If
-    '            Catch ex As Exception
-
-    '            End Try
-    '          End If
-    '          Dim oUG As List(Of SIS.VR.vrUserGroup) = SIS.VR.vrUserGroup.GetUserGroupByUserID(oVR.RequestedBy)
-    '          'Get TO Executers
-    '          Dim oExec As List(Of SIS.VR.vrUserGroup)
-    '          If oVR.OutOfContract Then
-    '            oExec = SIS.VR.vrUserGroup.GetOutOfContractByRoleID("Executer")
-    '          Else
-    '            oExec = SIS.VR.vrUserGroup.GetUsersByGroupIDRoleID(oUG(0).GroupID, "Executer")
-    '          End If
-    '          For Each _ex As SIS.VR.vrUserGroup In oExec
-    '            oAD = New MailAddress(_ex.FK_VR_UserGroup_UserID.EMailID, _ex.FK_VR_UserGroup_UserID.UserFullName)
-    '            Try
-    '              If Not .CC.Contains(oAD) Then
-    '                .CC.Add(oAD)
-    '              End If
-    '            Catch ex As Exception
-
-    '            End Try
-    '          Next
-    '        Next
-    '        'Transporter EMailIDS
-    '        If oRq.FK_VR_RequestExecution_TransporterID.EMailID <> String.Empty Then
-    '          Dim aIDs() As String = oRq.FK_VR_RequestExecution_TransporterID.EMailID.Split(",".ToCharArray)
-    '          For Each _id As String In aIDs
-    '            Dim oAD As MailAddress = New MailAddress(_id)
-    '            Try
-    '              If Not .To.Contains(oAD) Then
-    '                .To.Add(_id)
-    '              End If
-    '            Catch ex As Exception
-    '            End Try
-    '          Next
-    '        End If
-    '        .IsBodyHtml = True
-    '        If CancellationEMail Then
-    '          .Subject = "MEMO FOR LIFTING THE MATERIAL-CANCELLED, Exe.No: " & oRq.SRNNo
-    '        Else
-    '          .Subject = "MEMO FOR LIFTING THE MATERIAL, Exe.No: " & oRq.SRNNo
-    '        End If
-    '        Dim sb As New StringBuilder
-    '        With sb
-    '          .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
-    '          If CancellationEMail Then
-    '            .AppendLine("<tr><td colspan=""2"" style=""color:red"" align=""center""><h3><b>MEMO FOR LIFTING THE MATERIAL-CANCELLED</b></h2></td></tr>")
-    '          Else
-    '            .AppendLine("<tr><td colspan=""2"" align=""center""><h3><b>MEMO FOR LIFTING THE MATERIAL</b></h2></td></tr>")
-    '          End If
-    '          .AppendLine("<tr><td><b>Execution No.</b></td>")
-    '          .AppendLine("<td>" & oRq.SRNNo & "</td></tr>")
-    '          .AppendLine("<tr><td><b>Project Name &  Code</b></td>")
-    '          .AppendLine("<td>" & oVRs(0).FK_VR_VehicleRequest_ProjectID.Description & " [" & oVRs(0).ProjectID & "]" & "</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Name of Shipper / Supplier with Address and PIN CODE <br/>Name of the Contact person & Contact Number</b></td>")
-    '          .AppendLine("<td>")
-    '          First = True
-    '          Cnt = 1
-    '          For Each _vr As SIS.VR.vrVehicleRequest In oVRs
-    '            If Cnt > 1 Then
-    '              .AppendLine("<hr/>")
-    '              First = False
-    '            End If
-    '            .AppendLine(Cnt & ") " & _vr.FK_VR_VehicleRequest_SupplierID.Description & " [" & _vr.SupplierID & "]")
-    '            .AppendLine("<br/>" & _vr.SupplierLocation)
-    '            Cnt = Cnt + 1
-    '          Next
-    '          .AppendLine("</td></tr>")
-
-
-    '          .AppendLine("<tr><td><b>Receiver Name / Site/ CHA / Address and PIN CODE <br/>Name of the Contact person & Contact Number</b></td>")
-    '          .AppendLine("<td>" & oVRs(0).FK_VR_VehicleRequest_ProjectID.Description)
-    '          .AppendLine("<br/>" & oVRs(0).DeliveryLocation)
-    '          .AppendLine("</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Name of the Material / Equipment</b></td>")
-    '          .AppendLine("<td>")
-    '          Cnt = 1
-    '          For Each _vr As SIS.VR.vrVehicleRequest In oVRs
-    '            If Cnt > 1 Then
-    '              .AppendLine("<hr />")
-    '            End If
-    '            .AppendLine("<br/>" & Cnt & ") " & _vr.ItemDescription)
-    '            Cnt = Cnt + 1
-    '          Next
-    '          .AppendLine("</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Dimension (L x W x H ) Unit</b></td>")
-    '          .AppendLine("<td>")
-    '          Cnt = 1
-    '          For Each _vr As SIS.VR.vrVehicleRequest In oVRs
-    '            If Cnt > 1 Then
-    '              .AppendLine("<hr />")
-    '            End If
-    '            .AppendLine("<br/>" & Cnt & ") " & _vr.Length & " x " & _vr.Width & " x " & _vr.Height & " " & _vr.FK_VR_VehicleRequest_SizeUnit.Description)
-    '            Cnt = Cnt + 1
-    '          Next
-    '          .AppendLine("</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Weight - Unit</b></td>")
-    '          .AppendLine("<td>")
-    '          Cnt = 1
-    '          For Each _vr As SIS.VR.vrVehicleRequest In oVRs
-    '            If Cnt > 1 Then
-    '              .AppendLine("<hr />")
-    '            End If
-    '            .AppendLine("<br/>" & Cnt & ") " & _vr.MaterialWeight & " " & _vr.FK_VR_VehicleRequest_WeightUnit.Description)
-    '            Cnt = Cnt + 1
-    '          Next
-    '          .AppendLine("</td></tr>")
-
-
-    '          .AppendLine("<tr><td><b>No. Of Packages</b></td>")
-    '          .AppendLine("<td>")
-    '          Cnt = 1
-    '          For Each _vr As SIS.VR.vrVehicleRequest In oVRs
-    '            If Cnt > 1 Then
-    '              .AppendLine("<hr />")
-    '            End If
-    '            .AppendLine("<br/>" & Cnt & ") " & _vr.NoOfPackages)
-    '            Cnt = Cnt + 1
-    '          Next
-    '          .AppendLine("</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Type of Vehicle</b></td>")
-    '          .AppendLine("<td>" & oRq.FK_VR_RequestExecution_VehicleTypeID.cmba & "</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Vehicle to be placed on Date</b></td>")
-    '          .AppendLine("<td>" & oRq.VehiclePlacedOn & "</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Name of Executor</b></td>")
-    '          .AppendLine("<td>" & oRq.FK_VR_RequestExecution_ArrangedBy.UserFullName & " [" & oRq.ArrangedBy & "]" & "</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Export Invoice No.</b></td>")
-    '          .AppendLine("<td>" & IIf(oVRs(0).CustomInvoiceNo = String.Empty, "NA", oVRs(0).CustomInvoiceNo) & "</td></tr>")
-
-    '          .AppendLine("<tr><td><b>Transporter</b></td>")
-    '          .AppendLine("<td>" & oRq.FK_VR_RequestExecution_TransporterID.TransporterName & "</td></tr>")
-
-    '          .AppendLine("<tr><td colspan=""2"">")
-    '          .AppendLine("<br/><b>IMPORTANT NOTES:-</b>")
-    '          .AppendLine("<br/>1) Please Hand Over Consignee Copy of Docket to Shipper/Supplier and take the signature of Shipper/Supplier on the Docket.")
-    '          .AppendLine("<br/>2) Shipper Copy and POD Copy of docket must be carrying/accompany with Dispatch Documents & Material.")
-    '          .AppendLine("<br/>3) Shipper Copy of docket and Dispatch Documents along with Material to be handed Over to Customer/CHA (Receiver).")
-    '          .AppendLine("<br/>4) Take the Signature& Rubber Stamp of Receiver on the POD Copy of Docket at the time of delivery of material.")
-    '          .AppendLine("<br/>5) It is <b>MANDATORY</b> to inform us material dimension and weight in case of ODC or Over Weight Consignment.")
-    '          .AppendLine("<br/></td></tr>")
-
-    '          .AppendLine("</table>")
-
-    '        End With
-    '        Dim Header As String = ""
-    '        Header = Header & "<html xmlns=""http://www.w3.org/1999/xhtml"">"
-    '        Header = Header & "<head>"
-    '        Header = Header & "<title></title>"
-    '        Header = Header & "<style>"
-    '        Header = Header & "table{"
-
-    '        Header = Header & "border: solid 1pt black;"
-    '        Header = Header & "border-collapse:collapse;"
-    '        Header = Header & "font-family: Tahoma;}"
-
-    '        Header = Header & "td{"
-    '        Header = Header & "border: solid 1pt black;"
-    '        Header = Header & "font-family: Tahoma;"
-    '        Header = Header & "font-size: 12px;"
-    '        Header = Header & "vertical-align:top;}"
-
-    '        Header = Header & "</style>"
-    '        Header = Header & "</head>"
-    '        Header = Header & "<body>"
-    '        Header = Header & sb.ToString
-    '        Header = Header & "</body></html>"
-    '        .Body = Header
-
-    '        If Not CancellationEMail Then
-    '          For Each _vr As SIS.VR.vrVehicleRequest In oVRs
-    '            Dim oAtchs As List(Of SIS.VR.vrRequestAttachments) = SIS.VR.vrRequestAttachments.vrRequestAttachmentsSelectList(0, 99, "", False, "", _vr.RequestNo)
-    '            For Each atch As SIS.VR.vrRequestAttachments In oAtchs
-    '              If IO.File.Exists(atch.DiskFile) Then
-    '                Dim at As System.Net.Mail.Attachment = New System.Net.Mail.Attachment(atch.DiskFile)
-    '                at.Name = atch.FileName
-    '                .Attachments.Add(at)
-    '              End If
-    '            Next
-    '          Next
-    '        End If
-    '      End With
-    '      oClient.Send(oMsg)
-    '    Catch ex As Exception
-    '      mRet = ex.Message
-    '    End Try
-    '  End If
-    '  Return mRet
-    'End Function
     Public Shared Function UZ_vrLinkedExecution(ByVal SRNNo As Integer) As List(Of SIS.VR.vrRequestExecution)
       Dim Results As List(Of SIS.VR.vrRequestExecution) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
@@ -1076,7 +984,7 @@ Namespace SIS.VR
           If Not ProjectsAdded Then
             Try
               If vr.FK_VR_VehicleRequest_RequestedBy.EMailID.ToLower.IndexOf("isgec.com") >= 0 Then
-                oMsg.CC.Add(New MailAddress("sarvjeet_chowdhry@isgec.com", "Sarvjeet Chowdhry"))
+                oMsg.CC.Add(New MailAddress("sarvjeet@isgec.co.in", "Sarvjeet Chowdhry"))
                 oMsg.CC.Add(New MailAddress("tmdproject@isgec.com", "TMD Projects-YNR"))
                 oMsg.CC.Add(New MailAddress("manoj.raghav@isgec.co.in", "Manoj Raghav"))
               End If
@@ -1536,7 +1444,7 @@ Namespace SIS.VR
       Dim mRet As Boolean = False
       Dim oRE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNO)
       Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNO, "")
-      If oVRs.Count > 0 Then  Else Return Nothing
+      If oVRs.Count > 0 Then Else Return Nothing
       Dim ProjectID As String = oVRs(0).ProjectID
       Dim Company As String = GetProjectFinanceCompany(ProjectID)
       If ProjectID.StartsWith("BS") Or ProjectID.StartsWith("DS") Then
@@ -1784,7 +1692,7 @@ Namespace SIS.VR
       Return mRet
     End Function
     Public Shared Function GetConsumedInMaterial(ByVal ProjectID As String, ByVal Company As String) As Decimal
-      If Company = "700" Then 
+      If Company = "700" Then
       ElseIf Company = "651" Then
       Else
         Company = "200"
@@ -2209,13 +2117,14 @@ Namespace SIS.VR
       End Try
       Return mRet
     End Function
-    Public Shared Function vrRequestExecutionGetSPLoadByID(ByVal SPLoadID As String) As SIS.VR.vrRequestExecution
+    Public Shared Function vrRequestExecutionGetSPLoadByID(ByVal SPLoadID As String, RequestNo As Integer) As SIS.VR.vrRequestExecution
       Dim Results As SIS.VR.vrRequestExecution = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "spvr_LG_RequestExecutionSelectBySPLoadID"
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadID", SqlDbType.NVarChar, 51, SPLoadID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@RequestNo", SqlDbType.Int, 11, RequestNo)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
@@ -2227,7 +2136,18 @@ Namespace SIS.VR
       End Using
       Return Results
     End Function
-
+    Public Shared Function GetExecutionNoByLoadID(ByVal SPLoadID As String) As Integer
+      Dim Results As Integer = 0
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "select top 1 isnull(SRNNo,0) from VR_RequestExecution where sploadid='" & SPLoadID & "'"
+          Con.Open()
+          Results = Cmd.ExecuteScalar
+        End Using
+      End Using
+      Return Results
+    End Function
   End Class
 End Namespace
 'Public Shared Function InitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution

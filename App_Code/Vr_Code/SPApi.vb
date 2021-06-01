@@ -14,7 +14,7 @@ Public Class SPApi
     If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
       url = "https://app.superprocure.com/sp/tms/addCarrier"
     Else
-      url = "https://demo.superprocure.com/sp/tms/addCarrier"
+      url = "https://test.superprocure.com/sp/tms/addCarrier"
     End If
     Dim xResponse As SPApi.SPResponse = Nothing
     Dim xWebRequest As HttpWebRequest = GetWebRequest(url, "POST")
@@ -40,7 +40,7 @@ Public Class SPApi
     If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
       url = "https://app.superprocure.com/sp/requisition/createMemo"
     Else
-      url = "https://demo.superprocure.com/sp/requisition/createMemo"
+      url = "https://test.superprocure.com/sp/requisition/createMemo"
     End If
     Dim xResponse As SPApi.SPResponse = Nothing
     Dim xWebRequest As HttpWebRequest = GetWebRequest(url, "POST")
@@ -66,7 +66,7 @@ Public Class SPApi
     If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
       url = "https://app.superprocure.com/sp/requisition/cancelRequisition"
     Else
-      url = "https://demo.superprocure.com/sp/requisition/cancelRequisition"
+      url = "https://test.superprocure.com/sp/requisition/cancelRequisition"
     End If
     Dim xResponse As SPApi.SPResponse = Nothing
     Dim xWebRequest As HttpWebRequest = GetWebRequest(url, "POST")
@@ -96,7 +96,7 @@ Public Class SPApi
     If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
       url = "https://app.superprocure.com/sp/requisition/getAllotmentDetails?reqId=" & SPRequestID
     Else
-      url = "https://demo.superprocure.com/sp/requisition/getAllotmentDetails?reqId=" & SPRequestID
+      url = "https://test.superprocure.com/sp/requisition/getAllotmentDetails?reqId=" & SPRequestID
     End If
     Dim xResponse As SPApi.SPExecution = Nothing
     Dim xWebRequest As HttpWebRequest = GetWebRequest(url, "GET")
@@ -131,7 +131,7 @@ Public Class SPApi
     If Convert.ToBoolean(ConfigurationManager.AppSettings("SPLive")) Then
       url = "https://app.superprocure.com/sp/requisition/createRequisitionForISGEC"
     Else
-      url = "https://demo.superprocure.com/sp/requisition/createRequisitionForISGEC"
+      url = "https://test.superprocure.com/sp/requisition/createRequisitionForISGEC"
     End If
     Dim xResponse As SPApi.SPResponse = Nothing
     Dim xWebRequest As HttpWebRequest = GetWebRequest(url, "POST")
@@ -219,6 +219,15 @@ Public Class SPApi
     Public Property GeneratePO As Integer = 0
     Public Property Size As String = ""
     Public Property VehicleTypeDescription As String = ""
+    Public Property wuom As String = ""
+    '================================
+    Public Property IsClubberd As Boolean = False
+    Public Property ClubbedRequests As String = ""
+    Public ReadOnly Property ClubbedRequestList As List(Of String)
+      Get
+        Return ClubbedRequests.Split(",".ToCharArray).ToList()
+      End Get
+    End Property
 
   End Class
   Public Class SPRequest
@@ -319,6 +328,127 @@ Public Class SPApi
       End Try
       Return mRet
     End Function
+    '=============Without SP================
+    Public Shared Sub InsertData(ed As SIS.VR.vrRequestExecution, Optional Comp As String = "200")
+      Dim vrs As List(Of SIS.VR.vrLinkedRequest) = SIS.VR.vrLinkedRequest.vrLinkedRequestSelectList(0, 999, "", False, "", ed.SRNNo)
+      If vrs.Count <= 0 Then
+        Throw New Exception("Request NOT linked to execution.")
+      End If
+      Dim vr As SIS.VR.vrVehicleRequest = vrs(0)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+        Con.Open()
+        Dim sql As String = ""
+        sql &= " Insert InTo ttdisg140" & Comp
+        sql &= " ("
+        sql &= " t_load"
+        sql &= " ,t_ivrn"
+        sql &= " ,t_rqdt"
+        sql &= " ,t_vrdt"
+        sql &= " ,t_tran"
+        sql &= " ,t_tgst"
+        sql &= " ,t_cprj"
+        sql &= " ,t_pric"
+        sql &= " ,t_amnt"
+        sql &= " ,t_fcst"
+        sql &= " ,t_tcst"
+        sql &= " ,t_type"
+        sql &= " ,t_wght"
+        sql &= " ,t_size"
+        sql &= " ,t_novc"
+        sql &= " ,t_snam"
+        sql &= " ,t_dnam"
+        sql &= " ,t_bpid"
+        sql &= " ,t_proc"
+        sql &= " ,t_orno"
+        sql &= " ,t_genp"
+        sql &= " ,t_Refcntd"
+        sql &= " ,t_Refcntu"
+        sql &= " ,t_uoms"
+        sql &= " ,t_wunt"
+        sql &= " )"
+        sql &= " values ("
+        sql &= "   " & ed.ISGECLoadID & ""
+        sql &= " ,'" & vr.RequestNo & "'"
+        sql &= " ,convert(datetime,'" & ed.VehiclePlacedOn & "',103)"
+        sql &= " ,convert(datetime,'" & vr.RequestedOn & "',103)"
+        sql &= ",'" & ed.TransporterID & "'"
+        Dim tmpGSTIN As SIS.VR.vrBPGSTIN = SIS.VR.vrBPGSTIN.spmtBPGSTINGetByID(ed.TransporterID)
+        If tmpGSTIN IsNot Nothing Then
+          sql &= ",'" & tmpGSTIN.Description & "'"
+        Else
+          sql &= ",''"
+        End If
+        sql &= ",'" & vr.ProjectID & "'"
+        sql &= ", " & ed.EstimatedAmount & ""
+        sql &= ", " & ed.EstimatedAmount
+        sql &= ",'" & vr.FromLocation & "'"
+        sql &= ",'" & vr.ToLocation & "'"
+        sql &= ",'" & ed.FK_VR_RequestExecution_VehicleTypeID.cmba & "'"
+        sql &= ", " & vr.MaterialWeight & ""
+        sql &= ",'" & "Cargo L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & "'"
+        sql &= ", " & 1 & ""
+        sql &= ",'" & vr.SupplierLocation & "'"
+        sql &= ",'" & vr.DeliveryLocation & "'"
+        sql &= ",'" & vr.SupplierID & "'"
+        sql &= ", " & 2 & ""
+        sql &= ",'" & "" & "'"
+        sql &= ", " & 1 & "" 'Generate PO=YES
+        sql &= ", " & 0 & ""
+        sql &= ", " & 0 & ""
+        sql &= ",'" & vr.FK_VR_VehicleRequest_SizeUnit.Description & "'"
+        sql &= ",'" & vr.FK_VR_VehicleRequest_WeightUnit.Description & "'"
+        sql &= ")"
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = sql
+          Cmd.ExecuteNonQuery()
+        End Using
+      End Using
+    End Sub
+    Public Shared Sub UpdateData(ed As SIS.VR.vrRequestExecution, Optional Comp As String = "200")
+      Dim vrs As List(Of SIS.VR.vrLinkedRequest) = SIS.VR.vrLinkedRequest.vrLinkedRequestSelectList(0, 999, "", False, "", ed.SRNNo)
+      If vrs.Count <= 0 Then
+        Throw New Exception("Request NOT linked to execution.")
+      End If
+      Dim vr As SIS.VR.vrVehicleRequest = vrs(0)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+        Con.Open()
+        Dim sql As String = ""
+        sql &= " update ttdisg140" & Comp
+        sql &= " set t_ivrn = '" & vr.RequestNo & "'"
+        sql &= "    ,t_vrdt = convert(datetime,'" & ed.VehiclePlacedOn & "',103)"
+        sql &= "    ,t_rqdt = convert(datetime,'" & vr.RequestedOn & "',103)"
+        sql &= "    ,t_tran = '" & ed.TransporterID & "'"
+        Dim tmpGSTIN As SIS.VR.vrBPGSTIN = SIS.VR.vrBPGSTIN.spmtBPGSTINGetByID(ed.TransporterID)
+        If tmpGSTIN IsNot Nothing Then
+          sql &= "    ,t_tgst = '" & tmpGSTIN.Description & "'"
+        Else
+          sql &= "    ,t_tgst = ''"
+        End If
+        sql &= "    ,t_cprj = '" & vr.ProjectID & "'"
+        sql &= "    ,t_pric =  " & ed.EstimatedAmount
+        sql &= "    ,t_amnt =  " & ed.EstimatedAmount
+        sql &= "    ,t_fcst = '" & vr.FromLocation & "'"
+        sql &= "    ,t_tcst = '" & vr.ToLocation & "'"
+        sql &= "    ,t_type = '" & ed.FK_VR_RequestExecution_VehicleTypeID.cmba & "'"
+        sql &= "    ,t_wght =  " & vr.MaterialWeight
+        sql &= "    ,t_size = '" & "Cargo L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & "'"
+        sql &= "    ,t_novc =  " & 1
+        sql &= "    ,t_snam = '" & vr.SupplierLocation & "'"
+        sql &= "    ,t_dnam = '" & vr.DeliveryLocation & "'"
+        sql &= "    ,t_bpid = '" & vr.SupplierID & "'"
+        sql &= "    ,t_genp =  " & 1
+        sql &= "    ,t_uoms = '" & vr.FK_VR_VehicleRequest_SizeUnit.Description & "'"
+        sql &= "    ,t_wunt = '" & vr.FK_VR_VehicleRequest_WeightUnit.Description & "'"
+        sql &= " where t_load =" & ed.ISGECLoadID
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = sql
+          Cmd.ExecuteNonQuery()
+        End Using
+      End Using
+    End Sub
+    '==========With SP===========
     Public Shared Sub InsertData(ed As SPApi.ExecutionData, Optional Comp As String = "200")
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Con.Open()
@@ -349,6 +479,7 @@ Public Class SPApi
         sql &= " ,t_Refcntd"
         sql &= " ,t_Refcntu"
         sql &= " ,t_uoms"
+        sql &= " ,t_wunt"
         sql &= " )"
         sql &= " values ("
         sql &= "   " & ed.loadId & ""
@@ -375,6 +506,7 @@ Public Class SPApi
         sql &= ", " & 0 & ""
         sql &= ", " & 0 & ""
         sql &= ",'" & ed.uom & "'"
+        sql &= ",'" & ed.wuom & "'"
         sql &= ")"
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
@@ -407,6 +539,7 @@ Public Class SPApi
         sql &= "    ,t_bpid = '" & ed.BPID & "'"
         sql &= "    ,t_genp =  " & ed.GeneratePO
         sql &= "    ,t_uoms = '" & ed.uom & "'"
+        sql &= "    ,t_wunt = '" & ed.wuom & "'"
         sql &= " where t_load =" & ed.loadId
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text

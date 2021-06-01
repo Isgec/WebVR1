@@ -22,6 +22,10 @@
                     <span style="color: #ff0033">Loading...</span>
                   </ProgressTemplate>
                 </asp:UpdateProgress>
+                <div style="width:100%;text-align:center;padding:5px;background-color:gold;">
+                <asp:Label ID="IRNMsg" runat="server" Font-Bold="true" Font-Size="14px" Text="IRN Linking Process is on HOLD. Please FORWARD pending MRNs to HO."></asp:Label>
+                <asp:Button ID="showPending" runat="server" CssClass="nt-but-primary" style="margin-left:20px;" Text="Show Pending MRN" OnClientClick="$get('F_Pending').click();return false;" />
+                </div>
                 <asp:Panel ID="pnlH" runat="server" CssClass="cph_filter">
                   <div style="padding: 5px; cursor: pointer; vertical-align: middle;">
                     <div style="float: left;">Filter Records </div>
@@ -204,7 +208,7 @@
                               <asp:Label ID="Label1" runat="server" Text="Pending to Submit:" /></b>
                           </td>
                           <td>
-                            <asp:CheckBox ID="F_Pending" runat="server" CssClass="mychk" AutoPostBack="true" />
+                            <asp:CheckBox ID="F_Pending" runat="server" ClientIDMode="Static" CssClass="mychk" AutoPostBack="true" />
                           </td>
                         </tr>
                       </table>
@@ -291,10 +295,6 @@
                               AutoCompleteType="None"
                               onblur="script_vrLorryReceipts.validate_DownloadPrjID(this);"
                               runat="Server" />
-                            <%--<asp:Label
-                              ID = "F_DownloadPrjID_Display"
-                              Text=""
-                              Runat="Server" />--%>
                             <AJX:AutoCompleteExtender
                               ID="ACEDownloadPrjID"
                               BehaviorID="B_ACEDownloadPrjID"
@@ -451,6 +451,13 @@
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="30px" />
                     </asp:TemplateField>
+                    <asp:TemplateField HeaderText="MOVE MRN">
+                      <ItemTemplate>
+                        <asp:ImageButton ID="cmdChangeProject" runat="server" Visible='<%# Eval("InitiateWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Move MRN to other project" SkinID="shuffle" OnClientClick="return confirm('MOVE MRN to other Project ?');"  CommandName="MoveMRN" CommandArgument='<%# Container.DataItemIndex %>' />
+                      </ItemTemplate>
+                      <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle HorizontalAlign="Center" Width="30px" ForeColor="#ff3300" />
+                    </asp:TemplateField>
                   </Columns>
                   <EmptyDataTemplate>
                     <asp:Label ID="LabelEmpty" runat="server" Font-Size="Small" ForeColor="Red" Text="No record found !!!"></asp:Label>
@@ -496,6 +503,45 @@
       </asp:UpdatePanel>
     </div>
   </div>
+  <asp:UpdatePanel runat="server">
+    <ContentTemplate>
+      <asp:Panel ID="pnl1" runat="server" Style="background-color: white; display: none; height: 226px" Width='400px'>
+        <asp:Panel ID="pnlHeader" runat="server" Style="width: 100%; height: 33px; padding-top: 8px; text-align: center; border-bottom: 1pt solid lightgray;">
+          <asp:Label ID="HeaderText" runat="server" Font-Size="16px" Font-Bold="true" Text='My Modal Text'></asp:Label>
+        </asp:Panel>
+        <asp:Panel ID="modalContent" runat="server" Style="width: 100%; height: 136px; padding:4px;">
+          <br />
+          <br />
+          <asp:Label ID="L_EMailID" runat="server" Text="MOVE MRN to PROJECT:" Font-Bold="true" Width="150px"></asp:Label>
+          <asp:TextBox ID="M_ProjectID" runat="server" Width="80px" MaxLength="6" onfocus="this.select();"></asp:TextBox>
+          <br />
+          <br />
+          <asp:Label ID="Label2" runat="server" Text="NOTE: MRN will be deleted from current project. It will be created as Last MRN in entered project." Font-Italic="true" Width="382px"></asp:Label>
+        </asp:Panel>
+        <asp:Panel ID="pnlFooter" runat="server" Style="width: 100%; height: 33px; padding-top: 8px; text-align: right; border-top: 1pt solid lightgray;">
+          <asp:Label ID="L_PrimaryKey" runat="server" Style="display: none;"></asp:Label>
+          <asp:Button ID="cmdOK" runat="server" Width="70px" Text="OK" Style="text-align: center; margin-right: 30px;" />
+          <asp:Button ID="cmdCancel" runat="server" Width="70px" Text="Cancel" Style="text-align: center; margin-right: 30px;" />
+        </asp:Panel>
+      </asp:Panel>
+      <asp:Button ID="dummy" runat="server" Style="display: none;" Text="show"></asp:Button>
+      <AJX:ModalPopupExtender
+        ID="mPopup"
+        TargetControlID="dummy"
+        BackgroundCssClass="modalBackground"
+        CancelControlID="cmdCancel"
+        OkControlID="cmdCancel"
+        PopupControlID="pnl1"
+        PopupDragHandleControlID="pnlHeader"
+        DropShadow="true"
+        runat="server">
+      </AJX:ModalPopupExtender>
+    </ContentTemplate>
+    <Triggers>
+      <asp:AsyncPostBackTrigger ControlID="cmdOK" EventName="Click" />
+    </Triggers>
+  </asp:UpdatePanel>
+
   <div id="ready" runat="server">
 
   </div>

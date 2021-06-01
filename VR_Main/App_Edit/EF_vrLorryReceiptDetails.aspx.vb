@@ -1,3 +1,4 @@
+Imports System.Web.Script.Serialization
 Partial Class EF_vrLorryReceiptDetails
   Inherits SIS.SYS.UpdateBase
   Public Property Editable() As Boolean
@@ -62,6 +63,7 @@ Partial Class EF_vrLorryReceiptDetails
   Protected Sub FVvrLorryReceiptDetails_PreRender(ByVal sender As Object, ByVal e As System.EventArgs) Handles FVvrLorryReceiptDetails.PreRender
     TBLvrLorryReceiptDetails.EnableSave = Editable
     TBLvrLorryReceiptDetails.EnableDelete = Deleteable
+    CType(FVvrLorryReceiptDetails.FindControl("RFVPONumber"), RequiredFieldValidator).Enabled = Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking"))
     Dim mStr As String = ""
     Dim oTR As IO.StreamReader = New IO.StreamReader(HttpContext.Current.Server.MapPath("~/VR_Main/App_Edit") & "/EF_vrLorryReceiptDetails.js")
     mStr = oTR.ReadToEnd
@@ -71,32 +73,39 @@ Partial Class EF_vrLorryReceiptDetails
       Page.ClientScript.RegisterClientScriptBlock(GetType(System.String), "scriptvrLorryReceiptDetails", mStr)
     End If
   End Sub
-  <System.Web.Services.WebMethod()> _
-  <System.Web.Script.Services.ScriptMethod()> _
+  <System.Web.Services.WebMethod()>
+  <System.Web.Script.Services.ScriptMethod()>
   Public Shared Function SupplierIDCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
     Return SIS.VR.vrBusinessPartner.SelectvrBusinessPartnerAutoCompleteList(prefixText, count, contextKey)
   End Function
-  <System.Web.Services.WebMethod()> _
+  <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_VR_LorryReceiptDetails_SupplierID(ByVal value As String) As String
     Dim aVal() As String = value.Split(",".ToCharArray)
-    Dim mRet As String="0|" & aVal(0)
-    Dim SupplierID As String = CType(aVal(1),String)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim SupplierID As String = CType(aVal(1), String)
     Dim oVar As SIS.VR.vrBusinessPartner = SIS.VR.vrBusinessPartner.vrBusinessPartnerGetByID(SupplierID)
     If oVar Is Nothing Then
-      mRet = "1|" & aVal(0) & "|Record not found." 
+      mRet = "1|" & aVal(0) & "|Record not found."
     Else
-      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField 
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
     End If
     Return mRet
   End Function
 
   Protected Sub cmdShowIRN_Click(sender As Object, e As EventArgs)
+    Dim PONumber As String = CType(FVvrLorryReceiptDetails.FindControl("F_PONumber"), TextBox).Text
+    If PONumber = "" Then
+      Dim message As String = New JavaScriptSerializer().Serialize("Please enter PO Number.")
+      Dim script As String = String.Format("alert({0});$get('F_PONumber').focus();", message)
+      ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+      Exit Sub
+    End If
     Dim SupplierID As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierID"), TextBox).Text
     Dim BillNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceNo"), TextBox).Text
     Dim BillDate As String = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierInvoiceDate"), TextBox).Text
     Dim MrnNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_MRNNo"), TextBox).Text
     Dim oMrn As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID, MrnNo)
-    test.Show(ProjectID, SupplierID, oMrn.TransporterID, "", "")
+    test.Show(ProjectID, PONumber, SupplierID, oMrn.TransporterID, "", "")
   End Sub
   Private Sub test_Execute(IRNo As String, ProjectID As String) Handles test.Execute
     If IRNo = "" Then Exit Sub
@@ -112,5 +121,41 @@ Partial Class EF_vrLorryReceiptDetails
       If GrNo.Text = "" Then GrNo.Text = oIR.GRNo
       If GrDate.Text = "" Then GrDate.Text = oIR.GRDate
     End If
+  End Sub
+  Protected Sub F_PONumber_TextChanged(s As Object, e As EventArgs)
+    Dim oF_ProjectID As TextBox = FVvrLorryReceiptDetails.FindControl("F_ProjectID")
+    Dim ProjectID As String = oF_ProjectID.Text
+    Dim oPONumber As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_PONumber"), TextBox)
+    Dim PONumber As String = oPONumber.Text
+    If PONumber = "" Then Exit Sub
+    Dim oSupplierID As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierID"), TextBox)
+    Dim oSupplierIDDisplay As Label = CType(FVvrLorryReceiptDetails.FindControl("F_SupplierID_Display"), Label)
+    Dim oIRNO As TextBox = CType(FVvrLorryReceiptDetails.FindControl("F_IRNO"), TextBox)
+    oSupplierID.Text = ""
+    oSupplierIDDisplay.Text = ""
+    oIRNO.Text = ""
+    Dim oPO As SIS.PAK.pakPO = Nothing
+    Try
+      oPO = SIS.PAK.erpData.erpPO.ImportFromERP(PONumber)
+      'Dim MrnNo As String = CType(FVvrLorryReceiptDetails.FindControl("F_MRNNo"), TextBox).Text
+      'Dim oMrn As SIS.VR.vrLorryReceipts = SIS.VR.vrLorryReceipts.vrLorryReceiptsGetByID(ProjectID, MrnNo)
+      If oPO.ProjectID <> ProjectID Then
+        Dim message As String = New JavaScriptSerializer().Serialize("Purchase Order belongs to Project: " & oPO.ProjectID)
+        Dim script As String = String.Format("alert({0});$get('F_PONumber').value='';$get('F_PONumber').focus();", message)
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+        Exit Sub
+      End If
+      Dim oSup As SIS.VR.vrBusinessPartner = SIS.VR.vrBusinessPartner.vrBusinessPartnerGetByID(oPO.SupplierID)
+      If oSup Is Nothing Then
+        oSup = SIS.PAK.erpData.erpSupplier.GetFromERP(oPO.SupplierID)
+        SIS.VR.vrBusinessPartner.InsertData(oSup)
+      End If
+      oSupplierID.Text = oPO.SupplierID
+      oSupplierIDDisplay.Text = oSup.BPName
+    Catch ex As Exception
+      Dim message As String = New JavaScriptSerializer().Serialize(ex.Message.ToString())
+      Dim script As String = String.Format("alert({0});$get('F_PONumber').value='';$get('F_PONumber').focus();", message)
+      ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+    End Try
   End Sub
 End Class

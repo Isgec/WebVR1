@@ -51,6 +51,7 @@ Namespace SIS.VR
     Private _FK_VR_LorryReceipts_ExecutionNo As SIS.VR.vrRequestExecution = Nothing
     Private _FK_VR_LorryReceipts_TransporterID As SIS.VR.vrTransporters = Nothing
     Private _FK_VR_LorryReceipts_VehicleTypeID As SIS.VR.vrVehicleTypes = Nothing
+    Public Property SitePurchase As Boolean = False
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -753,6 +754,7 @@ Namespace SIS.VR
         .CreatedBy =  Global.System.Web.HttpContext.Current.Session("LoginID")
         .LRStatusID = 1
         .CreatedOn = Now
+        .SitePurchase = Record.SitePurchase
       End With
       Return SIS.VR.vrLorryReceipts.InsertData(_Rec)
     End Function
@@ -789,6 +791,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CreatedBy",SqlDbType.NVarChar,9, Iif(Record.CreatedBy= "" ,Convert.DBNull, Record.CreatedBy))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LRStatusID",SqlDbType.Int,11, Record.LRStatusID)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CreatedOn",SqlDbType.DateTime,21, Iif(Record.CreatedOn= "" ,Convert.DBNull, Record.CreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePurchase", SqlDbType.Bit, 3, Record.SitePurchase)
           Cmd.Parameters.Add("@Return_ProjectID", SqlDbType.NVarChar, 7)
           Cmd.Parameters("@Return_ProjectID").Direction = ParameterDirection.Output
           Cmd.Parameters.Add("@Return_MRNNo", SqlDbType.Int, 11)
@@ -831,6 +834,7 @@ Namespace SIS.VR
         .CreatedBy = Global.System.Web.HttpContext.Current.Session("LoginID")
         .LRStatusID = Record.LRStatusID
         .CreatedOn = Now
+        .SitePurchase = Record.SitePurchase
       End With
       Return SIS.VR.vrLorryReceipts.UpdateData(_Rec)
     End Function
@@ -869,6 +873,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CreatedBy",SqlDbType.NVarChar,9, Iif(Record.CreatedBy= "" ,Convert.DBNull, Record.CreatedBy))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LRStatusID",SqlDbType.Int,11, Record.LRStatusID)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CreatedOn",SqlDbType.DateTime,21, Iif(Record.CreatedOn= "" ,Convert.DBNull, Record.CreatedOn))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SitePurchase", SqlDbType.Bit, 3, Record.SitePurchase)
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

@@ -30,6 +30,7 @@ Namespace SIS.VR
     Private _FK_VR_LorryReceiptDetails_SupplierID As SIS.VR.vrBusinessPartner = Nothing
     Private _FK_VR_LorryReceiptDetails_MRNNo As SIS.VR.vrLorryReceipts = Nothing
     Public Property IRNO As String = ""
+    Public Property PONumber As String = ""
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -399,6 +400,7 @@ Namespace SIS.VR
         .MRNNo = Record.MRNNo
         .SupplierName = Record.SupplierName
         .IRNO = Record.IRNO
+        .PONumber = Record.PONumber
       End With
       Return SIS.VR.vrLorryReceiptDetails.InsertData(_Rec)
     End Function
@@ -423,6 +425,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MRNNo",SqlDbType.Int,11, Record.MRNNo)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SupplierName", SqlDbType.NVarChar, 51, IIf(Record.SupplierName = "", Convert.DBNull, Record.SupplierName))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@IRNO", SqlDbType.NVarChar, 11, IIf(Record.IRNO = "", Convert.DBNull, Record.IRNO))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@PONumber", SqlDbType.NVarChar, 9, IIf(Record.PONumber = "", Convert.DBNull, Record.PONumber))
           Cmd.Parameters.Add("@Return_ProjectID", SqlDbType.NVarChar, 7)
           Cmd.Parameters("@Return_ProjectID").Direction = ParameterDirection.Output
           Cmd.Parameters.Add("@Return_MRNNo", SqlDbType.Int, 11)
@@ -456,6 +459,7 @@ Namespace SIS.VR
         .Remarks = Record.Remarks
         .SupplierName = Record.SupplierName
         .IRNO = Record.IRNO
+        .PONumber = Record.PONumber
       End With
       Return SIS.VR.vrLorryReceiptDetails.UpdateData(_Rec)
     End Function
@@ -483,6 +487,7 @@ Namespace SIS.VR
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MRNNo",SqlDbType.Int,11, Record.MRNNo)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SupplierName",SqlDbType.NVarChar,51, Iif(Record.SupplierName= "" ,Convert.DBNull, Record.SupplierName))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@IRNO", SqlDbType.NVarChar, 11, IIf(Record.IRNO = "", Convert.DBNull, Record.IRNO))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@PONumber", SqlDbType.NVarChar, 9, IIf(Record.PONumber = "", Convert.DBNull, Record.PONumber))
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1

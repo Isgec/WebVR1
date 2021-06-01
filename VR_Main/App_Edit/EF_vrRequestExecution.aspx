@@ -506,6 +506,7 @@
                                         ID="TBLvrLinkedRequest"
                                         EditUrl="~/VR_Main/App_Edit/EF_vrLinkedRequest.aspx"
                                         BarText="Selected Vehicle Requests"
+                                        SearchValidationGroup="linked"
                                         runat="server" />
                                       <asp:UpdateProgress ID="UPGSvrLinkedRequest" runat="server" AssociatedUpdatePanelID="UPNLvrLinkedRequest" DisplayAfter="100">
                                         <ProgressTemplate>
@@ -634,6 +635,7 @@
                                         EditUrl="~/VR_Main/App_Edit/EF_vrUnLinkedRequest.aspx"
                                         BarText="Pending Vehicle Request"
                                         Skin="tbl_blue"
+                                        SearchValidationGroup="unlinked"
                                         runat="server" />
                                       <asp:UpdateProgress ID="UPGSvrUnLinkedRequest" runat="server" AssociatedUpdatePanelID="UPNLvrUnLinkedRequest" DisplayAfter="100">
                                         <ProgressTemplate>

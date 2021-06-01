@@ -340,8 +340,15 @@
                         onblur="return dc(this,0);"
                         runat="server" />
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td class="alignright">
+                      <asp:Label ID="Label1" runat="server" Text="Site Purchase :" />&nbsp;
+                    </td>
+                    <td>
+                      <asp:CheckBox ID="F_SitePurchase"
+                        Checked='<%# Bind("SitePurchase") %>'
+                        CssClass="mychk"
+                        runat="server" />
+                    </td>
                   </tr>
                   <tr>
                     <td colspan="4" style="border-top: solid 1pt LightGrey"></td>

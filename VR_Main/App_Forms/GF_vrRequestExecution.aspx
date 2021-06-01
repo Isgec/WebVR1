@@ -95,6 +95,11 @@
                       </td>
                     </tr>
                   </table>
+                  <div id="divPOList" runat="server">
+                    <asp:TextBox ID="lstLoadID" runat="server" Text=""></asp:TextBox>
+                    <asp:Button ID="cmdPushList" runat="server" Text="Push PO" OnClick="cmdPushList_Click" />
+                    <asp:Label ID="Errs" runat="server"></asp:Label>
+                  </div>
                 </asp:Panel>
                 <AJX:CollapsiblePanelExtender ID="cpe1" runat="Server" TargetControlID="pnlD" ExpandControlID="pnlH" CollapseControlID="pnlH" Collapsed="True" TextLabelID="lblH" ImageControlID="imgH" ExpandedText="(Hide Filters...)" CollapsedText="(Show Filters...)" ExpandedImage="~/images/ua.png" CollapsedImage="~/images/da.png" SuppressPostBack="true" />
                 <script type="text/javascript">
@@ -114,45 +119,52 @@
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
-                      <ItemStyle cssClass="alignCenter" />
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle Width="30px" />
                     </asp:TemplateField>
-                    <asp:TemplateField>
+<%--                    <asp:TemplateField>
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdPrintPage" runat="server" Visible='<%# Eval("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Print the record." SkinID="Print" OnClientClick="return print_report(this);" />
                       </ItemTemplate>
-                      <ItemStyle cssClass="alignCenter" />
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle Width="30px" />
-                    </asp:TemplateField>
-                    <asp:TemplateField HeaderText="SR.NO" SortExpression="SRNNo">
+                    </asp:TemplateField>--%>
+                    <asp:TemplateField HeaderText="Exe.No" SortExpression="SRNNo">
                       <ItemTemplate>
                         <asp:Label ID="LabelSRNNo" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("SRNNo") %>'></asp:Label>
                       </ItemTemplate>
-                      <ItemStyle HorizontalAlign="Center" VerticalAlign="Top" />
+                      <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle HorizontalAlign="Center" Width="40px" />
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Load ID" SortExpression="SPLoadID">
+                      <ItemTemplate>
+                        <asp:Label ID="LabelSPLoadID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# EVal("SPLoadID") %>'></asp:Label>
+                      </ItemTemplate>
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="TRANSPORTER" SortExpression="VR_Transporters10_TransporterName">
                       <ItemTemplate>
-                        <asp:Label ID="L_TransporterID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("TransporterID") %>' Text='<%# Eval("VR_Transporters10_TransporterName") %>'></asp:Label>
+                        <asp:Button ID="L_TransporterID" runat="server" ForeColor='<%# EVal("ForeColor") %>' BorderStyle="None" BackColor="Transparent" Style="cursor: pointer;" Font-Underline="true" Title='<%# EVal("TransporterID") %>' Text='<%# Eval("VR_Transporters10_TransporterName") %>' CommandName="lgEmailIDs" CommandArgument='<%# Container.DataItemIndex %>'></asp:Button>
                       </ItemTemplate>
-                      <ItemStyle VerticalAlign="Top" />
-                      <HeaderStyle Width="150px" />
+                      <ItemStyle CssClass="alignleft" />
+                      <HeaderStyle HorizontalAlign="Left" Width="40px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="VEHICLE" SortExpression="VR_VehicleTypes13_cmba">
                       <ItemTemplate>
-                        <asp:Label ID="L_VehicleTypeID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("VehicleTypeID") %>' Text='<%# Eval("VR_VehicleTypes13_cmba") %>'></asp:Label>
+                        <asp:Label ID="L_VehicleTypeID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("VehicleTypeID") %>' Text='<%# Eval("VR_VehicleTypes13_cmba") %>'></asp:Label>
                       </ItemTemplate>
                       <ItemStyle VerticalAlign="Top" />
                       <HeaderStyle Width="200px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="PLACED ON" SortExpression="VehiclePlacedOn">
+                    <asp:TemplateField HeaderText="REQD. ON" SortExpression="VehiclePlacedOn">
                       <ItemTemplate>
                         <asp:Label ID="LabelVehiclePlacedOn" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("VehiclePlacedOn") %>'></asp:Label>
                       </ItemTemplate>
                       <ItemStyle VerticalAlign="Top" />
                       <HeaderStyle Width="80px" />
                     </asp:TemplateField>
-<%--                    <asp:TemplateField HeaderText="GR NO" SortExpression="GRNo">
+                    <%--                    <asp:TemplateField HeaderText="GR NO" SortExpression="GRNo">
                       <ItemTemplate>
                         <asp:Label ID="LabelGRNo" runat="server" ForeColor='<%# EVal("ForeColor") %>' Text='<%# Bind("GRNo") %>'></asp:Label>
                       </ItemTemplate>
@@ -180,14 +192,14 @@
                       <ItemStyle VerticalAlign="Top" />
                       <HeaderStyle Width="100px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="LINK EXECUTIONS">
+                    <asp:TemplateField HeaderText="LINK EXEC.">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdLink" runat="server" Visible='<%# EVal("LinkVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Click to Link Executions." SkinID="link" OnClientClick='<%# "return lc_getLink.getLink(""" & EVal("SRNNo") & """,this);" %>' CommandName="LinkExecution" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
-                      <ItemStyle cssClass="alignCenter" />
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="CONFIRM VEHICLE">
+                    <asp:TemplateField HeaderText="CONF. VEH.">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdInitiateWF" runat="server" Visible='<%# EVal("InitiateWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Send Confirmation by E-Mail" SkinID="forward" OnClientClick='<%# "return confirm(""Vehicle Requester and Transporter will be notified through E-Mail. Continue ?"");" %>' CommandName="InitiateWF" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
@@ -198,14 +210,14 @@
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdVehiclePlacedWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("VehiclePlacedWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Click to update CT, when Vehicle is arrived at Supplier's Location." SkinID="revise" OnClientClick='<%# "return Page_ClientValidate(""Approve" & Container.DataItemIndex & """) && confirm(""Update CT for Vehicle Placed Activity ?"");" %>' CommandName="VehiclePlacedWF" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
-                      <ItemStyle CssClass="alignCenter"/>
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="CANCEL VEHICLE">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdCancleWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("CancelWFVisible") %>' Enabled='<%# EVal("CancelWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="It will cancel Vehicle Arrangement & Send Cancillation Noficationirmation by E-Mail" SkinID="reject" OnClientClick='<%# "return Page_ClientValidate(""Cancel" & Container.DataItemIndex & """) && confirm(""GR entry will be cleared and Vehicle Requester and Transporter will be notified through E-Mail. Continue ?"");" %>' CommandName="CancelWF" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
-                      <ItemStyle CssClass="alignCenter"/>
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
                     <asp:TemplateField HeaderText="LINK GR">
@@ -215,18 +227,19 @@
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="FOR APPROVAL">
+                    <asp:TemplateField HeaderText="FOR APRvl">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdForApproval" runat="server" Visible='<%# EVal("ForApprovalVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Send for approval" SkinID="forapproval" CommandName="ForApproval" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="TRANS SHIPMENT">
+                    <asp:TemplateField HeaderText="TRANS SHIP.">
                       <ItemTemplate>
-                        <asp:ImageButton ID="cmdCompleteWF" ValidationGroup='<%# "Complete" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("CompleteWFVisible") %>' Enabled='<%# EVal("CompleteWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Trans Shipment" SkinID="complete" OnClientClick='<%# "return Page_ClientValidate(""Complete" & Container.DataItemIndex & """) && lc_getTransShip.getTransShip(""" & EVal("SRNNo") & """,this);" %>' CommandName="CompleteWF" CommandArgument='<%# Container.DataItemIndex %>' />
+                        <asp:ImageButton ID="cmdCompleteWF" ValidationGroup='<%# "Complete" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("CompleteWFVisible") %>' Enabled='<%# EVal("CompleteWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Trans Shipment" SkinID="complete" OnClientClick='<%# "return Page_ClientValidate(""Complete" & Container.DataItemIndex & """) && lc_getTransShip.getTransShip(""" & Eval("SRNNo") & """,this);" %>' CommandName="CompleteWF" CommandArgument='<%# Container.DataItemIndex %>' />
+                        <asp:ImageButton ID="cmdPOData" runat="server" Visible='<%# Eval("PushPODataVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Push PO Data" SkinID="forward" OnClientClick="return confirm('Push PO data ?');" CommandName="PushPOData" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
-                      <ItemStyle CssClass="alignCenter"/>
+                      <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="50px" />
                     </asp:TemplateField>
                     <asp:TemplateField>
@@ -284,5 +297,39 @@
   <LGM:LC_vrGetGR ID="winGetGR" runat="server" />
   <LGM:LC_vrTransShip ID="winGetTS" runat="server" />
   <LGM:LC_LinkExecution ID="LC_LinkExecution1" runat="server" />
+
+  <asp:UpdatePanel runat="server">
+    <ContentTemplate>
+      <asp:Panel ID="pnl1" runat="server" Style="background-color: white; display: none; height: 226px" Width='400px'>
+        <asp:Panel ID="pnlHeader" runat="server" Style="width: 100%; height: 33px; padding-top: 8px; text-align: center; border-bottom: 1pt solid lightgray;">
+          <asp:Label ID="HeaderText" runat="server" Font-Size="16px" Font-Bold="true" Text='My Modal Text'></asp:Label>
+        </asp:Panel>
+        <asp:Panel ID="modalContent" runat="server" Style="width: 100%; height: 136px; padding: 4px;">
+          <asp:Label ID="L_EMailID" runat="server" Text="Update Transporter E-Mail IDs:" Font-Bold="true" Width="392px"></asp:Label>
+          <asp:TextBox ID="F_EMailIDs" runat="server" Width="386px" Height="100px" TextMode="MultiLine" onfocus="this.select();"></asp:TextBox>
+        </asp:Panel>
+        <asp:Panel ID="pnlFooter" runat="server" Style="width: 100%; height: 33px; padding-top: 8px; text-align: right; border-top: 1pt solid lightgray;">
+          <asp:Label ID="L_PrimaryKey" runat="server" Style="display: none;"></asp:Label>
+          <asp:Button ID="cmdOK" runat="server" Width="70px" Text="OK" Style="text-align: center; margin-right: 30px;" />
+          <asp:Button ID="cmdCancel" runat="server" Width="70px" Text="Cancel" Style="text-align: center; margin-right: 30px;" />
+        </asp:Panel>
+      </asp:Panel>
+      <asp:Button ID="dummy" runat="server" Style="display: none;" Text="show"></asp:Button>
+      <AJX:ModalPopupExtender
+        ID="mPopup"
+        TargetControlID="dummy"
+        BackgroundCssClass="modalBackground"
+        CancelControlID="cmdCancel"
+        OkControlID="cmdCancel"
+        PopupControlID="pnl1"
+        PopupDragHandleControlID="pnlHeader"
+        DropShadow="true"
+        runat="server">
+      </AJX:ModalPopupExtender>
+    </ContentTemplate>
+    <Triggers>
+      <asp:AsyncPostBackTrigger ControlID="cmdOK" EventName="Click" />
+    </Triggers>
+  </asp:UpdatePanel>
 
 </asp:Content>

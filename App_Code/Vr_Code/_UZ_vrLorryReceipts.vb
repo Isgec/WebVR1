@@ -159,12 +159,14 @@ Namespace SIS.VR
       If GRs.Count <= 0 Then
         Throw New Exception("NO GR entry found, can NOT forward to HO.")
       End If
-      If Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
-        For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
-          If gr.IRNO = "" Then
-            Throw New Exception("IR is not linked, CAN NOT forward MRN to HO." & vbCrLf & "CLICK ON EDIT BUTTON TO LINK IR.")
-          End If
-        Next
+      If Not Results.SitePurchase Then
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
+          For Each gr As SIS.VR.vrLorryReceiptDetails In GRs
+            If gr.IRNO = "" Then
+              Throw New Exception("IR is not linked, CAN NOT forward MRN to HO." & vbCrLf & "CLICK ON EDIT BUTTON TO LINK IR.")
+            End If
+          Next
+        End If
       End If
       With Results
         .LRStatusID = 2

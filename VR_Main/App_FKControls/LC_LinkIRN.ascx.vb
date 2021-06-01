@@ -15,6 +15,17 @@ Partial Class LC_LinkIRN
       ViewState.Add("Project", value)
     End Set
   End Property
+  Public Property PONumber As String
+    Get
+      If ViewState("PONumber") IsNot Nothing Then
+        Return Convert.ToString(ViewState("PONumber"))
+      End If
+      Return ""
+    End Get
+    Set(value As String)
+      ViewState.Add("PONumber", value)
+    End Set
+  End Property
   Public Property Supplier As String
     Get
       If ViewState("Supplier") IsNot Nothing Then
@@ -81,6 +92,24 @@ Partial Class LC_LinkIRN
     ODSirnList.SelectParameters("ProjectID").DefaultValue = ProjectID
     ODSirnList.SelectParameters("SupplierID").DefaultValue = SupplierID
     ODSirnList.SelectParameters("TransporterID").DefaultValue = TransporterID
+    ODSirnList.SelectParameters("PONumber").DefaultValue = PONumber
+    ODSirnList.SelectParameters("BillNo").DefaultValue = BillNo
+    ODSirnList.SelectParameters("BillDate").DefaultValue = BillDate
+    GVirnList.DataBind()
+    mPopup.Show()
+  End Sub
+  Public Sub Show(ProjectID As String, PONo As String, SupplierID As String, TransporterID As String, Optional BillNo As String = "", Optional BillDate As String = "")
+    Project = ProjectID
+    Supplier = SupplierID
+    Transporter = TransporterID
+    PONumber = PONo
+    HeaderText.Text = "IRN List: " & SupplierID
+    divGRInfo.InnerHtml = GRInfoToLink
+    ODSirnList.SelectParameters("ShowAll").DefaultValue = F_ShowAll.Checked
+    ODSirnList.SelectParameters("ProjectID").DefaultValue = ProjectID
+    ODSirnList.SelectParameters("SupplierID").DefaultValue = SupplierID
+    ODSirnList.SelectParameters("TransporterID").DefaultValue = TransporterID
+    ODSirnList.SelectParameters("PONumber").DefaultValue = PONumber
     ODSirnList.SelectParameters("BillNo").DefaultValue = BillNo
     ODSirnList.SelectParameters("BillDate").DefaultValue = BillDate
     GVirnList.DataBind()

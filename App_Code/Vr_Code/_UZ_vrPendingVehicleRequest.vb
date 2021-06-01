@@ -157,6 +157,7 @@ Namespace SIS.VR
     End Function
     Public Shared Function GetSPExecution(RequestNo As Int32, ByRef SPLoadData As String) As String
       Dim Results As SIS.VR.vrPendingVehicleRequest = vrPendingVehicleRequestGetByID(RequestNo)
+      'Set Flag that Process is started
       With Results
         '.SPStatus = enumSPStatus.UnderSPExecutionCreation
         .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
@@ -166,8 +167,10 @@ Namespace SIS.VR
       End With
       Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
       Dim tmp As SPApi.SPExecution = SPApi.GetSPExecution(Results.SPRequestID, SPLoadData)
-
+      'It is insured that tmp will NOT Nothing
+      'We have to check only error flag
       If tmp.IsError Then
+        'Re set Flag that Process is finished with error
         With Results
           .SPStatus = enumSPStatus.SPRequestCreated
           .SPEdiStatus = enumSPEdiStatus.SPError
@@ -176,7 +179,10 @@ Namespace SIS.VR
           .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
-      Else
+      End If
+      'Various updates when process is finished with success
+      If Not tmp.IsError Then
+        '1. Reset Flag
         With Results
           .SPStatus = enumSPStatus.SPExecutionCreated
           .SPEdiStatus = enumSPEdiStatus.SPDone
@@ -186,22 +192,29 @@ Namespace SIS.VR
           .SPLoadData = SPLoadData
         End With
         Results = SIS.VR.vrPendingVehicleRequest.UpdateData(Results)
-      End If
-
-      If Not tmp.IsError Then
+        'NOTE: It was supposed that execution Data of all clubbed Requests are returned in Array
+        '      But it returns only one Object in Array i.e. Only Requested Data NOT including All Clubbed
+        '      Though code is written to handle all
         For Each x As SPApi.ExecutionData In tmp.resultSet
-          '1. Create Execution
-          'Update Data Not Available in Load Data
+          '2. Update required Data Not Available in Load Data from Vehicle Request
           With x
             .RequestNo = Results.RequestNo
             .BPID = Results.SupplierID
             .Size = "Cargo L:" & Results.Length & ", W:" & Results.Width & ", H:" & Results.Height
             .VehicleTypeDescription = Results.FK_VR_VehicleRequest_VehicleTypeID.cmba
-            .GeneratePO = 2 'YES
+            .wuom = Results.FK_VR_VehicleRequest_WeightUnit.Description
+            If Convert.ToBoolean(ConfigurationManager.AppSettings("NewLogicSanctionCheck")) Then
+              .GeneratePO = 1 'YES
+            Else
+              .GeneratePO = 2 'NO
+            End If
           End With
-          'check already created execution to update
+          '2. Create/Update Execution
+          '   Insure if Execution Is NOT Created From Load Data 
+          '   If Requests are clubbed LoadID will be same, but RequestID/SPRequestID will be different 
+          '   We Have to create separate execution for each Request
           Dim Found As Boolean = True
-          Dim re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetSPLoadByID(x.loadId)
+          Dim re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetSPLoadByID(x.loadId, x.RequestNo)
           If re Is Nothing Then
             Found = False
             re = New SIS.VR.vrRequestExecution
@@ -231,11 +244,15 @@ Namespace SIS.VR
           Else
             re = SIS.VR.vrRequestExecution.InsertData(re)
           End If
-          'Link Vehicle request with execution
+          '3. Link Vehicle request with execution
+          '   CompleteWF handles UPD/INS
           SIS.VR.vrUnLinkedRequest.CompleteWF(Results.RequestNo, re.SRNNo)
-          'Push in ERP for PO
+          '4. Push in ERP for PO
+          '###Pushing in ERP for PO is removed from here 
+          '   As Only PO is to be generated for all clubbed requests
           Try
-            SIS.VR.vrPendingVehicleRequest.PushPOData(x)
+            'PushData Handles UPD/INS
+            '###SIS.VR.vrPendingVehicleRequest.PushPOData(x)
           Catch ex As Exception
             Dim xx As String = ""
           End Try
@@ -243,6 +260,172 @@ Namespace SIS.VR
       End If
       Return SPLoadData
     End Function
+#Region " NEW Get SPExecution "
+    '1 First Get List of Clubbed Requests
+    Private Shared Function GetClubbedRequests(RequestNo As Integer) As List(Of String)
+      'Returned JSON is used for debugging only
+      Dim ReturnedJSON As String = ""
+      Dim x As SIS.VR.vrPendingVehicleRequest = vrPendingVehicleRequestGetByID(RequestNo)
+      Dim tmp As SPApi.SPExecution = SPApi.GetSPExecution(x.SPRequestID, ReturnedJSON)
+      If tmp.IsError Then
+        Throw New Exception(tmp.Message)
+      End If
+      If tmp.resultSet Is Nothing Then
+        Throw New Exception("Execution List is NOT returned from SP.")
+      End If
+      If tmp.resultSet.Count <= 0 Then
+        Throw New Exception("No Data in Execution List.")
+      End If
+      'Only One execution is returned from SP, i.e. only requested vr data
+      Dim ed As SPApi.ExecutionData = tmp.resultSet(0)
+      If ed.IsClubberd Then
+        Return ed.ClubbedRequestList
+      End If
+      Return New List(Of String)
+    End Function
+    Private Class ReqVsSPExe
+      Public Property PendingRequest As SIS.VR.vrPendingVehicleRequest = Nothing
+      Public Property SPExecution As SPApi.SPExecution = Nothing
+      Public Property ReturnedJSON As String = ""
+      Public Property VrReFound As Boolean = True
+      Public Property VrRe As SIS.VR.vrRequestExecution = Nothing
+    End Class
+    Public Shared Function GetSPExecution(RequestNo As Int32) As String
+      Dim ClubbedRequestList As List(Of String) = GetClubbedRequests(RequestNo)
+      If ClubbedRequestList.Count <= 0 Then
+        ClubbedRequestList.Add(RequestNo)
+      Else
+        Dim tmpFound As Boolean = False
+        For Each tmpX As Integer In ClubbedRequestList
+          If tmpX = RequestNo Then
+            tmpFound = True
+            Exit For
+          End If
+        Next
+        If Not tmpFound Then
+          ClubbedRequestList.Add(RequestNo)
+        End If
+      End If
+      Dim ReqVsExe As New List(Of ReqVsSPExe)
+      Dim IsError As Boolean = False
+      For Each rno As Integer In ClubbedRequestList
+        Dim re As New ReqVsSPExe
+        re.PendingRequest = SIS.VR.vrPendingVehicleRequest.vrPendingVehicleRequestGetByID(rno)
+        re.SPExecution = SPApi.GetSPExecution(re.PendingRequest.SPRequestID, re.ReturnedJSON)
+        If Not re.SPExecution.IsError Then
+          'Update required Data from Vehicle request Not Available in re
+          'There will be only one element in resultset
+          Dim x As SPApi.ExecutionData = re.SPExecution.resultSet(0)
+          With x
+            .RequestNo = re.PendingRequest.RequestNo
+            .BPID = re.PendingRequest.SupplierID
+            .Size = "Cargo L:" & re.PendingRequest.Length & ", W:" & re.PendingRequest.Width & ", H:" & re.PendingRequest.Height
+            .VehicleTypeDescription = re.PendingRequest.FK_VR_VehicleRequest_VehicleTypeID.cmba
+            .wuom = re.PendingRequest.FK_VR_VehicleRequest_WeightUnit.Description
+            If Convert.ToBoolean(ConfigurationManager.AppSettings("NewLogicSanctionCheck")) Then
+              .GeneratePO = 1 'YES
+            Else
+              .GeneratePO = 2 'NO
+            End If
+          End With
+          re.VrReFound = True
+          re.VrRe = SIS.VR.vrRequestExecution.vrRequestExecutionGetSPLoadByID(x.loadId, x.RequestNo)
+          If re.VrRe Is Nothing Then
+            re.VrReFound = False
+            re.VrRe = New SIS.VR.vrRequestExecution
+          End If
+          With re.VrRe
+            .VehicleTypeID = x.vehicleType
+            .TransporterID = x.transporterCode
+            .VehiclePlacedOn = x.loadingDate
+            .ExecutionDescription = re.PendingRequest.ProjectID & "/"
+            '.VehicleNo = ""
+            '.EstimatedDistance = 0
+            '.EstimatedRatePerKM = 0
+            .EstimatedAmount = x.totalAmount
+            .Remarks = "System created"
+            '===============================
+            .ArrangedBy = Global.System.Web.HttpContext.Current.Session("LoginID")
+            .ArrangedOn = Now.ToString("dd/MM/yyyy HH:mm")
+            .RequestStatusID = RequestStates.UnderExecution
+            '===============================
+            .RequestNo = x.RequestNo
+            .SPRequestID = re.PendingRequest.SPRequestID
+            .SPLoadID = x.loadId
+            .SPExecutionStatus = enumSPExecutionStatus.Free
+            '====================
+            'Request Linking Data
+            .RequestStatusID = RequestStates.RequestLinked
+            .ArrangedBy = HttpContext.Current.Session("LoginID")
+            .ArrangedOn = Now
+            'Req.Execution LoadedAtSupplier will be used as Flag OutOfContract
+            .LoadedAtSupplier = re.PendingRequest.OutOfContract
+          End With
+          If re.VrReFound Then
+            re.VrRe = SIS.VR.vrRequestExecution.UpdateData(re.VrRe)
+          Else
+            re.VrRe = SIS.VR.vrRequestExecution.InsertData(re.VrRe)
+          End If
+          With re.PendingRequest
+            .SPStatus = enumSPStatus.SPExecutionCreated
+            .SPEdiStatus = enumSPEdiStatus.SPDone
+            .SPEdiMessage = ""
+            .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
+            .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+            .SPLoadData = re.ReturnedJSON
+            '====================
+            'Request Linking Data
+            .RequestStatus = RequestStates.RequestLinked
+            .SRNNo = re.VrRe.SRNNo
+          End With
+          re.PendingRequest = SIS.VR.vrPendingVehicleRequest.UpdateData(re.PendingRequest)
+        Else
+          IsError = True
+          With re.PendingRequest
+            .SPStatus = enumSPStatus.SPRequestCreated
+            .SPEdiStatus = enumSPEdiStatus.SPError
+            .SPEdiMessage = re.SPExecution.Message
+            .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
+            .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+          End With
+          re.PendingRequest = SIS.VR.vrPendingVehicleRequest.UpdateData(re.PendingRequest)
+        End If
+        ReqVsExe.Add(re)
+      Next
+      If IsError Then
+        Return "Error During Processing."
+      End If
+      'Push PO Data
+      'Create a Clubbed spapi.executiondata
+      Dim xed As SPApi.ExecutionData = Nothing
+      Dim strJSON As String = ""
+      Dim IsFirst As Boolean = True
+      For Each re As ReqVsSPExe In ReqVsExe
+        Dim ed As SPApi.ExecutionData = re.SPExecution.resultSet(0)
+        If IsFirst Then
+          xed = ed
+          IsFirst = False
+          strJSON = re.ReturnedJSON
+          Continue For
+        Else
+          xed.weight += ed.weight
+          xed.totalAmount += ed.totalAmount
+          xed.supplierLocation &= vbCrLf & ed.supplierLocation
+          'Additional Fields
+          strJSON &= vbCrLf & re.ReturnedJSON
+        End If
+      Next
+      Try
+        'PushData Handles UPD/INS
+        SIS.VR.vrPendingVehicleRequest.PushPOData(xed)
+      Catch ex As Exception
+        Dim xx As String = "Error During PO Creation in ERP"
+      End Try
+      Return strJSON
+    End Function
+
+#End Region
+
     Public Shared Function CreateSPRequest(RequestNo As Int32) As String
       Dim Results As SIS.VR.vrPendingVehicleRequest = vrPendingVehicleRequestGetByID(RequestNo)
       With Results
@@ -335,7 +518,7 @@ Namespace SIS.VR
           .breadth = r.Width
           .height = r.Height
           .notes = r.Remarks
-          .branchCode = "EU200"
+          .branchCode = "EU" & Comp
           .deliveryCode = "NONE"
           .materialWt = r.MaterialWeight
           .projectLocation = r.ToLocation

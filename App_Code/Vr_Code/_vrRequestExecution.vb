@@ -135,6 +135,15 @@ Namespace SIS.VR
     Public Property SPLoadID As String = ""
     Public Property SPExecutionStatus As Integer = 1
     '======================================================
+    Public ReadOnly Property ISGECLoadID As Integer
+      Get
+        If SPLoadID = "" Then
+          Return 20000000 + SRNNo
+        Else
+          Return SPLoadID
+        End If
+      End Get
+    End Property
     Public ReadOnly Property ForeColor() As System.Drawing.Color
 			Get
 				Dim mRet As System.Drawing.Color = Drawing.Color.Blue

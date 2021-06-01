@@ -15,6 +15,8 @@ Namespace SIS.VR
     Public Property BillDate As String = ""
     Public Property GRNo As String = ""
     Public Property GRDate As String = ""
+    Public Property PONumber As String = ""
+    Public Property ProjectID As String = ""
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Black
@@ -44,7 +46,9 @@ Namespace SIS.VR
       Sql &= "  lgr.t_grno as GRNo, "
       Sql &= "  lgr.t_grdt as GRDate, "
       Sql &= "  lgr.t_grbp as TransporterID, "
-      Sql &= "  gbp.t_nama as TransporterName "
+      Sql &= "  gbp.t_nama as TransporterName, "
+      Sql &= " 	ir.t_cdf_pono as PONumber, "
+      Sql &= " 	ir.t_cdf_cprj as ProjectID "
       Sql &= " from ttfacp100" & Comp & " as ir "
       Sql &= " inner join ttfisg002" & Comp & " as lgr on ir.t_ninv = lgr.t_irno "
       Sql &= " left outer join ttccom100" & Comp & " as gbp on gbp.t_bpid = lgr.t_grbp "
@@ -86,7 +90,7 @@ Namespace SIS.VR
     End Function
 
     <DataObjectMethod(DataObjectMethodType.Select)>
-    Public Shared Function SelectList(ProjectID As String, SupplierID As String, TransporterID As String, BillNo As String, BillDate As String, ShowAll As Boolean) As List(Of SIS.VR.irnList)
+    Public Shared Function SelectList(ProjectID As String, PONumber As String, SupplierID As String, TransporterID As String, BillNo As String, BillDate As String, ShowAll As Boolean) As List(Of SIS.VR.irnList)
       Dim Results As New List(Of SIS.VR.irnList)
       If ProjectID Is Nothing Then
         Return Results
@@ -106,25 +110,32 @@ Namespace SIS.VR
       Sql &= "  lgr.t_grno as GRNo, "
       Sql &= "  lgr.t_grdt as GRDate, "
       Sql &= "  lgr.t_grbp as TransporterID, "
-      Sql &= "  gbp.t_nama as TransporterName "
+      Sql &= "  gbp.t_nama as TransporterName, "
+      Sql &= " 	ir.t_cdf_pono as PONumber, "
+      Sql &= " 	ir.t_cdf_cprj as ProjectID "
       Sql &= " from ttfacp100" & Comp & " as ir "
       Sql &= " inner join ttfisg002" & Comp & " as lgr on ir.t_ninv = lgr.t_irno "
       Sql &= " left outer join ttccom100" & Comp & " as gbp on gbp.t_bpid = lgr.t_grbp "
-      Sql &= " where ir.t_cdf_irdt >= dateadd(d,-365,getdate()) "
-      Sql &= " 	and ir.t_cdf_cprj='" & ProjectID & "' "
-      If cmp = HttpContext.Current.Session("FinanceCompany") Then
-        If SupplierID <> "" AndAlso SupplierID.Substring(0, 3) <> "CUS" Then
-          Sql &= "  and ir.t_ifbp='" & SupplierID & "' "
+      Sql &= " where 1 = 1 "
+      If PONumber <> "" Then
+        Sql &= " 	and ir.t_cdf_pono='" & PONumber & "' "
+      Else
+        Sql &= "  and ir.t_cdf_irdt >= dateadd(d,-365,getdate()) "
+        Sql &= " 	and ir.t_cdf_cprj='" & ProjectID & "' "
+        If cmp = HttpContext.Current.Session("FinanceCompany") Then
+          If SupplierID <> "" AndAlso SupplierID.Substring(0, 3) <> "CUS" Then
+            Sql &= "  and ir.t_ifbp='" & SupplierID & "' "
+          End If
+          If TransporterID <> "" Then
+            'Sql &= " 	and lgr.t_grbp = '" & TransporterID & "' "
+          End If
         End If
-        If TransporterID <> "" Then
-          'Sql &= " 	and lgr.t_grbp = '" & TransporterID & "' "
+        If BillNo <> "" Then
+          Sql &= " 	and ir.t_isup = '" & BillNo & "' "
         End If
-      End If
-      If BillNo <> "" Then
-        Sql &= " 	and ir.t_isup = '" & BillNo & "' "
-      End If
-      If BillDate <> "" Then
-        Sql &= " 	and ir.t_invd = convert(datetime,'" & BillDate & "',103) "
+        If BillDate <> "" Then
+          Sql &= " 	and ir.t_invd = convert(datetime,'" & BillDate & "',103) "
+        End If
       End If
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()

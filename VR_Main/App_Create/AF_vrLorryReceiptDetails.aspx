@@ -135,13 +135,42 @@
                   </tr>
                   <tr>
                     <td class="alignright">
+                      <b>
+                        <asp:Label ID="Label2" ForeColor="#CC6633" runat="server" Text="PO Number :" /><span style="color: red">*</span></b>
+                    </td>
+                    <td colspan="3">
+                      <asp:TextBox ID="F_PONumber"
+                        Text='<%# Bind("PONumber") %>'
+                        CssClass="mytxt"
+                        onfocus="return this.select();"
+                        onblur="this.value=this.value.replace(/\'/g,'');"
+                        ToolTip="Enter PO Number."
+                        MaxLength="9"
+                        Width="78px"
+                        OnTextChanged="F_PONumber_TextChanged"
+                        AutoPostBack="true"
+                        ClientIDMode="Static"
+                        runat="server" />
+                      <asp:RequiredFieldValidator
+                        ID="RFVPONumber"
+                        runat="server"
+                        ControlToValidate="F_PONumber"
+                        ErrorMessage="<div class='errorLG'>Required!</div>"
+                        Display="Dynamic"
+                        EnableClientScript="true"
+                        ValidationGroup="vrLorryReceiptDetails"
+                        SetFocusOnError="true" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="alignright">
                       <asp:Label ID="L_SupplierID" runat="server" Text="Supplier ID :" />
                     </td>
                     <td>
                       <asp:TextBox
                         ID="F_SupplierID"
                         CssClass="myfktxt"
-                        Width="63px"
+                        Width="78px"
                         Text='<%# Bind("SupplierID") %>'
                         AutoCompleteType="None"
                         onfocus="return this.select();"

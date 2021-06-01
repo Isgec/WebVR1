@@ -101,6 +101,29 @@ Partial Class EF_vrLorryReceipts
         test.GRInfoToLink = mStr
         test.MRNNo = MRNNo
         test.SerialNo = SerialNo
+        test.PONumber = oGR.PONumber
+        If oGR.PONumber = "" Then
+          Dim message As String = New JavaScriptSerializer().Serialize("PO Number not entered, Pl. click on EDIT button to enter PO Number.")
+          Dim script As String = String.Format("alert({0});", message)
+          ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+          Exit Sub
+        Else
+          Dim oPO As SIS.PAK.pakPO = Nothing
+          oPO = SIS.PAK.erpData.erpPO.ImportFromERP(oGR.PONumber)
+          If oPO IsNot Nothing Then
+            If oPO.ProjectID <> ProjectID Then
+              Dim message As String = New JavaScriptSerializer().Serialize("Purchase Order belongs to Project: " & oPO.ProjectID)
+              Dim script As String = String.Format("alert({0});", message)
+              ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+              Exit Sub
+            End If
+          Else
+            Dim message As String = New JavaScriptSerializer().Serialize("Purchase Order NOT found in ERP: " & oGR.PONumber)
+            Dim script As String = String.Format("alert({0});", message)
+            ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+            Exit Sub
+          End If
+        End If
         test.Show(ProjectID, oGR.SupplierID, oMrn.TransporterID, "", "")
       Catch ex As Exception
         Dim message As String = New JavaScriptSerializer().Serialize(ex.Message.ToString())

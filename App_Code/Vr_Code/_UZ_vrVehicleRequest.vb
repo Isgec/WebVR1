@@ -341,7 +341,7 @@ Namespace SIS.VR
             Catch ex As Exception
             End Try
             If oEmp.EMailID.ToLower.IndexOf("isgec.com") >= 0 Then
-              .CC.Add(New MailAddress("sarvjeet_chowdhry@isgec.com", "Sarvjeet Chowdhry"))
+              .CC.Add(New MailAddress("sarvjeet@isgec.co.in", "Sarvjeet Chowdhry"))
             End If
             .IsBodyHtml = True
             .Subject = "Vehicle Required On: " & oRq.VehicleRequiredOn & " @ Vendor: " & oRq.IDM_Vendors5_Description & " Project: " & oRq.IDM_Projects4_Description
