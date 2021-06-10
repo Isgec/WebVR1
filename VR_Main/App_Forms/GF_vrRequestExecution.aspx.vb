@@ -17,7 +17,8 @@ Partial Class GF_vrRequestExecution
     If e.CommandName.ToLower = "PushPOData".ToLower Then
       Try
         Dim SRNNo As Int32 = GVvrRequestExecution.DataKeys(e.CommandArgument).Values("SRNNo")
-        SIS.VR.vrRequestExecution.PushPODataByExecution(SRNNo)
+        'It is available in PendingVehicleRequest
+        SIS.VR.vrPendingVehicleRequest.PushPODataByExecution(SRNNo)
         GVvrRequestExecution.DataBind()
       Catch ex As Exception
         Dim message As String = New JavaScriptSerializer().Serialize(ex.Message)
@@ -309,7 +310,7 @@ Partial Class GF_vrRequestExecution
         Dim Y As Integer = SIS.VR.vrRequestExecution.GetExecutionNoByLoadID(x)
         If Y > 0 Then
           Try
-            SIS.VR.vrRequestExecution.PushPODataByExecution(Y)
+            SIS.VR.vrPendingVehicleRequest.PushPODataByExecution(Y)
           Catch ex As Exception
             eStr &= "LoadID: " & x & " Err: " & ex.Message & "<br/>"
           End Try

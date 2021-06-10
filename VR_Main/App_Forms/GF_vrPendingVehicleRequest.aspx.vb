@@ -60,7 +60,11 @@ Partial Class GF_vrPendingVehicleRequest
       Dim str As String = ""
       Try
         Dim RequestNo As Int32 = GVvrPendingVehicleRequest.DataKeys(e.CommandArgument).Values("RequestNo")
-        SIS.VR.vrPendingVehicleRequest.GetSPExecution(RequestNo, str)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("NewLogicSanctionCheck")) Then
+          SIS.VR.vrPendingVehicleRequest.NewGetSPExecution(RequestNo)
+        Else
+          SIS.VR.vrPendingVehicleRequest.GetSPExecution(RequestNo, str)
+        End If
         GVvrPendingVehicleRequest.DataBind()
         '-------Temp Testing 
         'Dim isgE As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.vrRequestExecutionGetByRequestNo(RequestNo, "")

@@ -309,17 +309,6 @@ Namespace SIS.VR
         Return False
       End Get
     End Property
-    Public Shared Function PushPODataByExecution(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
-      Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
-      Dim Re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
-      Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, Comp)
-      If ePO Is Nothing Then
-        SPApi.POData.InsertData(Re, Comp)
-      Else
-        SPApi.POData.UpdateData(Re, Comp)
-      End If
-      Return Re
-    End Function
     'Confirm Vehicle
     Public Shared Function NewLogicInitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
       Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
@@ -331,9 +320,10 @@ Namespace SIS.VR
       If Re.SPLoadID = "" Then
         Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, Comp)
         If ePO Is Nothing Then
-          SPApi.POData.InsertData(Re, Comp)
+          SPApi.POData.NewInsertData(Re, Comp)
         Else
-          SPApi.POData.UpdateData(Re, Comp)
+          'To Write
+          'SPApi.POData.NewUpdateData(Re, Comp)
         End If
         epr.SPLoadID = Re.ISGECLoadID
       Else
@@ -2117,6 +2107,25 @@ Namespace SIS.VR
       End Try
       Return mRet
     End Function
+    Public Shared Function vrRequestExecutionAllGetSPLoadByID(ByVal SPLoadID As String) As List(Of SIS.VR.vrRequestExecution)
+      Dim Results As New List(Of SIS.VR.vrRequestExecution)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spvr_LG_RequestExecutionAllSelectBySPLoadID"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadID", SqlDbType.NVarChar, 51, SPLoadID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          While Reader.Read()
+            Results.Add(New SIS.VR.vrRequestExecution(Reader))
+          End While
+          Reader.Close()
+        End Using
+      End Using
+      Return Results
+    End Function
+
     Public Shared Function vrRequestExecutionGetSPLoadByID(ByVal SPLoadID As String, RequestNo As Integer) As SIS.VR.vrRequestExecution
       Dim Results As SIS.VR.vrRequestExecution = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())

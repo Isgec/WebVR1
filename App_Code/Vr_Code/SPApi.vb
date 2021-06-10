@@ -189,6 +189,13 @@ Public Class SPApi
     Public Property Status As String = ""
     Public Property Code As String = ""
     Public Property Message As String = ""
+    Public Property taggedRequestIds As String = ""
+    Public ReadOnly Property ClubbedRequests As String()
+      Get
+        Return taggedRequestIds.Split(",".ToCharArray)
+      End Get
+    End Property
+    Public Property requestCount As Integer = 0
     Public ReadOnly Property IsError As Boolean
       Get
         Return (Code <> "200")
@@ -220,15 +227,6 @@ Public Class SPApi
     Public Property Size As String = ""
     Public Property VehicleTypeDescription As String = ""
     Public Property wuom As String = ""
-    '================================
-    Public Property IsClubberd As Boolean = False
-    Public Property ClubbedRequests As String = ""
-    Public ReadOnly Property ClubbedRequestList As List(Of String)
-      Get
-        Return ClubbedRequests.Split(",".ToCharArray).ToList()
-      End Get
-    End Property
-
   End Class
   Public Class SPRequest
     Public Property RFQ As String = "" '200
@@ -329,126 +327,319 @@ Public Class SPApi
       Return mRet
     End Function
     '=============Without SP================
-    Public Shared Sub InsertData(ed As SIS.VR.vrRequestExecution, Optional Comp As String = "200")
-      Dim vrs As List(Of SIS.VR.vrLinkedRequest) = SIS.VR.vrLinkedRequest.vrLinkedRequestSelectList(0, 999, "", False, "", ed.SRNNo)
-      If vrs.Count <= 0 Then
-        Throw New Exception("Request NOT linked to execution.")
+    Public Shared Sub NewInsertData(re As SIS.VR.vrRequestExecution, Optional Comp As String = "200")
+      Dim throughSP As Boolean = IIf(re.SPLoadID = "", False, True)
+      Dim TotalAmount As Decimal = 0
+      Dim TotalWeight As Decimal = 0
+      Dim xPOStr As String = ""
+      If throughSP Then
+        Dim vr As SIS.VR.vrVehicleRequest = Nothing
+        Dim res As New List(Of SIS.VR.vrRequestExecution)
+        res = SIS.VR.vrRequestExecution.vrRequestExecutionAllGetSPLoadByID(re.SPLoadID)
+        For Each xre As SIS.VR.vrRequestExecution In res
+          vr = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(xre.RequestNo)
+          Dim spe As SPApi.SPExecution = New JavaScriptSerializer().Deserialize(vr.SPLoadData, GetType(SPApi.SPExecution))
+          Dim sped As SPApi.ExecutionData = spe.resultSet(0)
+          TotalAmount += xre.EstimatedAmount
+          TotalWeight += sped.weight
+          xPOStr &= vbCrLf & ""
+          xPOStr &= vbCrLf & "Vehicle Request No.: " & vr.RequestNo
+          xPOStr &= vbCrLf & "From State: " & vr.FromLocation
+          xPOStr &= vbCrLf & "Cargo Dimension: " & "L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & " " & vr.FK_VR_VehicleRequest_SizeUnit.Description
+          xPOStr &= vbCrLf & "Material Weight: " & vr.MaterialWeight & " " & vr.FK_VR_VehicleRequest_WeightUnit.Description
+          xPOStr &= vbCrLf & "Loading Point: "
+          'xPOStr &= vbCrLf & "=============="
+          xPOStr &= vbCrLf & "Supplier: " & vr.SupplierID & "-" & vr.FK_VR_VehicleRequest_SupplierID.Description
+          xPOStr &= vbCrLf & vr.SupplierLocation
+          xPOStr &= vbCrLf & "Pin Code: " & vr.FromPinCode
+          xPOStr &= vbCrLf & ""
+        Next
+        'Prefix Text
+        Dim tmpStr As String = ""
+        tmpStr &= "LUMPSUM LOWEST RATE SETTLED WITH TRANSPORTER FOR TRANSPORTATION OF MATERIAL"
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "Vehicle Required On: " & re.VehiclePlacedOn
+        tmpStr &= vbCrLf & "Vehicle Type: " & re.FK_VR_RequestExecution_VehicleTypeID.cmba
+        tmpStr &= vbCrLf & "Total Cargo Weight: " & TotalWeight & " " & vr.FK_VR_VehicleRequest_WeightUnit.Description
+        tmpStr &= vbCrLf & "Total Amount [Rs]: " & TotalAmount
+        xPOStr = tmpStr & xPOStr
+        'Suffix Text
+        tmpStr = ""
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "To State: " & vr.ToLocation
+        tmpStr &= vbCrLf & "Delivery Location: "
+        tmpStr &= vbCrLf & "=================="
+        tmpStr &= vbCrLf & vr.DeliveryLocation
+        tmpStr &= vbCrLf & "Pin Code: " & vr.ToPinCode
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "Contact Details: "
+        tmpStr &= vbCrLf & "=================="
+        tmpStr &= vbCrLf & "Name: " & vr.SitePersonName
+        tmpStr &= vbCrLf & "Phone: " & vr.SitePersonContact
+        tmpStr &= vbCrLf & "==============================================================================================="
+        tmpStr &= vbCrLf & "SPOT FINALISATION – TERMS & CONDITIONS AS PER Ref: DL/STC/2021/0102, Dated: 01st February, 2021"
+        tmpStr &= vbCrLf & "==============================================================================================="
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "==================================================================================="
+        tmpStr &= vbCrLf & "INFORMATION FOR USE BY LOGISTICS DEPARTMENT."
+        tmpStr &= vbCrLf & "============================================"
+        tmpStr &= vbCrLf & "1.Reason for SPOT Finalization: OC05- NO CONTRACT"
+        tmpStr &= vbCrLf & "2.Reference Rate Contract: "
+        tmpStr &= vbCrLf & "3.Reference Rate- Rs.NA."
+        tmpStr &= vbCrLf & "4.Excess by       Rs.NA."
+        tmpStr &= vbCrLf & "5.Lesser by       Rs.NA."
+        tmpStr &= vbCrLf & "6.Debit Action to if any: NA "
+        tmpStr &= vbCrLf & "=================================================================================="
+        xPOStr &= tmpStr
+        Dim txtNo As Long = CreateText(xPOStr, Comp)
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+          Con.Open()
+          Dim sql As String = ""
+          sql &= " Insert InTo ttdisg140" & Comp
+          sql &= " ("
+          sql &= " t_load"
+          sql &= " ,t_ivrn"
+          sql &= " ,t_rqdt"
+          sql &= " ,t_vrdt"
+          sql &= " ,t_tran"
+          sql &= " ,t_tgst"
+          sql &= " ,t_cprj"
+          sql &= " ,t_pric"
+          sql &= " ,t_amnt"
+          sql &= " ,t_fcst"
+          sql &= " ,t_tcst"
+          sql &= " ,t_type"
+          sql &= " ,t_wght"
+          sql &= " ,t_size"
+          sql &= " ,t_novc"
+          sql &= " ,t_snam"
+          sql &= " ,t_dnam"
+          sql &= " ,t_bpid"
+          sql &= " ,t_proc"
+          sql &= " ,t_orno"
+          sql &= " ,t_genp"
+          sql &= " ,t_Refcntd"
+          sql &= " ,t_Refcntu"
+          sql &= " ,t_uoms"
+          sql &= " ,t_wunt"
+          sql &= " ,t_txta"
+          sql &= " )"
+          sql &= " values ("
+          sql &= "   " & re.ISGECLoadID & ""
+          sql &= " ,'" & vr.RequestNo & "'"
+          sql &= " ,convert(datetime,'" & re.VehiclePlacedOn & "',103)"
+          sql &= " ,convert(datetime,'" & vr.RequestedOn & "',103)"
+          sql &= ",'" & re.TransporterID & "'"
+          Dim tmpGSTIN As SIS.VR.vrBPGSTIN = SIS.VR.vrBPGSTIN.spmtBPGSTINGetByID(re.TransporterID)
+          If tmpGSTIN IsNot Nothing Then
+            sql &= ",'" & tmpGSTIN.Description & "'"
+          Else
+            sql &= ",''"
+          End If
+          sql &= ",'" & vr.ProjectID & "'"
+          sql &= ", " & TotalAmount & ""
+          sql &= ", " & TotalAmount
+          sql &= ",'" & vr.FromLocation & "'"
+          sql &= ",'" & vr.ToLocation & "'"
+          sql &= ",'" & re.FK_VR_RequestExecution_VehicleTypeID.cmba & "'"
+          sql &= ", " & TotalWeight & ""
+          sql &= ",'" & "Cargo L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & "'"
+          sql &= ", " & 1 & ""
+          sql &= ",'" & vr.SupplierLocation & "'"
+          sql &= ",'" & vr.DeliveryLocation & "'"
+          sql &= ",'" & vr.SupplierID & "'"
+          sql &= ", " & 2 & ""
+          sql &= ",'" & "" & "'"
+          sql &= ", " & 1 & "" 'Generate PO=YES
+          sql &= ", " & 0 & ""
+          sql &= ", " & 0 & ""
+          sql &= ",'" & vr.FK_VR_VehicleRequest_SizeUnit.Description & "'"
+          sql &= ",'" & vr.FK_VR_VehicleRequest_WeightUnit.Description & "'"
+          sql &= ", " & txtNo & ""
+          sql &= ")"
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = sql
+            Cmd.ExecuteNonQuery()
+          End Using
+        End Using
+        '========================
+      Else 'Manual NOT through SP
+        '========================
+        Dim vr As SIS.VR.vrLinkedRequest = Nothing
+        Dim Vrs As List(Of SIS.VR.vrLinkedRequest) = SIS.VR.vrLinkedRequest.vrLinkedRequestSelectList(0, 999, "", False, "", re.SRNNo)
+        If Vrs.Count <= 0 Then
+          Throw New Exception("Request NOT linked to execution.")
+        End If
+        TotalAmount += re.EstimatedAmount
+        For Each vr In Vrs
+          TotalWeight += vr.MaterialWeight
+          xPOStr &= vbCrLf & ""
+          xPOStr &= vbCrLf & "Vehicle Request No.: " & vr.RequestNo
+          xPOStr &= vbCrLf & "From State: " & vr.FromLocation
+          xPOStr &= vbCrLf & "Cargo Dimension: " & "L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & " " & vr.FK_VR_VehicleRequest_SizeUnit.Description
+          xPOStr &= vbCrLf & "Material Weight: " & vr.MaterialWeight & " " & vr.FK_VR_VehicleRequest_WeightUnit.Description
+          xPOStr &= vbCrLf & "Loading Point: "
+          'xPOStr &= vbCrLf & "=============="
+          xPOStr &= vbCrLf & "Supplier: " & vr.SupplierID & "-" & vr.FK_VR_VehicleRequest_SupplierID.Description
+          xPOStr &= vbCrLf & vr.SupplierLocation
+          xPOStr &= vbCrLf & "Pin Code: " & vr.FromPinCode
+          xPOStr &= vbCrLf & ""
+        Next
+        vr = Vrs(0)
+        'Prefix Text
+        Dim tmpStr As String = ""
+        tmpStr &= "LUMPSUM LOWEST RATE SETTLED WITH TRANSPORTER FOR TRANSPORTATION OF MATERIAL"
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "Vehicle Required On: " & re.VehiclePlacedOn
+        tmpStr &= vbCrLf & "Vehicle Type: " & re.FK_VR_RequestExecution_VehicleTypeID.cmba
+        tmpStr &= vbCrLf & "Total Cargo Weight: " & TotalWeight & " " & vr.FK_VR_VehicleRequest_WeightUnit.Description
+        tmpStr &= vbCrLf & "Total Amount [Rs]: " & TotalAmount
+        xPOStr = tmpStr & xPOStr
+        'Suffix Text
+        tmpStr = ""
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "To State: " & vr.ToLocation
+        tmpStr &= vbCrLf & "Delivery Location: "
+        tmpStr &= vbCrLf & "=================="
+        tmpStr &= vbCrLf & vr.DeliveryLocation
+        tmpStr &= vbCrLf & "Pin Code: " & vr.ToPinCode
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "Contact Details: "
+        tmpStr &= vbCrLf & "=================="
+        tmpStr &= vbCrLf & "Name: " & vr.SitePersonName
+        tmpStr &= vbCrLf & "Phone: " & vr.SitePersonContact
+        tmpStr &= vbCrLf & "==============================================================================================="
+        tmpStr &= vbCrLf & "SPOT FINALISATION – TERMS & CONDITIONS AS PER Ref: DL/STC/2021/0102, Dated: 01st February, 2021"
+        tmpStr &= vbCrLf & "==============================================================================================="
+        tmpStr &= vbCrLf & ""
+        tmpStr &= vbCrLf & "==================================================================================="
+        tmpStr &= vbCrLf & "INFORMATION FOR USE BY LOGISTICS DEPARTMENT."
+        tmpStr &= vbCrLf & "============================================"
+        tmpStr &= vbCrLf & "1.Reason for SPOT Finalization: OC05- NO CONTRACT"
+        tmpStr &= vbCrLf & "2.Reference Rate Contract: "
+        tmpStr &= vbCrLf & "3.Reference Rate- Rs.NA."
+        tmpStr &= vbCrLf & "4.Excess by       Rs.NA."
+        tmpStr &= vbCrLf & "5.Lesser by       Rs.NA."
+        tmpStr &= vbCrLf & "6.Debit Action to if any: NA "
+        tmpStr &= vbCrLf & "=================================================================================="
+        xPOStr &= tmpStr
+        Dim txtNo As Long = CreateText(xPOStr, Comp)
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+          Con.Open()
+          Dim sql As String = ""
+          sql &= " Insert InTo ttdisg140" & Comp
+          sql &= " ("
+          sql &= " t_load"
+          sql &= " ,t_ivrn"
+          sql &= " ,t_rqdt"
+          sql &= " ,t_vrdt"
+          sql &= " ,t_tran"
+          sql &= " ,t_tgst"
+          sql &= " ,t_cprj"
+          sql &= " ,t_pric"
+          sql &= " ,t_amnt"
+          sql &= " ,t_fcst"
+          sql &= " ,t_tcst"
+          sql &= " ,t_type"
+          sql &= " ,t_wght"
+          sql &= " ,t_size"
+          sql &= " ,t_novc"
+          sql &= " ,t_snam"
+          sql &= " ,t_dnam"
+          sql &= " ,t_bpid"
+          sql &= " ,t_proc"
+          sql &= " ,t_orno"
+          sql &= " ,t_genp"
+          sql &= " ,t_Refcntd"
+          sql &= " ,t_Refcntu"
+          sql &= " ,t_uoms"
+          sql &= " ,t_wunt"
+          sql &= " ,t_txta"
+          sql &= " )"
+          sql &= " values ("
+          sql &= "   " & re.ISGECLoadID & ""
+          sql &= " ,'" & vr.RequestNo & "'"
+          sql &= " ,convert(datetime,'" & re.VehiclePlacedOn & "',103)"
+          sql &= " ,convert(datetime,'" & vr.RequestedOn & "',103)"
+          sql &= ",'" & re.TransporterID & "'"
+          Dim tmpGSTIN As SIS.VR.vrBPGSTIN = SIS.VR.vrBPGSTIN.spmtBPGSTINGetByID(re.TransporterID)
+          If tmpGSTIN IsNot Nothing Then
+            sql &= ",'" & tmpGSTIN.Description & "'"
+          Else
+            sql &= ",''"
+          End If
+          sql &= ",'" & vr.ProjectID & "'"
+          sql &= ", " & TotalAmount & ""
+          sql &= ", " & TotalAmount
+          sql &= ",'" & vr.FromLocation & "'"
+          sql &= ",'" & vr.ToLocation & "'"
+          sql &= ",'" & re.FK_VR_RequestExecution_VehicleTypeID.cmba & "'"
+          sql &= ", " & TotalWeight & ""
+          sql &= ",'" & "Cargo L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & "'"
+          sql &= ", " & 1 & ""
+          sql &= ",'" & vr.SupplierLocation & "'"
+          sql &= ",'" & vr.DeliveryLocation & "'"
+          sql &= ",'" & vr.SupplierID & "'"
+          sql &= ", " & 2 & ""
+          sql &= ",'" & "" & "'"
+          sql &= ", " & 1 & "" 'Generate PO=YES
+          sql &= ", " & 0 & ""
+          sql &= ", " & 0 & ""
+          sql &= ",'" & vr.FK_VR_VehicleRequest_SizeUnit.Description & "'"
+          sql &= ",'" & vr.FK_VR_VehicleRequest_WeightUnit.Description & "'"
+          sql &= ", " & txtNo & ""
+          sql &= ")"
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = sql
+            Cmd.ExecuteNonQuery()
+          End Using
+        End Using
       End If
-      Dim vr As SIS.VR.vrVehicleRequest = vrs(0)
+    End Sub
+    Public Shared Function CreateText(str As String, Optional Comp As String = "200") As Long
+      Dim nlin As Integer = (str.Length / 240)
+      If nlin Mod 240 > 0 Then
+        nlin = nlin + 1
+      End If
+      Dim txtNo As Long = 0
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Con.Open()
         Dim sql As String = ""
-        sql &= " Insert InTo ttdisg140" & Comp
-        sql &= " ("
-        sql &= " t_load"
-        sql &= " ,t_ivrn"
-        sql &= " ,t_rqdt"
-        sql &= " ,t_vrdt"
-        sql &= " ,t_tran"
-        sql &= " ,t_tgst"
-        sql &= " ,t_cprj"
-        sql &= " ,t_pric"
-        sql &= " ,t_amnt"
-        sql &= " ,t_fcst"
-        sql &= " ,t_tcst"
-        sql &= " ,t_type"
-        sql &= " ,t_wght"
-        sql &= " ,t_size"
-        sql &= " ,t_novc"
-        sql &= " ,t_snam"
-        sql &= " ,t_dnam"
-        sql &= " ,t_bpid"
-        sql &= " ,t_proc"
-        sql &= " ,t_orno"
-        sql &= " ,t_genp"
-        sql &= " ,t_Refcntd"
-        sql &= " ,t_Refcntu"
-        sql &= " ,t_uoms"
-        sql &= " ,t_wunt"
-        sql &= " )"
-        sql &= " values ("
-        sql &= "   " & ed.ISGECLoadID & ""
-        sql &= " ,'" & vr.RequestNo & "'"
-        sql &= " ,convert(datetime,'" & ed.VehiclePlacedOn & "',103)"
-        sql &= " ,convert(datetime,'" & vr.RequestedOn & "',103)"
-        sql &= ",'" & ed.TransporterID & "'"
-        Dim tmpGSTIN As SIS.VR.vrBPGSTIN = SIS.VR.vrBPGSTIN.spmtBPGSTINGetByID(ed.TransporterID)
-        If tmpGSTIN IsNot Nothing Then
-          sql &= ",'" & tmpGSTIN.Description & "'"
-        Else
-          sql &= ",''"
-        End If
-        sql &= ",'" & vr.ProjectID & "'"
-        sql &= ", " & ed.EstimatedAmount & ""
-        sql &= ", " & ed.EstimatedAmount
-        sql &= ",'" & vr.FromLocation & "'"
-        sql &= ",'" & vr.ToLocation & "'"
-        sql &= ",'" & ed.FK_VR_RequestExecution_VehicleTypeID.cmba & "'"
-        sql &= ", " & vr.MaterialWeight & ""
-        sql &= ",'" & "Cargo L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & "'"
-        sql &= ", " & 1 & ""
-        sql &= ",'" & vr.SupplierLocation & "'"
-        sql &= ",'" & vr.DeliveryLocation & "'"
-        sql &= ",'" & vr.SupplierID & "'"
-        sql &= ", " & 2 & ""
-        sql &= ",'" & "" & "'"
-        sql &= ", " & 1 & "" 'Generate PO=YES
-        sql &= ", " & 0 & ""
-        sql &= ", " & 0 & ""
-        sql &= ",'" & vr.FK_VR_VehicleRequest_SizeUnit.Description & "'"
-        sql &= ",'" & vr.FK_VR_VehicleRequest_WeightUnit.Description & "'"
-        sql &= ")"
+        sql &= " declare @Return_t_srno int  "
+        sql &= " declare @t_user nvarchar(12) = '0340'  "
+        sql &= " declare @t_kwd1 nvarchar(20) = 'dmisg140.txta'  "
+        sql &= " select @Return_t_srno=max(t_ctxt)+1 from ttttxt001" & Comp
+        sql &= " INSERT [ttttxt001" & Comp & "] ([t_ctxt],[t_opwd],[t_txtg],[t_desc],[t_Refcntd],[t_Refcntu]) VALUES (@Return_t_srno,'text','text','',0,0 ) "
+        sql &= " INSERT [ttttxt002" & Comp & "] ([t_ctxt],[t_clan],[t_kwd1],[t_kwd2],[t_kwd3],[t_kwd4],[t_ludt],[t_user],[t_nlin],[t_Refcntd],[t_Refcntu]) "
+        sql &= " VALUES (@Return_t_srno,2,@t_kwd1,'','','',GetDate(),@t_user," & nlin & ",0,0) "
+        sql &= " SELECT @Return_t_srno "
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
           Cmd.CommandText = sql
-          Cmd.ExecuteNonQuery()
+          txtNo = Cmd.ExecuteScalar()
         End Using
+        Dim J As Integer = 0
+        For I As Integer = 0 To nlin - 1
+          Dim lStr As String = ""
+          If I < nlin - 1 Then
+            lStr = str.Substring(J, 240)
+          Else
+            lStr = str.Substring(J)
+          End If
+          sql = " INSERT [ttttxt010" & Comp & "] ([t_ctxt],[t_clan],[t_seqe],[t_text],[t_Refcntd],[t_Refcntu]) VALUES (" & txtNo & ",2," & I + 1 & ",convert(binary,'" & lStr & "'),0,0) "
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = sql
+            Cmd.ExecuteNonQuery()
+          End Using
+          J = J + 240
+        Next
       End Using
-    End Sub
-    Public Shared Sub UpdateData(ed As SIS.VR.vrRequestExecution, Optional Comp As String = "200")
-      Dim vrs As List(Of SIS.VR.vrLinkedRequest) = SIS.VR.vrLinkedRequest.vrLinkedRequestSelectList(0, 999, "", False, "", ed.SRNNo)
-      If vrs.Count <= 0 Then
-        Throw New Exception("Request NOT linked to execution.")
-      End If
-      Dim vr As SIS.VR.vrVehicleRequest = vrs(0)
-      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
-        Con.Open()
-        Dim sql As String = ""
-        sql &= " update ttdisg140" & Comp
-        sql &= " set t_ivrn = '" & vr.RequestNo & "'"
-        sql &= "    ,t_vrdt = convert(datetime,'" & ed.VehiclePlacedOn & "',103)"
-        sql &= "    ,t_rqdt = convert(datetime,'" & vr.RequestedOn & "',103)"
-        sql &= "    ,t_tran = '" & ed.TransporterID & "'"
-        Dim tmpGSTIN As SIS.VR.vrBPGSTIN = SIS.VR.vrBPGSTIN.spmtBPGSTINGetByID(ed.TransporterID)
-        If tmpGSTIN IsNot Nothing Then
-          sql &= "    ,t_tgst = '" & tmpGSTIN.Description & "'"
-        Else
-          sql &= "    ,t_tgst = ''"
-        End If
-        sql &= "    ,t_cprj = '" & vr.ProjectID & "'"
-        sql &= "    ,t_pric =  " & ed.EstimatedAmount
-        sql &= "    ,t_amnt =  " & ed.EstimatedAmount
-        sql &= "    ,t_fcst = '" & vr.FromLocation & "'"
-        sql &= "    ,t_tcst = '" & vr.ToLocation & "'"
-        sql &= "    ,t_type = '" & ed.FK_VR_RequestExecution_VehicleTypeID.cmba & "'"
-        sql &= "    ,t_wght =  " & vr.MaterialWeight
-        sql &= "    ,t_size = '" & "Cargo L:" & vr.Length & ", W:" & vr.Width & ", H:" & vr.Height & "'"
-        sql &= "    ,t_novc =  " & 1
-        sql &= "    ,t_snam = '" & vr.SupplierLocation & "'"
-        sql &= "    ,t_dnam = '" & vr.DeliveryLocation & "'"
-        sql &= "    ,t_bpid = '" & vr.SupplierID & "'"
-        sql &= "    ,t_genp =  " & 1
-        sql &= "    ,t_uoms = '" & vr.FK_VR_VehicleRequest_SizeUnit.Description & "'"
-        sql &= "    ,t_wunt = '" & vr.FK_VR_VehicleRequest_WeightUnit.Description & "'"
-        sql &= " where t_load =" & ed.ISGECLoadID
-        Using Cmd As SqlCommand = Con.CreateCommand()
-          Cmd.CommandType = CommandType.Text
-          Cmd.CommandText = sql
-          Cmd.ExecuteNonQuery()
-        End Using
-      End Using
-    End Sub
-    '==========With SP===========
+      Return txtNo
+    End Function
+
     Public Shared Sub InsertData(ed As SPApi.ExecutionData, Optional Comp As String = "200")
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Con.Open()
