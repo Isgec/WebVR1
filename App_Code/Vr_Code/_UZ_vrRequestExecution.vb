@@ -17,9 +17,9 @@ Namespace SIS.VR
         If SentForApproval Or POApproved Then Return True Else Return False
       End Get
     End Property
-    Public Shared Function GetPOStatus(epr As SIS.VR.ErpPOResult) As SIS.VR.ErpPOResult
+    Public Shared Function GetPOStatus(epr As SIS.VR.ErpPOResult, ProjectID As String) As SIS.VR.ErpPOResult
       Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
-      Dim ePO As SPApi.POData = SPApi.POData.GetByID(epr.SPLoadID, Comp)
+      Dim ePO As SPApi.POData = SPApi.POData.GetByID(epr.SPLoadID, ProjectID, Comp)
       epr.ErpOrderNo = ePO.t_orno
       If ePO.t_orno <> "" Then
         Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
@@ -113,6 +113,46 @@ Namespace SIS.VR
           End If
         End If
         Return _Supplier
+      End Get
+    End Property
+    Public ReadOnly Property ProjectList() As List(Of String)
+      Get
+        Dim Results As New List(Of String)
+        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+          Using Cmd As SqlCommand = Con.CreateCommand()
+            Cmd.CommandType = CommandType.Text
+            Cmd.CommandText = "select distinct ProjectID from vr_vehicleRequest where SRNNo=" & _SRNNo
+            Con.Open()
+            Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+            While (Reader.Read())
+              Results.Add(Reader("ProjectID"))
+            End While
+            Reader.Close()
+          End Using
+        End Using
+        Return Results
+      End Get
+    End Property
+    Public ReadOnly Property ERPPO As String
+      Get
+        Dim mret As String = ""
+        Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
+        For Each prj As String In ProjectList
+          Dim ePO As SPApi.POData = SPApi.POData.GetByID(ISGECLoadID, prj, Comp)
+          If ePO IsNot Nothing Then
+            If mret = "" Then
+              If ePO.t_orno = "" Then
+                mret = "PO Data Pushed"
+                Exit For
+              Else
+                mret = ePO.t_orno
+              End If
+            Else
+              mret &= ", " & ePO.t_orno
+            End If
+          End If
+        Next
+        Return mret
       End Get
     End Property
     Public ReadOnly Property ForApprovalVisible() As Boolean
@@ -309,6 +349,7 @@ Namespace SIS.VR
         Return False
       End Get
     End Property
+
     'Confirm Vehicle
     Public Shared Function NewLogicInitiateWF(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
       Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
@@ -317,32 +358,46 @@ Namespace SIS.VR
         Throw New Exception("Transporter E-Mail ID is blank. Can Not Issue Memo.")
       End If
       Dim epr As New SIS.VR.ErpPOResult
-      If Re.SPLoadID = "" Then
-        Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, Comp)
-        If ePO Is Nothing Then
-          SPApi.POData.NewInsertData(Re, Comp)
-        Else
-          'To Write
-          'SPApi.POData.NewUpdateData(Re, Comp)
+      'If Re.SPLoadID = "" Then
+      Dim prjList As List(Of String) = Re.ProjectList
+        Dim isErr As Boolean = False
+        Dim erStr As String = ""
+        For Each prj As String In prjList
+          Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, prj, Comp)
+          If ePO Is Nothing Then
+            SPApi.POData.NewInsertData(Re, prj, Comp)
+          End If
+          epr.SPLoadID = Re.ISGECLoadID
+          epr = SIS.VR.ErpPOResult.GetPOStatus(epr, prj)
+          If Not epr.VehicleCanBePlaced Then
+            If erStr <> "" Then erStr &= vbCrLf
+            erStr &= "ERP PO: " & epr.ErpOrderNo & " -NOT Sent for approval or approved."
+            isErr = True
+          Else
+            If erStr <> "" Then erStr &= vbCrLf
+            erStr &= "ERP PO: " & epr.ErpOrderNo & " -OK"
+          End If
+        Next
+        If isErr Then
+          Throw New Exception(erStr)
         End If
-        epr.SPLoadID = Re.ISGECLoadID
-      Else
-        epr.SPLoadID = Re.SPLoadID
-      End If
-      epr = SIS.VR.ErpPOResult.GetPOStatus(epr)
-      If Not epr.VehicleCanBePlaced Then
-        Throw New Exception("ERP PO: " & epr.ErpOrderNo & " is NOT sent for approval or approved.")
-      End If
-      Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Re.SRNNo, "")
-      For Each le As SIS.VR.vrRequestExecution In oLEs
-        If le.SRNNo.ToString = Re.SRNNo Then Continue For
-        Dim lpr As New SIS.VR.ErpPOResult
-        lpr.SPLoadID = le.SPLoadID
-        lpr = SIS.VR.ErpPOResult.GetPOStatus(lpr)
-        If Not lpr.VehicleCanBePlaced Then
-          Throw New Exception("Linked VE ERP PO: " & lpr.ErpOrderNo & " is NOT sent for approval or approved.")
-        End If
-      Next
+      'Else
+      '  epr.SPLoadID = Re.SPLoadID
+      '  If Not epr.VehicleCanBePlaced Then
+      '    Throw New Exception("ERP PO: " & epr.ErpOrderNo & " is NOT sent for approval or approved.")
+      '  End If
+      'End If
+      'Linked Execution:Get PO Status is to be updated
+      'Dim oLEs As List(Of SIS.VR.vrRequestExecution) = SIS.VR.vrRequestExecution.GetByLinkID(Re.SRNNo, "")
+      'For Each le As SIS.VR.vrRequestExecution In oLEs
+      '  If le.SRNNo.ToString = Re.SRNNo Then Continue For
+      '  Dim lpr As New SIS.VR.ErpPOResult
+      '  lpr.SPLoadID = le.SPLoadID
+      '  lpr = SIS.VR.ErpPOResult.GetPOStatus(lpr)
+      '  If Not lpr.VehicleCanBePlaced Then
+      '    Throw New Exception("Linked VE ERP PO: " & lpr.ErpOrderNo & " is NOT sent for approval or approved.")
+      '  End If
+      'Next
       'Main Execution
       Dim oVRs As List(Of SIS.VR.vrVehicleRequest) = SIS.VR.vrVehicleRequest.GetBySRNNo(SRNNo, "")
       If oVRs.Count > 0 Then
@@ -363,40 +418,42 @@ Namespace SIS.VR
         Re = SIS.VR.vrRequestExecution.UpdateData(Re)
       End If
       'Linked Executions
-      For Each le As SIS.VR.vrRequestExecution In oLEs
-        If le.SRNNo.ToString = Re.SRNNo Then Continue For
-        oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
-        If oVRs.Count > 0 Then
-          Dim ODCFound As Boolean = False
-          For Each oVR As SIS.VR.vrVehicleRequest In oVRs
-            If oVR.OverDimentionConsignement Then
-              ODCFound = True
-            End If
-            oVR.RequestStatus = RequestStates.VehicleArranged
-            SIS.VR.vrVehicleRequest.UpdateData(oVR)
-          Next
-          With le
-            .RequestStatusID = RequestStates.VehicleArranged
-            .ArrangedBy = HttpContext.Current.Session("LoginID")
-            .ArrangedOn = Now
-            .ODCByRequest = ODCFound
-          End With
-          le = SIS.VR.vrRequestExecution.UpdateData(le)
-        End If
-      Next
+      'Is Pending
+      'For Each le As SIS.VR.vrRequestExecution In oLEs
+      '  If le.SRNNo.ToString = Re.SRNNo Then Continue For
+      '  oVRs = SIS.VR.vrVehicleRequest.GetBySRNNo(le.SRNNo, "")
+      '  If oVRs.Count > 0 Then
+      '    Dim ODCFound As Boolean = False
+      '    For Each oVR As SIS.VR.vrVehicleRequest In oVRs
+      '      If oVR.OverDimentionConsignement Then
+      '        ODCFound = True
+      '      End If
+      '      oVR.RequestStatus = RequestStates.VehicleArranged
+      '      SIS.VR.vrVehicleRequest.UpdateData(oVR)
+      '    Next
+      '    With le
+      '      .RequestStatusID = RequestStates.VehicleArranged
+      '      .ArrangedBy = HttpContext.Current.Session("LoginID")
+      '      .ArrangedOn = Now
+      '      .ODCByRequest = ODCFound
+      '    End With
+      '    le = SIS.VR.vrRequestExecution.UpdateData(le)
+      '  End If
+      'Next
       SendEMail(Re)
       Try
         CloseSPExecution(Re)
       Catch ex As Exception
       End Try
-      For Each le As SIS.VR.vrRequestExecution In oLEs
-        If le.SRNNo.ToString = Re.SRNNo Then Continue For
-        SendEMail(le)
-        Try
-          CloseSPExecution(le)
-        Catch ex As Exception
-        End Try
-      Next
+      'Linked Execution
+      'For Each le As SIS.VR.vrRequestExecution In oLEs
+      '  If le.SRNNo.ToString = Re.SRNNo Then Continue For
+      '  SendEMail(le)
+      '  Try
+      '    CloseSPExecution(le)
+      '  Catch ex As Exception
+      '  End Try
+      'Next
 
       Return Re
     End Function
@@ -1133,6 +1190,8 @@ Namespace SIS.VR
         'Main Execution
         .AppendLine("<tr><td style='background-color:lightgray'><b>Execution No.</b></td>")
         .AppendLine("<td style='font-size:14px;font-weight:bold;'>" & oRE.SRNNo & "</td></tr>")
+        .AppendLine("<tr><td style='background-color:lightgray'><b>ERP PO Number</b></td>")
+        .AppendLine("<td style='font-size:12px;font-weight:bold;'>" & oRE.ERPPO & "</td></tr>")
         .AppendLine("<tr><td><b>Project Name &  Code</b></td>")
         .AppendLine("<td>" & oVRs(0).FK_VR_VehicleRequest_ProjectID.Description & " [" & oVRs(0).ProjectID & "]" & "</td></tr>")
         .AppendLine("<tr><td><b>Name of Shipper / Supplier with Address and PIN CODE <br/>Name of the Contact person & Contact Number</b></td>")
@@ -2107,6 +2166,26 @@ Namespace SIS.VR
       End Try
       Return mRet
     End Function
+    Public Shared Function vrRequestExecutionAllGetSPLoadByIDProjectID(ByVal SPLoadID As String, ProjectID As String) As List(Of SIS.VR.vrRequestExecution)
+      Dim Results As New List(Of SIS.VR.vrRequestExecution)
+      Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spvr_LG_RequestExecutionAllSelectBySPLoadIDProjectID"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@SPLoadID", SqlDbType.NVarChar, 51, SPLoadID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ProjectID", SqlDbType.NVarChar, 6, ProjectID)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
+          Con.Open()
+          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
+          While Reader.Read()
+            Results.Add(New SIS.VR.vrRequestExecution(Reader))
+          End While
+          Reader.Close()
+        End Using
+      End Using
+      Return Results
+    End Function
+
     Public Shared Function vrRequestExecutionAllGetSPLoadByID(ByVal SPLoadID As String) As List(Of SIS.VR.vrRequestExecution)
       Dim Results As New List(Of SIS.VR.vrRequestExecution)
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())

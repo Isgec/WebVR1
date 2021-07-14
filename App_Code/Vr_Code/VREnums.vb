@@ -15,7 +15,9 @@ Public Enum enumSPEdiStatus
   Free = 1
   SPError = 2
   SPDone = 3
-
+  'Download Execution Status
+  DEError = 4
+  DEDone = 5
 End Enum
 
 Public Enum RequestStates

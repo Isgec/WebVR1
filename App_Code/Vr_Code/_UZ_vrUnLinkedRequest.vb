@@ -48,6 +48,7 @@ Namespace SIS.VR
           .ArrangedOn = Now
           'Req.Execution LoadedAtSupplier will be used as Flag OutOfContract
           .LoadedAtSupplier = Results.OutOfContract
+          .RequestNo = RequestNo
         End With
         SIS.VR.vrRequestExecution.UpdateData(oRE)
       End With

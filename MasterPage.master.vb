@@ -70,7 +70,7 @@ Partial Class MasterPage
 
 	End Sub
   Protected Sub cmdRedirected_Click(sender As Object, e As System.Web.UI.ImageClickEventArgs) Handles cmdRedirected.Click
-    Response.Redirect("http://192.9.200.169/Webpay/Empuser/default.htm")
+    Response.Redirect("http://hrms/Webpay/Empuser/default.htm")
   End Sub
 End Class
 

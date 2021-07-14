@@ -136,9 +136,9 @@
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="Load ID" SortExpression="SPLoadID">
+                    <asp:TemplateField HeaderText="Load ID">
                       <ItemTemplate>
-                        <asp:Label ID="LabelSPLoadID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# EVal("SPLoadID") %>'></asp:Label>
+                        <asp:Label ID="LabelSPLoadID" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# EVal("ISGECLoadID") %>'></asp:Label>
                       </ItemTemplate>
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
@@ -185,6 +185,13 @@
                       <ItemStyle VerticalAlign="Top" />
                       <HeaderStyle Width="60px" />
                     </asp:TemplateField>
+                    <asp:TemplateField HeaderText="ERP-PO">
+                      <ItemTemplate>
+                        <asp:Label ID="L_ERPPO" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Eval("ERPPO") %>'></asp:Label>
+                      </ItemTemplate>
+                      <ItemStyle VerticalAlign="Top" />
+                      <HeaderStyle Width="60px" />
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderText="STATUS" SortExpression="VR_RequestStates6_Description">
                       <ItemTemplate>
                         <asp:Label ID="L_RequestStatusID" runat="server" ForeColor='<%# EVal("ForeColor") %>' Title='<%# EVal("RequestStatusID") %>' Text='<%# Eval("VR_RequestStates6_Description") %>'></asp:Label>
@@ -206,13 +213,13 @@
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
-                    <asp:TemplateField HeaderText="VEHICLE PLACED">
+<%--                    <asp:TemplateField HeaderText="VEHICLE PLACED">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdVehiclePlacedWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("VehiclePlacedWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Click to update CT, when Vehicle is arrived at Supplier's Location." SkinID="revise" OnClientClick='<%# "return Page_ClientValidate(""Approve" & Container.DataItemIndex & """) && confirm(""Update CT for Vehicle Placed Activity ?"");" %>' CommandName="VehiclePlacedWF" CommandArgument='<%# Container.DataItemIndex %>' />
                       </ItemTemplate>
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
-                    </asp:TemplateField>
+                    </asp:TemplateField>--%>
                     <asp:TemplateField HeaderText="CANCEL VEHICLE">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdCancleWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("CancelWFVisible") %>' Enabled='<%# EVal("CancelWFEnable") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="It will cancel Vehicle Arrangement & Send Cancillation Noficationirmation by E-Mail" SkinID="reject" OnClientClick='<%# "return Page_ClientValidate(""Cancel" & Container.DataItemIndex & """) && confirm(""GR entry will be cleared and Vehicle Requester and Transporter will be notified through E-Mail. Continue ?"");" %>' CommandName="CancelWF" CommandArgument='<%# Container.DataItemIndex %>' />
@@ -247,7 +254,7 @@
                         </td></tr>
 						            <tr style="background-color: AntiqueWhite; color: DeepPink">
                           <td colspan="8"></td>
-                          <td colspan="8">
+                          <td colspan="7">
                             <asp:Label ID="LabelNotification" runat="server" Text='<%# Eval("Notification") %>'></asp:Label>
                           </td>
                         </tr>

@@ -106,6 +106,9 @@ Partial Class GF_vrLorryReceipts
     Return SIS.VR.vrBusinessPartner.SelectvrBusinessPartnerAutoCompleteList(prefixText, count, contextKey)
   End Function
   Protected Sub Page_Init(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Init
+    If Not Convert.ToBoolean(ConfigurationManager.AppSettings("IRNLinking")) Then
+      IRNMsg.Text = "IRN Linking Process is on HOLD. Please FORWARD pending MRNs to HO."
+    End If
     F_ProjectID_Display.Text = String.Empty
     If Not Session("F_ProjectID_Display") Is Nothing Then
       If Session("F_ProjectID_Display") <> String.Empty Then

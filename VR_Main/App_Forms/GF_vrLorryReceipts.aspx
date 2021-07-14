@@ -23,7 +23,7 @@
                   </ProgressTemplate>
                 </asp:UpdateProgress>
                 <div style="width:100%;text-align:center;padding:5px;background-color:gold;">
-                <asp:Label ID="IRNMsg" runat="server" Font-Bold="true" Font-Size="14px" Text="IRN Linking Process is on HOLD. Please FORWARD pending MRNs to HO."></asp:Label>
+                <asp:Label ID="IRNMsg" runat="server" Font-Bold="true" Font-Size="14px" Text=""></asp:Label>
                 <asp:Button ID="showPending" runat="server" CssClass="nt-but-primary" style="margin-left:20px;" Text="Show Pending MRN" OnClientClick="$get('F_Pending').click();return false;" />
                 </div>
                 <asp:Panel ID="pnlH" runat="server" CssClass="cph_filter">

@@ -18,7 +18,7 @@ Partial Class GF_vrRequestExecution
       Try
         Dim SRNNo As Int32 = GVvrRequestExecution.DataKeys(e.CommandArgument).Values("SRNNo")
         'It is available in PendingVehicleRequest
-        SIS.VR.vrPendingVehicleRequest.PushPODataByExecution(SRNNo)
+        SIS.VR.vrPendingVehicleRequest.PushPODataByExecution(SRNNo, True)
         GVvrRequestExecution.DataBind()
       Catch ex As Exception
         Dim message As String = New JavaScriptSerializer().Serialize(ex.Message)
@@ -100,6 +100,16 @@ Partial Class GF_vrRequestExecution
     Else
       divPOList.Visible = False
     End If
+    If ConfigurationManager.AppSettings("NewLogicSanctionCheck") Then
+      GVvrRequestExecution.Columns(7).Visible = True
+      GVvrRequestExecution.Columns(6).Visible = False
+      GVvrRequestExecution.Columns(9).Visible = False
+    Else
+      GVvrRequestExecution.Columns(7).Visible = False
+      GVvrRequestExecution.Columns(6).Visible = True
+      GVvrRequestExecution.Columns(9).Visible = True
+    End If
+
     If ShowPopup Then
       Dim RE As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
       Dim Supplier As SIS.VR.vrTransporters = RE.FK_VR_RequestExecution_TransporterID

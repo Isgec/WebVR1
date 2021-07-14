@@ -51,6 +51,14 @@ Namespace SIS.VR
         DelinkedSRNNo = .SRNNo
         .RequestStatus = RequestStates.UnderExecution
         .SRNNo = ""
+        If .SPEdiStatus = enumSPEdiStatus.DEDone Then
+          .SPStatus = enumSPStatus.SPRequestCreated
+          .SPEdiStatus = enumSPEdiStatus.SPDone
+          .SPEdiMessage = "Execution Deleted"
+          .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
+          .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
+          .SPLoadData = ""
+        End If
         Results = SIS.VR.vrLinkedRequest.UpdateData(Results)
         'Check if SRNO is not linked with other request
         Dim RELinkFound As Boolean = False

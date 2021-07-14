@@ -281,13 +281,13 @@ Namespace SIS.VR
       '2. DownLoad Execution for each Clubbed Request and Update Request Data
       For Each rqno As String In sp.ClubbedRequests
         Dim vReq As SIS.VR.vrPendingVehicleRequest = vrPendingVehicleRequestGetByID(rqno)
-        If vReq.SPEdiStatus <> enumSPEdiStatus.SPDone Then
+        If vReq.SPEdiStatus <> enumSPEdiStatus.DEDone Then
           'Set Flag that Process is started
           With vReq
             '.SPStatus = enumSPStatus.UnderSPExecutionCreation
             .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
             .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
-            .SPEdiStatus = enumSPEdiStatus.Free
+            .SPEdiStatus = enumSPEdiStatus.SPDone
             .SPEdiMessage = ""
           End With
           spJSON = ""
@@ -298,7 +298,7 @@ Namespace SIS.VR
             'Set Flag that Process is finished with error
             With vReq
               .SPStatus = enumSPStatus.SPRequestCreated
-              .SPEdiStatus = enumSPEdiStatus.SPError
+              .SPEdiStatus = enumSPEdiStatus.DEError
               .SPEdiMessage = spExe.Message
               .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
               .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
@@ -310,7 +310,7 @@ Namespace SIS.VR
             'Reset Flag
             With vReq
               .SPStatus = enumSPStatus.SPExecutionCreated
-              .SPEdiStatus = enumSPEdiStatus.SPDone
+              .SPEdiStatus = enumSPEdiStatus.DEDone
               .SPEdiMessage = ""
               .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
               .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
@@ -386,19 +386,22 @@ Namespace SIS.VR
       Catch ex As Exception
         Dim xx As String = "Error During PO Creation in ERP"
       End Try
-
       Return ""
     End Function
-    Public Shared Function PushPODataByExecution(ByVal SRNNo As Int32) As SIS.VR.vrRequestExecution
+    Public Shared Function PushPODataByExecution(ByVal SRNNo As Int32, Optional Forced As Boolean = False) As SIS.VR.vrRequestExecution
       Dim Comp As String = HttpContext.Current.Session("FinanceCompany")
       Dim Re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
-      Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, Comp)
-      If ePO Is Nothing Then
-        SPApi.POData.NewInsertData(Re, Comp)
-      Else
-        'To Write
-        'SPApi.POData.NewUpdateData(Re, Comp)
-      End If
+      Dim prjList As List(Of String) = Re.ProjectList
+      For Each prj As String In prjList
+        Dim ePO As SPApi.POData = SPApi.POData.GetByID(Re.ISGECLoadID, prj, Comp)
+        If ePO Is Nothing Then
+          SPApi.POData.NewInsertData(Re, prj, Comp)
+        Else
+          If Forced Then
+            SPApi.POData.NewInsertData(Re, prj, Comp, ePO.t_orno)
+          End If
+        End If
+      Next
       Return Re
     End Function
 

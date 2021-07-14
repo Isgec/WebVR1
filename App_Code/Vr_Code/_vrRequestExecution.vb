@@ -1951,7 +1951,7 @@ Namespace SIS.VR
           Dim tmpRq As SIS.VR.vrVehicleRequest = SIS.VR.vrVehicleRequest.vrVehicleRequestGetByID(Record.RequestNo)
           With tmpRq
             .SPStatus = enumSPStatus.SPRequestCreated
-            .SPEdiStatus = enumSPEdiStatus.Free
+            .SPEdiStatus = enumSPEdiStatus.SPDone
             .SPEdiMessage = "Execution Deleted"
             .SPExecutionCreatedBy = HttpContext.Current.Session("LoginID")
             .SPExecutionCreatedOn = Now.ToString("dd/MM/yyyy HH:mm")
