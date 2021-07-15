@@ -405,7 +405,7 @@ Public Class SPApi
           Con.Open()
           Using Cmd As SqlCommand = Con.CreateCommand()
             Cmd.CommandType = CommandType.Text
-            Cmd.CommandText = " delete ttdisg140" & Comp & " where t_load=" & re.ISGECLoadID & " and t_cprj='" & vr.ProjectID & "'"
+            Cmd.CommandText = " delete ttdisg140" & Comp & " where t_load=" & re.ISGECLoadID & " and t_cprj='" & vr.ProjectID.ToUpper & "'"
             Cmd.ExecuteNonQuery()
           End Using
           Dim sql As String = ""
@@ -450,7 +450,7 @@ Public Class SPApi
           Else
             sql &= ",''"
           End If
-          sql &= ",'" & vr.ProjectID & "'"
+          sql &= ",'" & vr.ProjectID.ToUpper & "'"
           sql &= ", " & TotalAmount & ""
           sql &= ", " & TotalAmount
           'sql &= ",'" & vr.FromLocation & "'"
@@ -558,7 +558,7 @@ Public Class SPApi
           Con.Open()
           Using Cmd As SqlCommand = Con.CreateCommand()
             Cmd.CommandType = CommandType.Text
-            Cmd.CommandText = " delete ttdisg140" & Comp & " where t_load=" & re.ISGECLoadID & " and t_cprj='" & vr.ProjectID & "'"
+            Cmd.CommandText = " delete ttdisg140" & Comp & " where t_load=" & re.ISGECLoadID & " and t_cprj='" & vr.ProjectID.ToUpper & "'"
             Cmd.ExecuteNonQuery()
           End Using
           Dim sql As String = ""
@@ -603,7 +603,7 @@ Public Class SPApi
           Else
             sql &= ",''"
           End If
-          sql &= ",'" & vr.ProjectID & "'"
+          sql &= ",'" & vr.ProjectID.ToUpper & "'"
           sql &= ", " & TotalAmount & ""
           sql &= ", " & TotalAmount
           'sql &= ",'" & vr.FromLocation & "'"
