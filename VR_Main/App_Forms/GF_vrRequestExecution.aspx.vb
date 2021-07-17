@@ -49,6 +49,17 @@ Partial Class GF_vrRequestExecution
         ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
       End Try
     End If
+    If e.CommandName.ToLower = "ReSendMail".ToLower Then
+      Try
+        Dim SRNNo As Int32 = GVvrRequestExecution.DataKeys(e.CommandArgument).Values("SRNNo")
+        Dim re As SIS.VR.vrRequestExecution = SIS.VR.vrRequestExecution.vrRequestExecutionGetByID(SRNNo)
+        SIS.VR.vrRequestExecution.SendEMail(Re)
+      Catch ex As Exception
+        Dim message As String = New JavaScriptSerializer().Serialize(ex.Message)
+        Dim script As String = String.Format("alert({0});", message)
+        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+      End Try
+    End If
     If e.CommandName.ToLower = "cancelwf".ToLower Then
       Try
         Dim SRNNo As Int32 = GVvrRequestExecution.DataKeys(e.CommandArgument).Values("SRNNo")

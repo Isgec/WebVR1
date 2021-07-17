@@ -213,6 +213,13 @@
                       <ItemStyle CssClass="alignCenter" />
                       <HeaderStyle HorizontalAlign="Center" Width="40px" />
                     </asp:TemplateField>
+                    <asp:TemplateField HeaderText="ReSend">
+                      <ItemTemplate>
+                        <asp:ImageButton ID="cmdResendWF" runat="server" Visible='<%# Eval("ResendWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Re-Send Confirmation by E-Mail" SkinID="email" OnClientClick='<%# "return confirm(""Resend Memo to Transporter ?"");" %>' CommandName="ReSendMail" CommandArgument='<%# Container.DataItemIndex %>' />
+                      </ItemTemplate>
+                      <ItemStyle CssClass="alignCenter" />
+                      <HeaderStyle HorizontalAlign="Center" Width="40px" />
+                    </asp:TemplateField>
 <%--                    <asp:TemplateField HeaderText="VEHICLE PLACED">
                       <ItemTemplate>
                         <asp:ImageButton ID="cmdVehiclePlacedWF" ValidationGroup='<%# "Initiate" & Container.DataItemIndex %>' CausesValidation="true" runat="server" Visible='<%# EVal("VehiclePlacedWFVisible") %>' AlternateText='<%# EVal("PrimaryKey") %>' ToolTip="Click to update CT, when Vehicle is arrived at Supplier's Location." SkinID="revise" OnClientClick='<%# "return Page_ClientValidate(""Approve" & Container.DataItemIndex & """) && confirm(""Update CT for Vehicle Placed Activity ?"");" %>' CommandName="VehiclePlacedWF" CommandArgument='<%# Container.DataItemIndex %>' />
@@ -254,7 +261,7 @@
                         </td></tr>
 						            <tr style="background-color: AntiqueWhite; color: DeepPink">
                           <td colspan="8"></td>
-                          <td colspan="7">
+                          <td colspan="8">
                             <asp:Label ID="LabelNotification" runat="server" Text='<%# Eval("Notification") %>'></asp:Label>
                           </td>
                         </tr>

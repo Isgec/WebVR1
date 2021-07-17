@@ -224,6 +224,19 @@ Namespace SIS.VR
         Return mRet
       End Get
     End Property
+    Public ReadOnly Property ResendWFVisible() As Boolean
+      Get
+        Dim mRet As Boolean = False
+        Try
+          Select Case _RequestStatusID
+            Case RequestStates.VehicleArranged
+              mRet = True
+          End Select
+        Catch ex As Exception
+        End Try
+        Return mRet
+      End Get
+    End Property
     Public ReadOnly Property InitiateWFEnable() As Boolean
       Get
         Dim mRet As Boolean = True

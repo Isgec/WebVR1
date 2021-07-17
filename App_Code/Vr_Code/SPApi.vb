@@ -301,7 +301,7 @@ Public Class SPApi
         Con.Open()
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
-          Cmd.CommandText = "Select * from ttdisg140" & Comp & " where t_load=" & LoadID & " and t_cprj='" & ProjectID & "'"
+          Cmd.CommandText = "Select * from ttdisg140" & Comp & " where t_load=" & LoadID & " and t_cprj='" & ProjectID.ToUpper & "'"
           Dim rd As SqlDataReader = Cmd.ExecuteReader
           If rd.Read Then
             mRet = New SPApi.POData(rd)
